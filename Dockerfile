@@ -35,6 +35,7 @@ COPY --chown=node bin/start.sh .
 COPY --chown=node api/ api/
 COPY --from=web /home/node/web/dist api/static/
 
+
 EXPOSE 80
 ENV PORT=80
 HEALTHCHECK --start-period=10s --timeout=5s \
