@@ -1,0 +1,68 @@
+{
+	"name": "@textbook/starter-kit",
+	"version": "2.0.0",
+	"description": "v2 upgrade of the starter kit",
+	"funding": "https://ko-fi.com/textbook",
+	"license": "ISC",
+	"author": "Jonathan Sharpe <mail@jonrshar.pe>",
+	"type": "module",
+	"workspaces": [
+		"web",
+		"api",
+		"e2e",
+		"linting"
+	],
+	"config": {
+		"dev_api_port": "3100",
+		"dev_port": "3000"
+	},
+	"scripts": {
+		"build": "npm --workspace web run build",
+		"dev": "cross-env API_PORT=$npm_package_config_dev_api_port PORT=$npm_package_config_dev_port concurrently \"npm:dev:*\"",
+		"dev:api": "cross-env PORT=$API_PORT npm --workspace api run dev",
+		"dev:web": "npm --workspace web run dev",
+		"e2e": "cross-env PORT=$npm_package_config_dev_port npm --workspace e2e run e2e",
+		"e2e:dev": "cross-env PLAYWRIGHT_START_COMMAND=\"npm run dev\" npm run e2e",
+		"format": "npm run lint:prettier -- --write .",
+		"lint": "npm run lint:eslint . && npm run lint:prettier -- --check .",
+		"lint:eslint": "eslint --max-warnings 0 --report-unused-disable-directives",
+		"lint:fix": "npm run lint:eslint -- --fix . && npm run format",
+		"lint:prettier": "prettier --ignore-unknown",
+		"migration": "npm --workspace api run migration",
+		"migration:create": "npm --workspace api run migration:create",
+		"prepare": "husky || echo 'no husky 🐶'",
+		"preserve": "npm run build",
+		"serve": "cross-env PORT=$npm_package_config_dev_port npm start",
+		"ship": "npm run lint && npm run test && npm run e2e",
+		"prestart": "npm run migration up",
+		"start": "npm --workspace api start",
+		"test": "vitest --run",
+		"test:cover": "npm run test -- --coverage",
+		"test:watch": "npm run test -- --no-run"
+	},
+	"lint-staged": {
+		"*.{js,jsx}": "npm run lint:eslint -- --fix",
+		"*": "npm run lint:prettier -- --write"
+	},
+	"prettier": {
+		"useTabs": true
+	},
+	"devDependencies": {
+		"@types/node": "^20.19.24",
+		"@vitest/coverage-v8": "^4.0.7",
+		"concurrently": "^9.2.1",
+		"cross-env": "^10.1.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.6",
+		"prettier": "~3.6.2",
+		"vite": "^7.2.0",
+		"vitest": "^4.0.7"
+	},
+	"engines": {
+		"node": "^20.19 || ^22.12 || ^24",
+		"npm": "^10 || ^11"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.3"
+	}
+}

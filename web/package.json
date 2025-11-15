@@ -1,0 +1,28 @@
+{
+	"name": "web",
+	"private": true,
+	"description": "Vite/React client",
+	"license": "UNLICENSED",
+	"type": "module",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite"
+	},
+	"dependencies": {
+		"react": "^19.2.0",
+		"react-dom": "^19.2.0",
+		"react-router": "^7.9.5"
+	},
+	"devDependencies": {
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.0",
+		"@testing-library/user-event": "^14.6.1",
+		"@textbook/build-info": "^1.4.1",
+		"@types/react": "^19.2.2",
+		"@types/react-dom": "^19.2.2",
+		"@vitejs/plugin-react-swc": "^4.2.1",
+		"jsdom": "^27.1.0",
+		"msw": "^2.12.0"
+	}
+}
