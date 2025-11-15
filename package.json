@@ -18,6 +18,7 @@
 	},
 	"scripts": {
 		"build": "npm --workspace web run build",
+		"postbuild": "mkdir -p api/static && cp -r web/static/* api/static/",
 		"dev": "cross-env API_PORT=$npm_package_config_dev_api_port PORT=$npm_package_config_dev_port concurrently \"npm:dev:*\"",
 		"dev:api": "cross-env PORT=$API_PORT npm --workspace api run dev",
 		"dev:web": "npm --workspace web run dev",
