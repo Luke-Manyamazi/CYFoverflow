@@ -1,47 +1,7 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-import buildInfo from "@textbook/build-info/rollup-plugin";
-import react from "@vitejs/plugin-react-swc";
-import { configDotenv } from "dotenv";
-import { defineConfig } from "vitest/config";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-configDotenv({
-	path: resolve(__dirname, "..", process.env.DOTENV_CONFIG_PATH ?? ".env"),
-	quiet: true,
-});
-
-const apiPort = process.env.API_PORT ?? "3100";
-const target = `http://localhost:${apiPort}`;
-const port = process.env.PORT;
-const proxy = Object.fromEntries(
-	["/api", "/healthz"].map((path) => [
-		path,
-		{
-			target,
-			configure(proxy_) {
-				if (process.env.LOG_LEVEL?.toLowerCase() === "debug") {
-					proxy_.on("proxyReq", (_, req) => {
-						console.debug("proxying %s %s --> %s", req.method, req.url, target);
-					});
-				}
-			},
-		},
-	]),
-);
-
+// https://vite.dev/config/
 export default defineConfig({
-	build: {
-		emptyOutDir: true,
-		outDir: "../api/static",
-	},
-	plugins: [buildInfo({ filename: "buildinfo.txt" }), react()],
-	server: { port, proxy, strictPort: true },
-	test: {
-		environment: "jsdom",
-		globals: true,
-		setupFiles: ["src/setupTests.js"],
-	},
-});
+  plugins: [react()],
+})

@@ -1,38 +1,20 @@
-import { useState } from "react";
-
-import viteLogo from "/vite.svg";
-
-import reactLogo from "../assets/react.svg";
-import ServerStatus from "../components/ServerStatus";
-
-function App() {
-	const [count, setCount] = useState(0);
-
-	return (
-		<>
-			<div>
-				<a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-					<img src={viteLogo} className="logo" alt="Vite logo" />
-				</a>
-				<a href="https://react.dev" target="_blank" rel="noreferrer">
-					<img src={reactLogo} className="logo react" alt="React logo" />
-				</a>
-			</div>
-			<h1>Vite + React</h1>
-			<div className="card">
-				<button onClick={() => setCount((count) => count + 1)}>
-					count is {count}
-				</button>
-				<p>
-					Edit <code>src/App.jsx</code> and save to test HMR
-				</p>
-			</div>
-			<p className="read-the-docs">
-				Click on the Vite and React logos to learn more
-			</p>
-			<ServerStatus />
-		</>
-	);
+function Home() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          Welcome to <span style={{ color: "#ed4d4e" }}>CYF</span>
+          <span style={{ color: "#281d80" }}>overflow</span>
+        </h1>
+        <p className="text-xl text-gray-600 mb-4 font-medium">
+          Your community Q&A platform for technical questions
+        </p>
+        <p className="text-gray-500 text-lg">
+          Questions list will be displayed here soon...
+        </p>
+      </div>
+    </div>
+  );
 }
 
-export default App;
+export default Home;
