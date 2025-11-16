@@ -19,11 +19,9 @@ api.post("/register", async (req, res) => {
 
 	// Validation check includes 'name'
 	if (!name || !email || !password || password.length < 6) {
-		return res
-			.status(400)
-			.send({
-				message: "Name, valid email, and password (min 6 chars) are required.",
-			});
+		return res.status(400).send({
+			message: "Name, valid email, and password (min 6 chars) are required.",
+		});
 	}
 
 	try {
