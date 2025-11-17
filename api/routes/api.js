@@ -2,8 +2,7 @@ import { Router } from "express";
 
 import { registerUser, loginUser } from "../messages/auth.js";
 import messageRouter from "../messages/messageRouter.js";
-
-// Import the authentication functions from the service file
+import logger from "../utils/logger.js";
 
 const api = Router();
 
@@ -12,9 +11,8 @@ api.use("/message", messageRouter);
 
 // --- New Authentication Routes ---
 
-// POST /register (Sign Up)
-api.post("/register", async (req, res) => {
-	// We now extract name, email, and password from the request body
+// POST /signup (Sign Up)
+api.post("/signup", async (req, res) => {
 	const { name, email, password } = req.body;
 
 	// Validation check includes 'name'
@@ -33,12 +31,17 @@ api.post("/register", async (req, res) => {
 			user: newUser, // newUser already contains id, name, and email
 		});
 	} catch (error) {
+		// Check for specific "User already exists" error
 		if (error.message === "User already exists.") {
 			return res
 				.status(409)
 				.send({ message: "This email is already registered." });
 		}
 
+		// DEBUGGING STEP: Log the actual error using the logger utility
+		logger.error("Error during user registration: %O", error);
+
+		// For all other errors (like DB issues, missing tables, etc.), return 500
 		return res.status(500).send({ message: "Internal server error." });
 	}
 });
@@ -65,6 +68,9 @@ api.post("/login", async (req, res) => {
 			// Sends generic error for security
 			return res.status(401).send({ message: "Invalid email or password." });
 		}
+
+		// DEBUGGING STEP: Log the actual error using the logger utility
+		logger.error("Error during user login: %O", error);
 
 		return res.status(500).send({ message: "Internal server error." });
 	}

@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import db from "../db.js";
+import { query } from "../db.js";
 import config from "../utils/config.js";
 import logger from "../utils/logger.js";
 
@@ -18,7 +18,7 @@ const JWT_SECRET =
  */
 export async function registerUser(name, email, password) {
 	// 1. Check if user already exists
-	const existingUser = await db.query("SELECT id FROM users WHERE email = $1", [
+	const existingUser = await query("SELECT id FROM users WHERE email = $1", [
 		email,
 	]);
 	if (existingUser.rows.length > 0) {
@@ -30,7 +30,7 @@ export async function registerUser(name, email, password) {
 	logger.debug(`Password for ${email} hashed successfully.`);
 
 	// 3. Insert new user into the database
-	const result = await db.query(
+	const result = await query(
 		"INSERT INTO users (name, email, hashed_password) VALUES ($1, $2, $3) RETURNING id, name, email",
 		[name, email, hashedPassword],
 	);
@@ -45,7 +45,7 @@ export async function registerUser(name, email, password) {
  * @returns {Promise<{token: string, user: object}>} The JWT and public user data.
  */
 export async function loginUser(email, password) {
-	const userResult = await db.query(
+	const userResult = await query(
 		"SELECT id, name, email, hashed_password FROM users WHERE email = $1",
 		[email],
 	);

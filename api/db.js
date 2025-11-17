@@ -5,8 +5,12 @@ import logger from "./utils/logger.js";
 
 let pool;
 
+/**
+ * Initializes the database connection pool.
+ */
 export const connectDb = async () => {
 	try {
+		// Initialize the pool
 		pool = new pg.Pool(config.dbConfig);
 
 		pool.on("error", (err) => logger.error("Unexpected PG error", err));
@@ -21,4 +25,15 @@ export const connectDb = async () => {
 	}
 };
 
-export default pool;
+/**
+ * Helper function to run queries on the initialized pool.
+ * @param {string} text - The query text.
+ * @param {any[]} [params] - Optional query parameters.
+ * @returns {Promise<pg.QueryResult>}
+ */
+export const query = (text, params) => {
+	if (!pool) {
+		throw new Error("Database pool not initialized. Call connectDb() first.");
+	}
+	return pool.query(text, params);
+};
