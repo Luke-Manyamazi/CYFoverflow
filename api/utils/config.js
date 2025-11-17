@@ -23,7 +23,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * @typedef {import("node-pg-migrate/dist/runner.js").RunnerOptionUrl} RunnerOptionUrl
  */
 
-const REQUIRED_ARGS = ["DATABASE_URL"];
+const REQUIRED_ARGS =
+	process.env.NODE_ENV === "production" ? ["DATABASE_URL"] : [];
 
 /**
  * @params {Record<string, string>} overrides
@@ -89,8 +90,27 @@ export default config;
  * @returns {Config["dbConfig"]}
  */
 function createDbConfig(source) {
-	const databaseUrl = new URL(source.DATABASE_URL);
+	if (!source.DATABASE_URL || process.env.NODE_ENV !== "production") {
+		// Local fallback
+		const user = source.DB_USER || "postgres";
+		const password = source.DB_PASSWORD || "password";
+		const host = source.DB_HOST || "localhost";
+		const port = parseInt(source.DB_PORT || "5432", 10); // Ensure port is a number
+		const database = source.DB_NAME || "my_local_db";
 
+		return {
+			user,
+			password,
+			host,
+			port,
+			database,
+			connectionTimeoutMillis: 5000,
+			ssl: false,
+		}; // <-- Pass object with individual keys, not connectionString
+	}
+
+	// Use DATABASE_URL for production
+	const databaseUrl = new URL(source.DATABASE_URL);
 	const localDb = [
 		"0.0.0.0",
 		"127.0.0.1",
@@ -101,7 +121,7 @@ function createDbConfig(source) {
 
 	return {
 		connectionString: databaseUrl.toString(),
-		connectionTimeoutMillis: 5_000,
+		connectionTimeoutMillis: 5000,
 		ssl:
 			localDb || sslMode === "disable"
 				? false

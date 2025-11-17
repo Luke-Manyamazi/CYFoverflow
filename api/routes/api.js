@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import { registerUser, loginUser } from "./messages/auth.js";
-import messageRouter from "./messages/messageRouter.js";
+import { registerUser, loginUser } from "../messages/auth.js";
+import messageRouter from "../messages/messageRouter.js";
 
 // Import the authentication functions from the service file
 

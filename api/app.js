@@ -1,7 +1,8 @@
 import express from "express";
 
-import apiRouter from "./api.js";
-import { testConnection } from "./db.js";
+import apiRouter from "../api/routes/api.js";
+
+import { connectDb } from "./db.js";
 import config from "./utils/config.js";
 import {
 	clientRouter,
@@ -25,7 +26,7 @@ if (config.production) {
 }
 
 app.get("/healthz", async (_, res) => {
-	await testConnection();
+	await connectDb();
 	res.sendStatus(200);
 });
 

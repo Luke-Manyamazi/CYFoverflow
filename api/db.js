@@ -3,30 +3,22 @@ import pg from "pg";
 import config from "./utils/config.js";
 import logger from "./utils/logger.js";
 
-/** @type {pg.Pool} */
 let pool;
 
 export const connectDb = async () => {
-	pool = new pg.Pool(config.dbConfig);
-	pool.on("error", (err) => logger.error("%O", err));
-	const client = await pool.connect();
-	logger.info("connected to %s", client.database);
-	client.release();
-};
+	try {
+		pool = new pg.Pool(config.dbConfig);
 
-export const disconnectDb = async () => {
-	if (pool) {
-		await pool.end();
+		pool.on("error", (err) => logger.error("Unexpected PG error", err));
+
+		const res = await pool.query("SELECT 1");
+		logger.info("Connected to PostgreSQL:", res.rows);
+
+		return pool;
+	} catch (err) {
+		logger.error("Database connection failed:", err);
+		throw err;
 	}
 };
 
-export const testConnection = async () => {
-	await query("SELECT 1;");
-};
-
-function query(...args) {
-	logger.debug("Postgres query: %O", args);
-	return pool.query.apply(pool, args);
-}
-
-export default { query };
+export default pool;
