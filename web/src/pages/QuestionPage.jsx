@@ -129,6 +129,12 @@ const AskQuestionPage = () => {
                     </div>
                 </div>
                 
+                {/* Character count */}
+                <div className="flex justify-end mt-2">
+                 <span className={`text-xs ${charCount < 50 ? 'text-red-500' : 'text-gray-500'}`}>
+                    {charCount} characters (min 50)
+                 </span>
+              </div>
             </form>
 
         </div>
