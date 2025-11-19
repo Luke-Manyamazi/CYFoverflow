@@ -57,6 +57,30 @@ const AskQuestionPage = () => {
             </p>
           </div>
 
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+
+
+            {/* Title Input */}
+            <div>
+              <label htmlFor="questionTitle" className="block text-sm font-semibold text-gray-700 mb-2">
+                Question Title
+              </label>
+              <input
+                id="questionTitle"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#281d80] focus:ring-2 focus:ring-[#281d80]/20 transition-all"
+                placeholder="e.g., How do I filter an array in JavaScript?"
+              />
+            </div>
+          </form>
+
         </div>
       </div>
     </div>
