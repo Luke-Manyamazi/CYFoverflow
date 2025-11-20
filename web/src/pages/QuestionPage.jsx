@@ -12,6 +12,14 @@ const AskQuestionPage = () => {
   const [error, setError] = useState(null);
   const editorRef = useRef(null);
 
+
+
+  // Template specific fields state
+  const [templateFields, setTemplateFields] = useState({
+    'bug-report': { browser: '', os: '' },
+    'how-to': { documentationLink: '' }
+  });
+
   const handleEditorChange = (newContent, editor) => {
     setContent(newContent);
     setCharCount(editor.getContent({ format: 'text' }).length);
@@ -85,7 +93,7 @@ const AskQuestionPage = () => {
                 </div>
 
 
-                    {/* LOGIC 2: TinyMCE Editor */}
+                    {/*TinyMCE Editor */}
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Details</label>
                     <div className="rounded-lg overflow-hidden border-2 border-gray-200 focus-within:border-[#281d80] focus-within:ring-2 focus-within:ring-[#281d80]/20 transition-all">
@@ -131,10 +139,81 @@ const AskQuestionPage = () => {
                 
                 {/* Character count */}
                 <div className="flex justify-end mt-2">
-                 <span className={`text-xs ${charCount < 50 ? 'text-red-500' : 'text-gray-500'}`}>
-                    {charCount} characters (min 50)
-                 </span>
+                    <span className={`text-xs ${charCount < 50 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {charCount} characters (min 50)
+                    </span>
+                </div>
+
+
+
+                {/*Template-specific fields */}
+            {activeTemplate === 'bug-report' && (
+              <div className="bg-blue-50 border-l-4 border-[#281d80] p-6 rounded-r-lg space-y-4 animate-fade-in-down">
+                <h4 className="text-[#281d80] font-bold text-sm uppercase tracking-wide">🐛 Bug Report Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Browser Version</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Chrome 98"
+                      value={templateFields['bug-report'].browser}
+                      onChange={(e) =>
+                        setTemplateFields(prev => ({
+                          ...prev,
+                          'bug-report': { ...prev['bug-report'], browser: e.target.value }
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#281d80]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">OS</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Windows 11"
+                      value={templateFields['bug-report'].os}
+                      onChange={(e) =>
+                        setTemplateFields(prev => ({
+                          ...prev,
+                          'bug-report': { ...prev['bug-report'], os: e.target.value }
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#281d80]"
+                    />
+                  </div>
+                </div>
               </div>
+            )}
+
+            {activeTemplate === 'how-to' && (
+              <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-r-lg space-y-4 animate-fade-in-down">
+                <h4 className="text-green-800 font-bold text-sm uppercase tracking-wide">📘 Context</h4>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Documentation Link</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., https://react.dev/..."
+                    value={templateFields['how-to'].documentationLink}
+                    onChange={(e) =>
+                      setTemplateFields(prev => ({
+                        ...prev,
+                        'how-to': { ...prev['how-to'], documentationLink: e.target.value }
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-green-600"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] transition-all shadow-md hover:shadow-lg"
+            >
+              Post Your Question
+            </button>
+
             </form>
 
         </div>
