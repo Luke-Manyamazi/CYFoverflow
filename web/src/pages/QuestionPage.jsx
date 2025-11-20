@@ -98,7 +98,7 @@ const AskQuestionPage = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Details</label>
                     <div className="rounded-lg overflow-hidden border-2 border-gray-200 focus-within:border-[#281d80] focus-within:ring-2 focus-within:ring-[#281d80]/20 transition-all">
                         <Editor
-                            apiKey="YOUR_API_KEY_HERE"
+                            apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
                             onInit={(evt, editor) => editorRef.current = editor}
                             value={content}
                             onEditorChange={handleEditorChange}
