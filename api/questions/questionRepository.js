@@ -3,13 +3,15 @@ import db from "../db.js";
 export const createQuestionDB = async (
   title,
   body,
-  tags,
   templateType,
-  userId
+  userId,
+  browser = null,
+  os = null,
+  documentationLink = null
 ) => {
   const result = await db.query(
-    "INSERT INTO questions (title, body, tags, template_type, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-    [title, body, tags, templateType, userId]
+    "INSERT INTO questions (title, body, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [title, body, templateType, userId, browser, os, documentationLink]
   );
 
   return result.rows[0];
@@ -41,11 +43,11 @@ export const deleteQuestionDB = async (id) => {
   return true;
 };
 
-export const updateQuestionDB = async (id, title, body, tags, templateType) => {
+export const updateQuestionDB = async (id, title, body, templateType, browser = null, os = null, documentationLink = null) => {
     const result = await db.query(
         `UPDATE questions
-         SET title = $1, body = $2, tags = $3, template_type = $4, updated_at = NOW() WHERE id = $5 RETURNING *`,
-        [title, body, tags, templateType, id]
+         SET title = $1, body = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
+        [title, body, templateType, browser, os, documentationLink, id]
   );
   return result.rows[0];
 };
