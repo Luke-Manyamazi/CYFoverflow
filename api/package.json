@@ -8,9 +8,11 @@
 	"scripts": {
 		"dev": "node --inspect --watch --watch-path . server.js",
 		"migration": "node ./migrations/migrate.js",
-		"migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js"
+		"migrate": "npm run migration",
+        "migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js"
 	},
 	"dependencies": {
+		"dotenv": "^17.2.3",
 		"express": "^5.1.0",
 		"helmet": "^8.1.0",
 		"morgan": "^1.10.1",
