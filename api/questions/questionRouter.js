@@ -6,8 +6,8 @@ import logger from "../utils/logger.js";
 const router = express.Router();
 router.post("/", async(req, res)=>{
     try{
-    const {title, body, tags, templateType} = req.body;
-    const question = await createQuestion(req.user.id, title,body,tags,templateType);
+    const {title, body, templateType, browser, os, documentationLink} = req.body;
+    const question = await createQuestion(req.user.id, title,body,templateType,browser, os, documentationLink);
     res.status(201).json(question)
     }catch(error){
         logger.error("Create a question error: %0", error);
@@ -42,8 +42,8 @@ router.get("/:id",async(req, res)=>{
 router.put("/:id", async(req, res)=>{
     try{
     const {id}=req.params;    
-    const {title, body, tags, templateType} = req.body;
-    const question = await updateQuestion(Number(id), req.user.id, title,body,tags,templateType);
+    const {title, body, templateType, browser, os, documentationLink} = req.body;
+    const question = await updateQuestion(Number(id), req.user.id, title,body,templateType, browser, os, documentationLink);
     res.status(201).json(question)
     }catch(error){
         logger.error("update a question error: %0", error);
