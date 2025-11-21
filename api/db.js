@@ -3,37 +3,30 @@ import pg from "pg";
 import config from "./utils/config.js";
 import logger from "./utils/logger.js";
 
+/** @type {pg.Pool} */
 let pool;
 
-/**
- * Initializes the database connection pool.
- */
 export const connectDb = async () => {
-	try {
-		// Initialize the pool
-		pool = new pg.Pool(config.dbConfig);
+	pool = new pg.Pool(config.dbConfig);
+	pool.on("error", (err) => logger.error("%O", err));
+	const client = await pool.connect();
+	logger.info("connected to %s", client.database);
+	client.release();
+};
 
-		pool.on("error", (err) => logger.error("Unexpected PG error", err));
-
-		const res = await pool.query("SELECT 1");
-		logger.info("Connected to PostgreSQL:", res.rows);
-
-		return pool;
-	} catch (err) {
-		logger.error("Database connection failed:", err);
-		throw err;
+export const disconnectDb = async () => {
+	if (pool) {
+		await pool.end();
 	}
 };
 
-/**
- * Helper function to run queries on the initialized pool.
- * @param {string} text - The query text.
- * @param {any[]} [params] - Optional query parameters.
- * @returns {Promise<pg.QueryResult>}
- */
-export const query = (text, params) => {
-	if (!pool) {
-		throw new Error("Database pool not initialized. Call connectDb() first.");
-	}
-	return pool.query(text, params);
+export const testConnection = async () => {
+	await query("SELECT 1;");
 };
+
+function query(...args) {
+	logger.debug("Postgres query: %O", args);
+	return pool.query.apply(pool, args);
+}
+
+export default { query };

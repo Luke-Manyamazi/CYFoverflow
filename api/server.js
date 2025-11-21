@@ -6,7 +6,6 @@ const { port } = config.init();
 
 await connectDb();
 
-// Loading the Express application from app.js
 const { default: app } = await import("./app.js");
 
 app.listen(port, (err) => {

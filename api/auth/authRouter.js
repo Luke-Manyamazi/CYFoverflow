@@ -1,97 +1,61 @@
-// api/auth/authRouter.js
-
 import { Router } from "express";
 
-import { connectDb } from "../db.js";
+import { generateToken } from "../utils/auth.js";
 import logger from "../utils/logger.js";
+
+import * as authService from "./authService.js";
 
 const authRouter = Router();
 
-// --- POST /signup route ---
-// Expected URL: POST /api/signup
-authRouter.post("/signup", async (req, res, next) => {
-	const { name, email, password } = req.body;
-
-	if (!name || !email || !password) {
-		return res
-			.status(400)
-			.json({ message: "All fields (name, email, password) are required." });
-	}
-
+authRouter.post("/signup", async (req, res) => {
 	try {
-		const pool = await connectDb();
+		const { name, email, password } = req.body;
 
-		logger.info(`Attempting to sign up user: ${email}`);
+		if (!name || !email || !password) {
+			return res
+				.status(400)
+				.json({ message: "All fields (name, email, password) are required." });
+		}
 
-		// Placeholder for actual database insertion logic
-		// This query is for demonstration and should be replaced with secured logic
-		const result = await pool.query(
-			"INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
-			[name, email, password], // Passwords should be hashed!
-		);
+		if (password.length < 6) {
+			return res
+				.status(400)
+				.json({ message: "Password must be at least 6 characters long." });
+		}
+
+		const newUser = await authService.signUp(name, email, password);
+		const token = generateToken(newUser.id);
 
 		res.status(201).json({
-			message: "User registered successfully.",
-			userId: result.rows[0].id,
+			newUser,
+			token,
 		});
 	} catch (error) {
-		// Handle common errors like duplicate email constraint violation
-		if (error.code === "23505") {
-			// PostgreSQL unique violation error code
-			return res
-				.status(409)
-				.json({ message: "This email address is already registered." });
-		}
-		logger.error("Signup failed:", error);
-		next(error); // Pass error to Express error handler
+		logger.error("Signup failed: %0", error);
+		res.status(500).json({ message: "Internal server error." });
 	}
 });
 
-// --- POST /login route ---
-// Expected URL: POST /api/login
-authRouter.post("/login", async (req, res, next) => {
-	const { email, password } = req.body;
-
-	if (!email || !password) {
-		return res
-			.status(400)
-			.json({ message: "Email and password are required." });
-	}
-
+authRouter.post("/login", async (req, res) => {
 	try {
-		const pool = await connectDb();
+		const { email, password } = req.body;
 
-		// ⚠️ WARNING: In a real app, retrieve the password HASH and compare it.
-		// This is a placeholder for fetching user credentials.
-		const result = await pool.query(
-			"SELECT id, password_hash FROM users WHERE email = $1",
-			[email],
-		);
-
-		const user = result.rows[0];
-
-		if (!user) {
-			return res.status(401).json({ message: "Invalid credentials." });
+		if (!email || !password) {
+			return res
+				.status(400)
+				.json({ message: "Email and password are required." });
 		}
 
-		// Placeholder for password comparison
-		// if (await bcrypt.compare(password, user.password_hash)) { ... }
-		if (password === user.password_hash) {
-			// 🚫 DANGER: Use bcrypt in production
-			logger.info(`User logged in: ${email}`);
+		const user = await authService.login(email, password);
+		const token = generateToken(user.id);
 
-			// 🔒 Generate and return a JWT token here for state management
-			res.json({
-				message: "Login successful.",
-				token: "FAKE_JWT_TOKEN_FOR_NOW",
-				userId: user.id,
-			});
-		} else {
-			res.status(401).json({ message: "Invalid credentials." });
-		}
+		res.status(200).json({
+			user,
+			token,
+		});
 	} catch (error) {
-		logger.error("Login failed:", error);
-		next(error);
+		logger.error("Login failed: %0", error);
+		res.status(500).json({ message: "Internal server error." });
 	}
 });
 

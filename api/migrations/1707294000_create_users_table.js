@@ -30,14 +30,11 @@ export async function up(pgm) {
 			notNull: true,
 		},
 		created_at: {
-			type: "TIMESTAMP WITH TIME ZONE",
+			type: "timestamp",
 			notNull: true,
-			default: pgm.func("current_timestamp"),
+			default: pgm.func("NOW()"),
 		},
 	});
-
-	// Optional: Create an index on the email column for faster lookups during login
-	pgm.createIndex("users", "email");
 }
 
 /**
