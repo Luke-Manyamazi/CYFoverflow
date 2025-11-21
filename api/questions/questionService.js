@@ -3,15 +3,15 @@ import logger from "../utils/logger.js";
 
 
 
-export const createQuestion = async (userId, title,body, tags, templateType) => {
-    if (!title && body) {
+export const createQuestion = async (userId, title, body, templateType, browser = null, os = null, documentationLink = null) => {
+    if (!title) {
       throw new Error("Title is required");
     }
-    if(title && !body){
+    if(!body){
         throw new Error("Content is required");
     }
 
-    return repository.createQuestionDB(title.trim(), body.trim(), tags, templateType, userId);
+    return repository.createQuestionDB(title.trim(), body.trim(), templateType, userId, browser, os, documentationLink);
     
 };
 
@@ -29,22 +29,22 @@ export const getQuestionById = async(id)=>{
         return question;
 }
 
-export const updateQuestion = async(userId, id, title, body)=>{
+export const updateQuestion = async(id, userId, title, body, templateType, browser = null, os = null, documentationLink = null)=>{
     
         const updated= await repository.getQuestionByIdDB(id);
         if(!updated){
-            logger.error( "Question not found");
+            throw new Error( "Question not found");
         }
         if(!title){
-            logger.error( "title is required");
+            throw new Error( "title is required");
         }
         if(!body){
-            logger.error( "body is required");
+            throw new Error( "body is required");
         }
          if(updated.user_id !== userId ){
-            logger.error( "You are not authorised to edit");
+            throw new Error( "You are not authorised to edit");
         }
-        return repository.updateQuestionDB(id);
+        return repository.updateQuestionDB(id, title, body, templateType, browser, os, documentationLink);
 }
 
 
@@ -53,9 +53,89 @@ export const deleteQuestion = async (id, userId) => {
     if(!question){
     logger.error("Question not found");
    }
- if(updated.user_id !== userId ){
+ if(question.user_id !== userId ){
     logger.error( "You are not authorised to delete");
  }
  return repository.deleteQuestionDB(id);
     
 };
+
+// import * as repository from "./questionRepository.js";
+// import logger from "../utils/logger.js";
+
+// // CREATE
+// export const createQuestion = async (userId, title, body, templateType, browser = null, os = null, documentationLink = null) => {
+//     if (!title) {
+//         throw new Error("Title is required");
+//     }
+//     if (!body) {
+//         throw new Error("Content is required");
+//     }
+
+//     return repository.createQuestionDB(
+//         title.trim(),
+//         body.trim(),
+//         templateType,
+//         userId,
+//         browser,
+//         os,
+//         documentationLink
+//     );
+// };
+
+// // GET ALL
+// export const getAllQuestions = async () => {
+//     return repository.getAllQuestionsDB();
+// };
+
+// // GET BY ID
+// export const getQuestionById = async (id) => {
+//     const question = await repository.getQuestionByIdDB(id);
+//     if (!question) {
+//         logger.error("Error not found Question");
+//     }
+//     return question;
+// };
+
+// // UPDATE
+// export const updateQuestion = async (id, userId, title, body, templateType, browser = null, os = null, documentationLink = null) => {
+
+//     const updated = await repository.getQuestionByIdDB(id);
+
+//     if (!updated) {
+//         throw new Error("Question not found");
+//     }
+//     if (!title) {
+//         throw new Error("title is required");
+//     }
+//     if (!body) {
+//         throw new Error("body is required");
+//     }
+//     if (updated.user_id !== userId) {
+//         throw new Error("You are not authorised to edit");
+//     }
+
+//     return repository.updateQuestionDB(
+//         id,
+//         title,
+//         body,
+//         templateType,
+//         browser,
+//         os,
+//         documentationLink
+//     );
+// };
+
+// // DELETE
+// export const deleteQuestion = async (id, userId) => {
+//     const question = await repository.getQuestionByIdDB(id);
+
+//     if (!question) {
+//         throw new Error("Question not found");
+//     }
+//     if (question.user_id !== userId) {
+//         throw new Error("You are not authorised to delete");
+//     }
+
+//     return repository.deleteQuestionDB(id);
+// };
