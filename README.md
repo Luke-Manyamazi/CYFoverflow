@@ -1,8 +1,8 @@
 # CYFoverflow
 
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/) 
-[![React](https://img.shields.io/badge/React-v18-blue)](https://reactjs.org/) 
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/) 
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-v18-blue)](https://reactjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 CYFoverflow is a community-driven Q&A platform, inspired by Stack Overflow, built by the CodeYourFuture team. It allows users to ask questions, share knowledge, and engage in a technical community.
@@ -13,30 +13,32 @@ This project uses the **Starter Kit v2** template, providing modern tools and co
 
 ## Key Technologies
 
-| Category       | Technology          | Description                                                                 |
-|----------------|-------------------|-----------------------------------------------------------------------------|
-| Backend (API)  | Express.js, Node.js LTS | Robust server implementation with Node 20.x support.                       |
-| Database       | PostgreSQL with pg | Reliable relational database for storing users, questions, messages.       |
-| Authentication | bcrypt, JWT        | Secure password hashing and token-based user authentication.               |
-| Frontend       | React with Vite    | Fast, modern client-side application build process.                        |
-| Routing        | React Router       | Dynamic client-side navigation.                                            |
+| Category       | Technology              | Description                                                          |
+| -------------- | ----------------------- | -------------------------------------------------------------------- |
+| Backend (API)  | Express.js, Node.js LTS | Robust server implementation with Node 20.x support.                 |
+| Database       | PostgreSQL with pg      | Reliable relational database for storing users, questions, messages. |
+| Authentication | bcrypt, JWT             | Secure password hashing and token-based user authentication.         |
+| Frontend       | React with Vite         | Fast, modern client-side application build process.                  |
+| Routing        | React Router            | Dynamic client-side navigation.                                      |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-- **Node.js 20.x LTS**  
+
+- **Node.js 20.x LTS**
 - **PostgreSQL** running locally
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```bash
 DATABASE_URL=postgres://your_user:your_password@localhost:5432/cyfoverflow
 JWT_SECRET=a_very_secure_secret_key_here
 PGSSLMODE=disable
-````
+```
 
 > Generate a strong JWT secret:
 > `python3 -c 'import secrets;print(secrets.token_hex(32))'`
@@ -90,10 +92,10 @@ npm run migrate
 
 ## Security
 
-* Only collect essential PII: Name, Email, Hashed Password.
-* Authentication required for access.
-* Passwords hashed with **bcrypt**, never stored in plain text.
-* All validation and security logic handled on the backend.
+- Only collect essential PII: Name, Email, Hashed Password.
+- Authentication required for access.
+- Passwords hashed with **bcrypt**, never stored in plain text.
+- All validation and security logic handled on the backend.
 
 ---
 
@@ -109,9 +111,9 @@ MIT License © CodeYourFuture Team
 
 ```
 
-This version has:  
-- Badges for Node.js, React, PostgreSQL, and License  
-- Clean sections: Overview, Tech Stack, Setup, Scripts, Deployment, Security, Contributing, License  
-- GitHub-ready formatting  
+This version has:
+- Badges for Node.js, React, PostgreSQL, and License
+- Clean sections: Overview, Tech Stack, Setup, Scripts, Deployment, Security, Contributing, License
+- GitHub-ready formatting
 
 ```

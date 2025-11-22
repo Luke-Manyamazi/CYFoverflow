@@ -4,9 +4,7 @@ import { fileURLToPath } from "node:url";
 import { configDotenv } from "dotenv";
 
 import logger from "./logger.js";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 /**
  * @typedef Config
  * @property {import("pg").ClientConfig} dbConfig
@@ -38,15 +36,10 @@ const createConfig = (overrides) => {
 		process.env.DOTENV_CONFIG_PATH ?? ".env",
 	);
 	const migrationsDir = resolve(__dirname, "..", "migrations");
-
 	configDotenv({ path: dotenvPath, quiet: true });
-
 	const source = { ...process.env, ...overrides };
-
 	requireArgs(source, REQUIRED_ARGS);
-
 	const dbConfig = createDbConfig(source);
-
 	return {
 		dbConfig,
 		dotenvPath,
@@ -66,7 +59,6 @@ const createConfig = (overrides) => {
 		timestampFormat: source.TIMESTAMP_FORMAT,
 	};
 };
-
 /** @type {Config} */
 const config = new Proxy(
 	{ config: undefined },
@@ -82,9 +74,7 @@ const config = new Proxy(
 		},
 	},
 );
-
 export default config;
-
 /**
  * @param {Record<string, string>} source
  * @returns {Config["dbConfig"]}
@@ -135,7 +125,6 @@ function createDbConfig(source) {
 		ssl: false,
 	};
 }
-
 /**
  * @param {Record<string, string>} source
  * @param {string[]} required
