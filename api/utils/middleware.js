@@ -1,6 +1,7 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import cors from "cors";
 import express, { Router } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -8,6 +9,24 @@ import morgan from "morgan";
 import logger from "./logger.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * CORS Middleware Configuration
+ * This must be configured to allow your frontend origin (http://localhost:5173).
+ * @returns {import("express").RequestHandler}
+ */
+export const configuredCors = () => {
+	const corsOptions = {
+		// Set this to your frontend's exact origin
+		origin: "http://localhost:5173",
+		// Allow credentials (like cookies or authorization headers)
+		credentials: true,
+		// Allow the necessary methods and headers for the preflight request
+		allowedMethods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+		allowedHeaders: "Content-Type,Authorization",
+	};
+	return cors(corsOptions);
+};
 
 export const clientRouter = (apiRoot) => {
 	const staticDir = resolve(__dirname, "..", "static");

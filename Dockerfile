@@ -33,8 +33,7 @@ RUN npm \
 
 COPY --chown=node bin/start.sh .
 COPY --chown=node api/ api/
-COPY --from=web /home/node/web/dist api/static/
-
+COPY --from=web /home/node/api/static api/static/
 
 EXPOSE 80
 ENV PORT=80

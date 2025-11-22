@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 
 function Navbar() {
+
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const { isLoggedIn, user, logout } = useAuth();
@@ -146,6 +147,8 @@ function Navbar() {
 						</div>
 					</div>
 				)}
+
+
 			</div>
 		</nav>
 	);
