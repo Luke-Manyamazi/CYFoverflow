@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 
 function Navbar() {
-
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const { isLoggedIn, user, logout } = useAuth();
@@ -15,7 +14,7 @@ function Navbar() {
 		setIsMenuOpen(false);
 	};
 
-	const userName = user?.username || user?.name;
+	const userName = user?.name;
 
 	return (
 		<nav className="bg-white shadow-lg border-b border-gray-200">
@@ -147,8 +146,6 @@ function Navbar() {
 						</div>
 					</div>
 				)}
-
-
 			</div>
 		</nav>
 	);
