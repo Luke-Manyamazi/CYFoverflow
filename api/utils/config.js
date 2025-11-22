@@ -11,6 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * @property {string} dotenvPath
  * @property {(overrides?: Record<string, string>) => Config} init
  * @property {string} logLevel
+ * @property {string} jwtSecret
  * @property {Omit<RunnerOption & RunnerOptionUrl, "direction">} migrationConfig
  * @property {number} port
  * @property {boolean} production
@@ -43,6 +44,7 @@ const createConfig = (overrides) => {
 	return {
 		dbConfig,
 		dotenvPath,
+		jwtSecret: source.JWT_SECRET,
 		logLevel: source.LOG_LEVEL?.toLowerCase() ?? "info",
 		migrationConfig: {
 			databaseUrl: dbConfig,
