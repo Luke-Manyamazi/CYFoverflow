@@ -31,8 +31,11 @@ authRouter.post("/signup", async (req, res) => {
 			token,
 		});
 	} catch (error) {
-		logger.error("Signup failed: %0", error);
-		res.status(500).json({ message: "Internal server error." });
+		logger.error("Signup failed: %O", error);
+		const statusCode = error.message?.includes("already exists") ? 409 : 500;
+		res.status(statusCode).json({
+			message: error.message || "Internal server error.",
+		});
 	}
 });
 
@@ -54,8 +57,13 @@ authRouter.post("/login", async (req, res) => {
 			token,
 		});
 	} catch (error) {
-		logger.error("Login failed: %0", error);
-		res.status(500).json({ message: "Internal server error." });
+		logger.error("Login failed: %O", error);
+		const statusCode = error.message?.includes("Invalid credentials")
+			? 401
+			: 500;
+		res.status(statusCode).json({
+			message: error.message || "Internal server error.",
+		});
 	}
 });
 
