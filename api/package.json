@@ -7,21 +7,28 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node --inspect --watch --watch-path . server.js",
-		"migration": "node ./migrations/migrate.js",
-		"migrate": "npm run migration",
-        "migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js"
+		"migration": "node -r dotenv/config ./migrations/migrate.js",
+		"migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js",
+		"lint:eslint": "eslint ."
 	},
 	"dependencies": {
+		"bcrypt": "^6.0.0",
+		"cors": "^2.8.5",
 		"dotenv": "^17.2.3",
 		"express": "^5.1.0",
 		"helmet": "^8.1.0",
+		"jsonwebtoken": "^9.0.2",
 		"morgan": "^1.10.1",
 		"node-pg-migrate": "^8.0.3",
 		"pg": "^8.16.3",
 		"winston": "^3.18.3"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.39.1",
 		"@testcontainers/postgresql": "^11.8.0",
+		"eslint": "^9.39.1",
+		"eslint-plugin-react": "^7.37.5",
+		"globals": "^16.5.0",
 		"strip-ansi": "^7.1.2",
 		"supertest": "^7.1.4"
 	}
