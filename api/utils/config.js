@@ -4,9 +4,7 @@ import { fileURLToPath } from "node:url";
 import { configDotenv } from "dotenv";
 
 import logger from "./logger.js";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 /**
  * @typedef Config
  * @property {import("pg").ClientConfig} dbConfig
@@ -23,7 +21,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * @typedef {import("node-pg-migrate/dist/runner.js").RunnerOptionUrl} RunnerOptionUrl
  */
 
-const REQUIRED_ARGS = ["DATABASE_URL"];
+const REQUIRED_ARGS =
+	process.env.NODE_ENV === "production" ? ["DATABASE_URL"] : [];
 
 /**
  * @params {Record<string, string>} overrides
@@ -37,15 +36,10 @@ const createConfig = (overrides) => {
 		process.env.DOTENV_CONFIG_PATH ?? ".env",
 	);
 	const migrationsDir = resolve(__dirname, "..", "migrations");
-
 	configDotenv({ path: dotenvPath, quiet: true });
-
 	const source = { ...process.env, ...overrides };
-
 	requireArgs(source, REQUIRED_ARGS);
-
 	const dbConfig = createDbConfig(source);
-
 	return {
 		dbConfig,
 		dotenvPath,
@@ -65,7 +59,6 @@ const createConfig = (overrides) => {
 		timestampFormat: source.TIMESTAMP_FORMAT,
 	};
 };
-
 /** @type {Config} */
 const config = new Proxy(
 	{ config: undefined },
@@ -81,41 +74,57 @@ const config = new Proxy(
 		},
 	},
 );
-
 export default config;
-
 /**
  * @param {Record<string, string>} source
  * @returns {Config["dbConfig"]}
  */
 function createDbConfig(source) {
-	const databaseUrl = new URL(source.DATABASE_URL);
+	// Use DATABASE_URL if provided, regardless of NODE_ENV
+	if (source.DATABASE_URL) {
+		const databaseUrl = new URL(source.DATABASE_URL);
+		const localDb = [
+			"0.0.0.0",
+			"127.0.0.1",
+			"localhost",
+			"host.docker.internal",
+		].includes(databaseUrl.hostname);
+		const sslMode = databaseUrl.searchParams.get("sslmode") ?? source.PGSSLMODE;
 
-	const localDb = [
-		"0.0.0.0",
-		"127.0.0.1",
-		"localhost",
-		"host.docker.internal",
-	].includes(databaseUrl.hostname);
-	const sslMode = databaseUrl.searchParams.get("sslmode") ?? source.PGSSLMODE;
+		return {
+			connectionString: databaseUrl.toString(),
+			connectionTimeoutMillis: 5000,
+			ssl:
+				localDb || sslMode === "disable"
+					? false
+					: {
+							rejectUnauthorized: [
+								"prefer",
+								"require",
+								"verify-ca",
+								"verify-full",
+							].includes(sslMode),
+						},
+		};
+	}
+
+	// Local fallback only if DATABASE_URL is not set
+	const user = source.DB_USER || "postgres";
+	const password = source.DB_PASSWORD || "password";
+	const host = source.DB_HOST || "localhost";
+	const port = parseInt(source.DB_PORT || "5432", 10);
+	const database = source.DB_NAME || "my_local_db";
 
 	return {
-		connectionString: databaseUrl.toString(),
-		connectionTimeoutMillis: 5_000,
-		ssl:
-			localDb || sslMode === "disable"
-				? false
-				: {
-						rejectUnauthorized: [
-							"prefer",
-							"require",
-							"verify-ca",
-							"verify-full",
-						].includes(sslMode),
-					},
+		user,
+		password,
+		host,
+		port,
+		database,
+		connectionTimeoutMillis: 5000,
+		ssl: false,
 	};
 }
-
 /**
  * @param {Record<string, string>} source
  * @param {string[]} required
