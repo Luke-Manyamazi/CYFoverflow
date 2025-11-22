@@ -1,7 +1,7 @@
 import express from "express";
 
 import apiRouter from "./api.js";
-import { testConnection } from "./db.js";
+//import { testConnection } from "./db.js";
 import config from "./utils/config.js";
 import {
 	clientRouter,
@@ -31,7 +31,7 @@ app.get("/healthz", async (_, res) => {
 
 app.use(API_ROOT, apiRouter);
 
-app.use(clientRouter(API_ROOT));
+//app.use(clientRouter(API_ROOT));
 
 app.use(logErrors());
 
