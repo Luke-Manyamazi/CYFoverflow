@@ -2,6 +2,7 @@ import express from "express";
 
 import apiRouter from "./api.js";
 import { testConnection } from "./db.js";
+import { authenticateToken } from "./utils/auth.js";
 import config from "./utils/config.js";
 import {
 	clientRouter,
@@ -28,7 +29,8 @@ app.get("/healthz", async (_, res) => {
 	await testConnection();
 	res.sendStatus(200);
 });
-
+// Apply authentication to questions routes
+app.use("/api/questions", authenticateToken());
 app.use(API_ROOT, apiRouter);
 
 app.use(clientRouter(API_ROOT));
