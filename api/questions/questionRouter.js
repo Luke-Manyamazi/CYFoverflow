@@ -1,5 +1,6 @@
 import express from "express";
 
+import { authenticateToken } from "../utils/auth.js";
 import logger from "../utils/logger.js";
 
 import {
@@ -11,14 +12,10 @@ import {
 } from "./questionService.js";
 
 const router = express.Router();
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken(), async (req, res) => {
 	try {
-		const { title, content, type, metaData } = req.body;
-
-		const templateType = type;
-		const browser = metaData?.browser || null;
-		const os = metaData?.os || null;
-		const documentationLink = metaData?.documentationLink || null;
+		const { title, content, templateType, browser, os, documentationLink } =
+			req.body;
 
 		const question = await createQuestion(
 			req.user.id,
@@ -57,15 +54,11 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, content, type, metaData } = req.body;
-
-		const templateType = type;
-		const browser = metaData?.browser || null;
-		const os = metaData?.os || null;
-		const documentationLink = metaData?.documentationLink || null;
+		const { title, content, templateType, browser, os, documentationLink } =
+			req.body;
 
 		const question = await updateQuestion(
 			Number(id),
@@ -83,7 +76,7 @@ router.put("/:id", async (req, res) => {
 		res.status(500).json({ error: "fail to update question" });
 	}
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		await deleteQuestion(Number(id), req.user.id);

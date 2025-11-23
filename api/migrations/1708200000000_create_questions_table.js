@@ -6,7 +6,12 @@ export async function up(pgm) {
 		id: { type: "serial", primaryKey: true },
 		title: { type: "text", notNull: true },
 		body: { type: "text", notNull: true },
-		user_id: { type: "integer", notNull: true },
+		user_id: {
+			type: "integer",
+			notNull: true,
+			references: "users(id)",
+			onDelete: "CASCADE",
+		},
 		template_type: { type: "text", notNull: false },
 		browser: { type: "text", notNull: false }, // For bug-report template
 		os: { type: "text", notNull: false }, // For bug-report template
