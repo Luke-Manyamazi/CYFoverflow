@@ -13,12 +13,17 @@ import {
 const router = express.Router();
 router.post("/", async (req, res) => {
 	try {
-		const { title, body, templateType, browser, os, documentationLink } =
-			req.body;
+		const { title, content, type, metaData } = req.body;
+
+		const templateType = type;
+		const browser = metaData?.browser || null;
+		const os = metaData?.os || null;
+		const documentationLink = metaData?.documentationLink || null;
+
 		const question = await createQuestion(
 			req.user.id,
 			title,
-			body,
+			content,
 			templateType,
 			browser,
 			os,
@@ -55,13 +60,18 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, body, templateType, browser, os, documentationLink } =
-			req.body;
+		const { title, content, type, metaData } = req.body;
+
+		const templateType = type;
+		const browser = metaData?.browser || null;
+		const os = metaData?.os || null;
+		const documentationLink = metaData?.documentationLink || null;
+
 		const question = await updateQuestion(
 			Number(id),
 			req.user.id,
 			title,
-			body,
+			content,
 			templateType,
 			browser,
 			os,
