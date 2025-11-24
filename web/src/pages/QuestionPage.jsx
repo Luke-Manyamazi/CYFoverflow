@@ -2,10 +2,13 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../contexts/useAuth";
+
 import { TEMPLATES } from "./templates";
 
 const AskQuestionPage = () => {
 	const navigate = useNavigate();
+	const { token, isloggedIn } = useAuth();
 	// Controls the View (null = Selection Grid, 'id' = Editor Form)
 	const [activeTemplate, setActiveTemplate] = useState(null);
 
@@ -72,6 +75,11 @@ const AskQuestionPage = () => {
 		e.preventDefault();
 		setError(null);
 
+		if (!isloggedIn || !token) {
+			setError("You must be logged in to post a question.");
+			return;
+		}
+
 		const plainText = editorRef.current.getContent({ format: "text" });
 
 		if (!title.trim()) {
@@ -105,9 +113,10 @@ const AskQuestionPage = () => {
 		const questionData = {
 			title: title,
 			content: cleanContent,
-			type: activeTemplate || "general",
-			metaData: metaData,
-			createdAt: new Date().toISOString(),
+			templateType: activeTemplate || "general-question",
+			browser: metaData.browser || null,
+			os: metaData.os || null,
+			documentationLink: metaData.documentationLink || null,
 		};
 
 		try {
@@ -115,6 +124,7 @@ const AskQuestionPage = () => {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify(questionData),
 			});

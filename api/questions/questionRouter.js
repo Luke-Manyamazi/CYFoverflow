@@ -1,5 +1,6 @@
 import express from "express";
 
+import { authenticateToken } from "../utils/auth.js";
 import logger from "../utils/logger.js";
 
 import {
@@ -11,14 +12,15 @@ import {
 } from "./questionService.js";
 
 const router = express.Router();
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken(), async (req, res) => {
 	try {
-		const { title, body, templateType, browser, os, documentationLink } =
+		const { title, content, templateType, browser, os, documentationLink } =
 			req.body;
+
 		const question = await createQuestion(
 			req.user.id,
 			title,
-			body,
+			content,
 			templateType,
 			browser,
 			os,
@@ -52,16 +54,17 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, body, templateType, browser, os, documentationLink } =
+		const { title, content, templateType, browser, os, documentationLink } =
 			req.body;
+
 		const question = await updateQuestion(
 			Number(id),
 			req.user.id,
 			title,
-			body,
+			content,
 			templateType,
 			browser,
 			os,
@@ -73,7 +76,7 @@ router.put("/:id", async (req, res) => {
 		res.status(500).json({ error: "fail to update question" });
 	}
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		await deleteQuestion(Number(id), req.user.id);
