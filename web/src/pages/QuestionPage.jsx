@@ -8,7 +8,7 @@ import { TEMPLATES } from "./templates";
 
 const AskQuestionPage = () => {
 	const navigate = useNavigate();
-	const { token, islogIn } = useAuth();
+	const { token, isloggedIn } = useAuth();
 	// Controls the View (null = Selection Grid, 'id' = Editor Form)
 	const [activeTemplate, setActiveTemplate] = useState(null);
 
@@ -75,7 +75,7 @@ const AskQuestionPage = () => {
 		e.preventDefault();
 		setError(null);
 
-		if (!islogIn || !token) {
+		if (!isloggedIn || !token) {
 			setError("You must be logged in to post a question.");
 			return;
 		}

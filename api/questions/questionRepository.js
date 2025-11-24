@@ -28,7 +28,10 @@ export const getAllQuestionsDB = async () => {
 };
 
 export const getQuestionByIdDB = async (id) => {
-	const result = await db.query(`SELECT * FROM questions WHERE id = $1`, [id]);
+	const result = await db.query(
+		`SELECT q.*, u.name as author_name FROM questions q Join users u ON q.user_id = u.id WHERE q.id = $1`,
+		[id],
+	);
 	return result.rows[0];
 };
 
