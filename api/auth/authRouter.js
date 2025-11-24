@@ -2,26 +2,19 @@ import { Router } from "express";
 
 import { generateToken } from "../utils/auth.js";
 import logger from "../utils/logger.js";
+import validate from "../utils/validation.js";
 
 import * as authService from "./authService.js";
+import { signupSchema, loginSchema } from "./validationSchema.js";
 
 const authRouter = Router();
 
-authRouter.post("/signup", async (req, res) => {
+// --- SIGN-UP Route ---
+// Using the validate middleware with signupSchema
+authRouter.post("/signup", validate(signupSchema), async (req, res) => {
 	try {
+		// Joi has ensured name, email, and password meet all requirements.
 		const { name, email, password } = req.body;
-
-		if (!name || !email || !password) {
-			return res
-				.status(400)
-				.json({ message: "All fields (name, email, password) are required." });
-		}
-
-		if (password.length < 6) {
-			return res
-				.status(400)
-				.json({ message: "Password must be at least 6 characters long." });
-		}
 
 		const newUser = await authService.signUp(name, email, password);
 		const token = generateToken(newUser.id);
@@ -31,20 +24,20 @@ authRouter.post("/signup", async (req, res) => {
 			token,
 		});
 	} catch (error) {
-		logger.error("Signup failed: %0", error);
-		res.status(500).json({ message: "Internal server error." });
+		logger.error("Signup failed: %O", error);
+		const statusCode = error.message?.includes("already exists") ? 409 : 500;
+		res.status(statusCode).json({
+			message: error.message || "Internal server error.",
+		});
 	}
 });
 
-authRouter.post("/login", async (req, res) => {
+// --- LOGIN Route ---
+// Using the validate middleware with loginSchema
+authRouter.post("/login", validate(loginSchema), async (req, res) => {
 	try {
+		// Joi has ensured email and password are present and meet min length.
 		const { email, password } = req.body;
-
-		if (!email || !password) {
-			return res
-				.status(400)
-				.json({ message: "Email and password are required." });
-		}
 
 		const user = await authService.login(email, password);
 		const token = generateToken(user.id);
@@ -54,8 +47,13 @@ authRouter.post("/login", async (req, res) => {
 			token,
 		});
 	} catch (error) {
-		logger.error("Login failed: %0", error);
-		res.status(500).json({ message: "Internal server error." });
+		logger.error("Login failed: %O", error);
+		const statusCode = error.message?.includes("Invalid credentials")
+			? 401
+			: 500;
+		res.status(statusCode).json({
+			message: error.message || "Internal server error.",
+		});
 	}
 });
 
