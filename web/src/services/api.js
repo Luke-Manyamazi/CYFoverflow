@@ -11,7 +11,9 @@ export const login = async (email, password) => {
 
 	if (!response.ok) {
 		const error = await response.json();
-		throw new Error(error.message || "Login failed");
+		// Handle validation errors (400) with details field
+		const errorMessage = error.details || error.message || "Login failed";
+		throw new Error(errorMessage);
 	}
 
 	return response.json();
@@ -28,7 +30,9 @@ export const signUp = async (name, email, password) => {
 
 	if (!response.ok) {
 		const error = await response.json();
-		throw new Error(error.message || "Sign up failed");
+		// Handle validation errors (400) with details field
+		const errorMessage = error.details || error.message || "Sign up failed";
+		throw new Error(errorMessage);
 	}
 
 	return response.json();
