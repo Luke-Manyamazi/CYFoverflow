@@ -8,7 +8,7 @@ import { TEMPLATES } from "./templates";
 
 const AskQuestionPage = () => {
 	const navigate = useNavigate();
-	const { token, isloggedIn } = useAuth();
+	const { token, isLoggedIn } = useAuth();
 	// Controls the View (null = Selection Grid, 'id' = Editor Form)
 	const [activeTemplate, setActiveTemplate] = useState(null);
 
@@ -75,7 +75,7 @@ const AskQuestionPage = () => {
 		e.preventDefault();
 		setError(null);
 
-		if (!isloggedIn || !token) {
+		if (!isLoggedIn || !token) {
 			setError("You must be logged in to post a question.");
 			return;
 		}
@@ -427,20 +427,3 @@ const AskQuestionPage = () => {
 };
 
 export default AskQuestionPage;
-
-/* expected question data structure: for Sheetal to work on
-
-{
-  "title": "string",             // Question title from the title input
-  "content": "string",           // Rich-text content from the TinyMCE editor (HTML)
-  "template": "string",          // Template ID (e.g., "bug-report" or "how-to")
-  "templateFields": {            // Object containing template-specific fields
-    // For Bug Report template:
-    "browser": "string",         // Optional, only if template is bug-report
-    "os": "string"               // Optional, only if template is bug-report
-
-    // For How-To template:
-    "documentationLink": "string" // Optional, only if template is how-to
-  }
-}
- */
