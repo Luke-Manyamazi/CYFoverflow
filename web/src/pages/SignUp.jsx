@@ -130,9 +130,9 @@ function SignUp() {
 										}
 									>
 										{showPassword ? (
-											<HiEyeOff className="w-5 h-5" />
-										) : (
 											<HiEye className="w-5 h-5" />
+										) : (
+											<HiEyeOff className="w-5 h-5" />
 										)}
 									</button>
 								</div>
