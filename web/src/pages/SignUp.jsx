@@ -136,6 +136,13 @@ function SignUp() {
 										)}
 									</button>
 								</div>
+								{password.length > 0 && (
+									<span className="block mt-2 text-xs text-gray-500">
+										Password must be at least 6 characters and contain at least
+										one uppercase letter, one lowercase letter or number, and
+										one special character.
+									</span>
+								)}
 							</div>
 						</div>
 
