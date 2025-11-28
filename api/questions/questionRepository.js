@@ -56,3 +56,15 @@ export const updateQuestionDB = async (
 	);
 	return result.rows[0];
 };
+// Get questions by user ID
+export const getQuestionsByUserIdDB = async (userId) => {
+	const result = await db.query(
+		`SELECT q.*, u.name as author_name
+         FROM questions q
+         JOIN users u ON q.user_id = u.id
+         WHERE q.user_id = $1
+         ORDER BY q.created_at DESC`,
+		[userId],
+	);
+	return result.rows;
+};
