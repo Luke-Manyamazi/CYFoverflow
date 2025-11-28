@@ -14,13 +14,13 @@ import {
 const router = express.Router();
 router.post("/", authenticateToken(), async (req, res) => {
 	try {
-		const { title, content, templateType, browser, os, documentationLink } =
+		const { title, body, templateType, browser, os, documentationLink } =
 			req.body;
 
 		const question = await createQuestion(
 			req.user.id,
 			title,
-			content,
+			body,
 			templateType,
 			browser,
 			os,
