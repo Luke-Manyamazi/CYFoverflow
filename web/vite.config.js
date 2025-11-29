@@ -7,4 +7,9 @@ export default defineConfig({
 	build: {
 		outDir: "../api/static",
 	},
+	server: {
+		proxy: {
+			"/api": "http://localhost:8080",
+		},
+	},
 });

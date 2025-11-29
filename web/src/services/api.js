@@ -37,3 +37,17 @@ export const signUp = async (name, email, password) => {
 
 	return response.json();
 };
+
+// Questions API methods
+export const getLatestQuestions = async (limit = 10) => {
+	const response = await fetch(`${API_BASE_URL}/questions?limit=${limit}`);
+
+	if (!response.ok) {
+		const error = await response.json();
+		const errorMessage =
+			error.details || error.message || "Failed to fetch questions";
+		throw new Error(errorMessage);
+	}
+
+	return response.json();
+};

@@ -19,11 +19,15 @@ export const createQuestionDB = async (
 
 export const getAllQuestionsDB = async () => {
 	const result = await db.query(
-		`SELECT q.*, u.name as author_name
-         FROM questions q
-         JOIN users u ON q.user_id = u.id
-         ORDER BY q.created_at DESC`,
+		`SELECT
+      q.*,
+      u.name as author_name
+     FROM questions q
+     JOIN users u ON q.user_id = u.id
+     ORDER BY q.created_at DESC
+     LIMIT 10`,
 	);
+
 	return result.rows;
 };
 
