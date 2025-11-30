@@ -33,13 +33,6 @@ function Navbar() {
 
 					{/* Desktop Menu */}
 					<div className="hidden md:flex items-center gap-4 lg:gap-6">
-						<Link
-							to="/"
-							className="text-gray-700 hover:text-[#281d80] px-3 lg:px-4 py-2 rounded-lg text-sm lg:text-base font-semibold transition-colors duration-200"
-						>
-							Home
-						</Link>
-
 						{isLoggedIn ? (
 							<>
 								<span className="text-gray-700 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium hidden lg:inline">
@@ -104,14 +97,6 @@ function Navbar() {
 				{isMenuOpen && (
 					<div className="md:hidden py-4 border-t border-gray-200">
 						<div className="flex flex-col space-y-3">
-							<Link
-								to="/"
-								onClick={() => setIsMenuOpen(false)}
-								className="text-gray-700 hover:text-[#281d80] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200"
-							>
-								Home
-							</Link>
-
 							{isLoggedIn ? (
 								<>
 									<div className="text-gray-700 px-4 py-2 text-base font-medium">
