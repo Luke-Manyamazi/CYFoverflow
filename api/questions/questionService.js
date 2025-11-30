@@ -40,6 +40,10 @@ export const getQuestionById = async (id) => {
 	}
 	return question;
 };
+// Get questions by user ID
+export const getQuestionsByUserId = async (userId) => {
+  return repository.getQuestionsByUserIdDB(userId);
+};
 
 export const updateQuestion = async (
 	id,
