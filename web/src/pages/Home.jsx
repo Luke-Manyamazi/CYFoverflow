@@ -19,10 +19,6 @@ function Home() {
 
 				{isLoggedIn && user && (
 					<div className="mt-8 mb-6">
-						<p className="text-lg text-gray-700 mb-4">
-							Welcome back,{" "}
-							<span className="font-semibold text-[#281d80]">{user.name}</span>!
-						</p>
 						<button
 							onClick={() => navigate("/ask")}
 							className="bg-[#281d80] text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg"
