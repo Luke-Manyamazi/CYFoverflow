@@ -5,27 +5,33 @@ import * as repository from "./questionRepository.js";
 export const createQuestion = async (
 	userId,
 	title,
-	body,
+	content,
 	templateType,
 	browser = null,
 	os = null,
 	documentationLink = null,
+	labelId = [],
 ) => {
 	if (!title) {
 		throw new Error("Title is required");
 	}
-	if (!body) {
+	if (!content) {
 		throw new Error("Content is required");
 	}
 
+	if (!Array.isArray(labelId)) throw new Error("Labels must be an array");
+	if (labelId.length < 1) throw new Error("At least 1 label required");
+	if (labelId.length > 3) throw new Error("Maximum 3 labels allowed");
+
 	return repository.createQuestionDB(
 		title.trim(),
-		body.trim(),
+		content.trim(),
 		templateType,
 		userId,
 		browser,
 		os,
 		documentationLink,
+		labelId,
 	);
 };
 
@@ -45,11 +51,12 @@ export const updateQuestion = async (
 	id,
 	userId,
 	title,
-	body,
+	content,
 	templateType,
 	browser = null,
 	os = null,
 	documentationLink = null,
+	labelId = [],
 ) => {
 	const updated = await repository.getQuestionByIdDB(id);
 	if (!updated) {
@@ -58,8 +65,8 @@ export const updateQuestion = async (
 	if (!title) {
 		throw new Error("title is required");
 	}
-	if (!body) {
-		throw new Error("body is required");
+	if (!content) {
+		throw new Error("content is required");
 	}
 	if (updated.user_id !== userId) {
 		throw new Error("You are not authorised to edit");
@@ -67,11 +74,12 @@ export const updateQuestion = async (
 	return repository.updateQuestionDB(
 		id,
 		title,
-		body,
+		content,
 		templateType,
 		browser,
 		os,
 		documentationLink,
+		labelId,
 	);
 };
 
@@ -84,4 +92,15 @@ export const deleteQuestion = async (id, userId) => {
 		throw new Error("You are not authorised to delete");
 	}
 	return repository.deleteQuestionDB(id);
+};
+
+export const getAllLabels = async () => {
+	return repository.getAllLabelsDB();
+};
+
+export const searchQuestionsByLabels = async (labelId = []) => {
+	if (!Array.isArray(labelId)) throw new Error("labelIds must be an array");
+	if (labelId.length === 0) throw new Error("At least one label ID required");
+
+	return repository.searchQuestionsByLabelsDB(labelId);
 };
