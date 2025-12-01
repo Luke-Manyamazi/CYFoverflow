@@ -7,38 +7,15 @@ import {
 	createQuestion,
 	getAllQuestions,
 	getQuestionById,
-	getQuestionsByUserId,
 	updateQuestion,
 	deleteQuestion,
-	getAllLabels,
-	searchQuestionsByLabels,
 } from "./questionService.js";
 
 const router = express.Router();
-
-// Get all questions by the current user
-router.get("/my", authenticateToken(), async (req, res) => {
-  try {
-    const questions = await getQuestionsByUserId(req.user.id);
-    res.json(questions);
-  } catch (error) {
-    logger.error("Get my questions error: %0", error);
-    res.status(500).json({ error: "failed to fetch user's questions" });
-  }
-});
-
-
 router.post("/", authenticateToken(), async (req, res) => {
 	try {
-		const {
-			title,
-			content,
-			templateType,
-			browser,
-			os,
-			documentationLink,
-			labelId,
-		} = req.body;
+		const { title, content, templateType, browser, os, documentationLink } =
+			req.body;
 
 		const question = await createQuestion(
 			req.user.id,
@@ -48,7 +25,6 @@ router.post("/", authenticateToken(), async (req, res) => {
 			browser,
 			os,
 			documentationLink,
-			labelId,
 		);
 		res.status(201).json(question);
 	} catch (error) {
@@ -81,15 +57,8 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
-		const {
-			title,
-			content,
-			templateType,
-			browser,
-			os,
-			documentationLink,
-			labelId,
-		} = req.body;
+		const { title, content, templateType, browser, os, documentationLink } =
+			req.body;
 
 		const question = await updateQuestion(
 			Number(id),
@@ -100,46 +69,21 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 			browser,
 			os,
 			documentationLink,
-			labelId,
 		);
 		res.status(201).json(question);
 	} catch (error) {
 		logger.error("update a question error: %0", error);
-		res.status(500).json({ error: "failed to update question" });
+		res.status(500).json({ error: "fail to update question" });
 	}
 });
-
 router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		await deleteQuestion(Number(id), req.user.id);
-		res.status(200).json({ message: "Question deleted successfully" });
+		res.sendStatus(204);
 	} catch (error) {
 		logger.error("delete a question error: %0", error);
-		res.status(500).json({ error: "failed to delete question" });
-	}
-});
-
-router.get("/labels/all", async (__, res) => {
-	try {
-		const labels = await getAllLabels();
-		res.json(labels);
-	} catch (error) {
-		logger.error("Get labels error: %0", error);
-		res.status(500).json({ error: "failed to fetch labels" });
-	}
-});
-
-router.post("/search/by-labels", async (req, res) => {
-	try {
-		const { labelId } = req.body;
-		const questions = await searchQuestionsByLabels(labelId);
-		res.json(questions);
-	} catch (error) {
-		logger.error("Search questions by labels error: %0", error);
-		res
-			.status(500)
-			.json({ error: error.message || "Failed to search questions by labels" });
+		res.status(500).json({ error: "fail to delete question" });
 	}
 });
 
