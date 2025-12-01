@@ -40,8 +40,7 @@ export const getAllQuestionsDB = async () => {
       u.name as author_name
      FROM questions q
      JOIN users u ON q.user_id = u.id
-     ORDER BY q.created_at DESC
-     LIMIT 10`,
+     ORDER BY q.created_at DESC`,
 	);
 
 	const questions = result.rows;
