@@ -54,7 +54,17 @@ export const getAllQuestionsDB = async () => {
 
 	return questions;
 };
-
+export const getQuestionsByUserIdDB = async (userId) => {
+	const result = await db.query(
+		`SELECT q.*, u.name as author_name
+         FROM questions q
+         JOIN users u ON q.user_id = u.id
+         WHERE q.user_id = $1
+         ORDER BY q.created_at DESC`,
+		[userId],
+	);
+	return result.rows;
+};
 export const getQuestionByIdDB = async (id) => {
 	const result = await db.query(
 		`SELECT q.*, u.name as author_name FROM questions q Join users u ON q.user_id = u.id WHERE q.id = $1`,
@@ -62,7 +72,7 @@ export const getQuestionByIdDB = async (id) => {
 	);
 	const question = result.rows[0];
 	const labelResult = await db.query(
-		`SELECT l.id, l.name 
+		`SELECT l.id, l.name
          FROM labels l
          JOIN question_labels ql ON l.id = ql.label_id
          WHERE ql.question_id = $1`,

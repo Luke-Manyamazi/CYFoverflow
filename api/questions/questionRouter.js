@@ -7,6 +7,7 @@ import {
 	createQuestion,
 	getAllQuestions,
 	getQuestionById,
+	getQuestionsByUserId,
 	updateQuestion,
 	deleteQuestion,
 	getAllLabels,
@@ -14,6 +15,16 @@ import {
 } from "./questionService.js";
 
 const router = express.Router();
+
+router.get("/my-questions", authenticateToken(), async (req, res) => {
+	try {
+		const questions = await getQuestionsByUserId(req.user.id);
+		res.json(questions);
+	} catch (error) {
+		logger.error("Get my questions error: %0", error);
+		res.status(500).json({ error: "failed to fetch user's questions" });
+	}
+});
 router.post("/", authenticateToken(), async (req, res) => {
 	try {
 		const {

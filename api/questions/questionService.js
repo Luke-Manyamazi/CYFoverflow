@@ -47,6 +47,9 @@ export const getQuestionById = async (id) => {
 	return question;
 };
 
+export const getQuestionsByUserId = async (userId) => {
+	return repository.getQuestionsByUserIdDB(userId);
+};
 export const updateQuestion = async (
 	id,
 	userId,
