@@ -5,7 +5,7 @@ export async function up(pgm) {
 	pgm.createTable("questions", {
 		id: { type: "serial", primaryKey: true },
 		title: { type: "text", notNull: true },
-		body: { type: "text", notNull: true },
+		content: { type: "text", notNull: true },
 		user_id: {
 			type: "integer",
 			notNull: true,
@@ -36,5 +36,3 @@ export async function up(pgm) {
 export async function down(pgm) {
 	pgm.dropTable("questions");
 }
-
-export const shorthands = {};
