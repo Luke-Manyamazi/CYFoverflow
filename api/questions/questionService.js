@@ -10,6 +10,7 @@ export const createQuestion = async (
 	browser = null,
 	os = null,
 	documentationLink = null,
+	labelId = [],
 ) => {
 	if (!title) {
 		throw new Error("Title is required");
@@ -17,6 +18,10 @@ export const createQuestion = async (
 	if (!body) {
 		throw new Error("Content is required");
 	}
+
+	if (labelId == null) labelId = [];
+	if (!Array.isArray(labelId)) throw new Error("Labels must be an array");
+	if (labelId.length > 3) throw new Error("Maximum 3 labels allowed");
 
 	return repository.createQuestionDB(
 		title.trim(),
@@ -26,6 +31,7 @@ export const createQuestion = async (
 		browser,
 		os,
 		documentationLink,
+		labelId,
 	);
 };
 
