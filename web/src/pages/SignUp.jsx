@@ -47,7 +47,7 @@ function SignUp() {
 							Or{" "}
 							<Link
 								to="/login"
-								className="font-semibold text-[#281d80] hover:text-[#ed4d4e] transition-colors"
+								className="font-semibold text-[#281d80] hover:text-[#ed4d4e] transition-colors cursor-pointer"
 							>
 								sign in to your existing account
 							</Link>
@@ -124,7 +124,7 @@ function SignUp() {
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors"
+										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors cursor-pointer"
 										aria-label={
 											showPassword ? "Hide password" : "Show password"
 										}
@@ -148,7 +148,7 @@ function SignUp() {
 
 						<button
 							type="submit"
-							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#ed4d4e] hover:bg-[#d43d3e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed4d4e] transition-all shadow-md hover:shadow-lg"
+							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#ed4d4e] hover:bg-[#d43d3e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed4d4e] transition-all shadow-md hover:shadow-lg cursor-pointer"
 						>
 							Sign up
 						</button>
