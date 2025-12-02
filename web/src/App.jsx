@@ -21,13 +21,10 @@ function App() {
 					<div className="min-h-screen" style={{ backgroundColor: "#efeef8" }}>
 						<Navbar />
 						<Routes>
-							{/* Existing Routes */}
 							<Route path="/" element={<Home />} />
 							<Route path="/login" element={<Login />} />
 							<Route path="/signup" element={<SignUp />} />
 							<Route path="/ask" element={<QuestionPage />} />
-							
-							{/* New Routes */}
 							<Route path="/questions" element={<QuestionsPage />} />
 							<Route path="/labels" element={<LabelsPage />} />
 							<Route path="/my-questions" element={<MyQuestionsPage />} />
