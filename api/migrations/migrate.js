@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { parseArgs } from "node:util";
 
 import { runner } from "node-pg-migrate";
@@ -26,6 +27,7 @@ const waitForDatabase = async (maxRetries = 10, delayMs = 2000) => {
 			await client.connect();
 			await client.query("SELECT 1");
 			await client.end();
+			console.log("Database connection successful");
 			logger.info("Database connection successful");
 			return;
 		} catch (error) {
@@ -36,6 +38,9 @@ const waitForDatabase = async (maxRetries = 10, delayMs = 2000) => {
 				);
 				throw error;
 			}
+			console.log(
+				`Database not ready, retrying in ${delayMs}ms... (attempt ${i + 1}/${maxRetries})`,
+			);
 			logger.info(
 				"Database not ready, retrying in %dms... (attempt %d/%d)",
 				delayMs,
@@ -47,11 +52,14 @@ const waitForDatabase = async (maxRetries = 10, delayMs = 2000) => {
 	}
 };
 
+console.log("Waiting for database...");
 await waitForDatabase();
+console.log("Database ready, starting migrations...");
 
 const count = rawCount ? parseInt(rawCount, 10) : undefined;
 
 try {
+	console.log("Running migrations...");
 	logger.info("Starting migrations...");
 	if (direction === "redo") {
 		await runner({ ...migrationConfig, count, direction: "down" });
@@ -59,8 +67,10 @@ try {
 	} else {
 		await runner({ ...migrationConfig, count, direction });
 	}
+	console.log("Migrations completed successfully");
 	logger.info("Migrations completed successfully");
 } catch (error) {
+	console.error("Migration failed:", error);
 	logger.error("Migration failed: %O", error);
 	throw error;
 }
