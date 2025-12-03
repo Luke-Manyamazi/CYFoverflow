@@ -92,7 +92,7 @@ function Navbar() {
 						)}
 					</div>
 
-					{/* Mobile Menu Button */}
+
 					<button
 						onClick={() => setIsMenuOpen(!isMenuOpen)}
 						className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
@@ -116,18 +116,18 @@ function Navbar() {
 					</button>
 				</div>
 
-				{/* Mobile Menu */}
+
 				{isMenuOpen && (
 					<div className="md:hidden py-4 border-t border-gray-200">
 						<div className="flex flex-col space-y-3">
-							{/* Search Bar - Mobile */}
+							
 							<div className="px-4">
 								<SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
 							</div>
 
 							{isLoggedIn ? (
 								<>
-									{/* Avatar Only */}
+
 									<div className="px-4 py-2 flex items-center gap-3">
 										<div className="w-10 h-10 bg-[#281d80] text-white rounded-full flex items-center justify-center font-semibold">
 											{userName?.charAt(0).toUpperCase()}

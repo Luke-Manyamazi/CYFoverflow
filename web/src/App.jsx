@@ -11,6 +11,7 @@ import QuestionsPage from "./pages/QuestionsPage";
 import LabelsPage from "./pages/LabelsPage";
 import MyQuestionsPage from "./pages/MyQuestionsPage";
 import MyResponsesPage from "./pages/MyResponsesPage";
+import QuestionDetailPage from "./pages/QuestionDetailPage";
 import "./App.css";
 
 function App() {

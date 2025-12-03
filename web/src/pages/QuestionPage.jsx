@@ -81,9 +81,29 @@ const AskQuestionPage = () => {
 		}
 
 		const plainText = editorRef.current.getContent({ format: "text" });
+		const htmlContent = editorRef.current.getContent();
 
 		if (!title.trim()) {
 			setError("Please enter a title for your question.");
+			return;
+		}
+
+		// Check if content has meaningful text (not just code blocks)
+		const tempDiv = document.createElement("div");
+		tempDiv.innerHTML = htmlContent;
+
+		// Remove code blocks to check if there's any text content
+		tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("code").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
+
+		const textOnly = tempDiv.textContent.trim();
+		const hasMeaningfulText = textOnly.length > 20 &&
+			!textOnly.match(/^(Problem Summary|What I've Already Tried|Describe|Explain|Provide|Any additional).*$/i);
+
+		if (!hasMeaningfulText) {
+			setError("Please provide a description explaining your question. Code blocks alone are not sufficient.");
 			return;
 		}
 

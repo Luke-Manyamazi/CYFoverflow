@@ -12,6 +12,7 @@ import {
 	deleteQuestion,
 	getAllLabels,
 	searchQuestionsByLabels,
+	getTotalQuestionsCount,
 } from "./questionService.js";
 
 const router = express.Router();
@@ -54,10 +55,35 @@ router.post("/", authenticateToken(), async (req, res) => {
 	}
 });
 
-router.get("/", async (__, res) => {
+router.get("/", async (req, res) => {
 	try {
-		const questions = await getAllQuestions();
-		res.json(questions);
+		const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+		const page = req.query.page ? parseInt(req.query.page, 10) : null;
+
+		// If limit is provided without page, it's for recent questions (no pagination)
+		// If page is provided, it's for pagination (limit defaults to 10 if not provided)
+		const paginationLimit = page ? limit || 10 : limit;
+
+		const questions = await getAllQuestions(paginationLimit, page);
+
+		// If pagination is requested, return paginated response
+		if (page) {
+			const total = await getTotalQuestionsCount();
+			const totalPages = Math.ceil(total / paginationLimit);
+
+			res.json({
+				questions,
+				pagination: {
+					currentPage: page,
+					totalPages,
+					totalItems: total,
+					itemsPerPage: paginationLimit,
+				},
+			});
+		} else {
+			// Simple response for recent questions (no pagination)
+			res.json(questions);
+		}
 	} catch (error) {
 		logger.error("Get questions error: %0", error);
 		res.status(500).json({ error: "failed to fetch questions" });

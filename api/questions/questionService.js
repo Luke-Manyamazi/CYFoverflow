@@ -36,8 +36,12 @@ export const createQuestion = async (
 	);
 };
 
-export const getAllQuestions = async () => {
-	return repository.getAllQuestionsDB();
+export const getAllQuestions = async (limit = null, page = null) => {
+	return repository.getAllQuestionsDB(limit, page);
+};
+
+export const getTotalQuestionsCount = async () => {
+	return repository.getTotalQuestionsCountDB();
 };
 
 export const getQuestionById = async (id) => {
