@@ -33,14 +33,28 @@ export const createQuestionDB = async (
 	return question;
 };
 
-export const getAllQuestionsDB = async () => {
-	const result = await db.query(
-		`SELECT q.*, u.name as author_name
+export const getAllQuestionsDB = async (limit = null, page = null) => {
+	let query = `SELECT q.*, u.name as author_name
          FROM questions q
          JOIN users u ON q.user_id = u.id
-         ORDER BY q.created_at DESC`,
-	);
+         ORDER BY q.created_at DESC`;
+
+	const params = [];
+
+	if (limit && page) {
+		// Pagination: calculate offset
+		const offset = (page - 1) * limit;
+		query += ` LIMIT $1 OFFSET $2`;
+		params.push(limit, offset);
+	} else if (limit) {
+		// Simple limit (for recent questions)
+		query += ` LIMIT $1`;
+		params.push(limit);
+	}
+
+	const result = await db.query(query, params);
 	const questions = result.rows;
+
 	for (let question of questions) {
 		const labelResult = await db.query(
 			`SELECT l.id, l.name
@@ -53,6 +67,11 @@ export const getAllQuestionsDB = async () => {
 	}
 
 	return questions;
+};
+
+export const getTotalQuestionsCountDB = async () => {
+	const result = await db.query(`SELECT COUNT(*) as total FROM questions`);
+	return parseInt(result.rows[0].total, 10);
 };
 export const getQuestionsByUserIdDB = async (userId) => {
 	const result = await db.query(
