@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import { useAuth } from "../contexts/useAuth";
+import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/sidebar";
-import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
 import { useSearch } from "../contexts/SearchContext";
+import { useAuth } from "../contexts/useAuth";
+import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
 
-const AskQuestionButton = ({ className = "", children = "Ask Question", onNavigate }) => (
+const AskQuestionButton = ({
+	className = "",
+	children = "Ask Question",
+	onNavigate,
+}) => (
 	<button
 		onClick={() => onNavigate("/ask")}
 		className={`bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${className}`}
@@ -17,19 +22,42 @@ const AskQuestionButton = ({ className = "", children = "Ask Question", onNaviga
 
 function Home() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { isLoggedIn, user } = useAuth();
 	const { searchTerm } = useSearch();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const [selectedLabel, setSelectedLabel] = useState(null);
 
 	useEffect(() => {
-		fetchLatestQuestions();
-	}, []);
+		if (selectedLabel) {
+			fetchQuestionsByLabel(selectedLabel.id);
+		} else {
+			fetchLatestQuestions();
+		}
+	}, [selectedLabel]);
+
+	useEffect(() => {
+		if (location.state?.labelId) {
+			fetch("/api/questions/labels/all")
+				.then((res) => res.json())
+				.then((labels) => {
+					const label = labels.find((l) => l.id === location.state.labelId);
+					if (label) {
+						setSelectedLabel(label);
+					}
+				})
+				.catch(console.error);
+			navigate(location.pathname, { replace: true, state: {} });
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [location.state?.labelId]);
 
 	const fetchLatestQuestions = async () => {
 		try {
 			setLoading(true);
+			setError("");
 			const response = await fetch("/api/questions?limit=10");
 
 			if (!response.ok) {
@@ -44,6 +72,42 @@ function Home() {
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const fetchQuestionsByLabel = async (labelId) => {
+		try {
+			setLoading(true);
+			setError("");
+			const response = await fetch("/api/questions/search/by-labels", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					labelId: [labelId],
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to fetch questions");
+			}
+
+			const data = await response.json();
+			setQuestions(data);
+		} catch (err) {
+			console.error("Error fetching questions by label:", err);
+			setError("Failed to load questions. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleLabelClick = (label) => {
+		setSelectedLabel(label);
+	};
+
+	const handleClearLabelFilter = () => {
+		setSelectedLabel(null);
 	};
 
 	// Filter questions based on search term
@@ -100,17 +164,29 @@ function Home() {
 						{/* Latest Questions Section */}
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200">
 							<div className="p-6 border-b border-gray-200">
-								<div className="flex justify-between items-center">
-									<h2 className="text-2xl font-bold text-gray-900">
-										{searchTerm
-											? `Search Results for "${searchTerm}"`
-											: "Latest Questions"}
-										{searchTerm && (
-											<span className="text-sm font-normal text-gray-500 ml-2">
-												({filteredQuestions.length} results)
-											</span>
+								<div className="flex justify-between items-center flex-wrap gap-4">
+									<div className="flex items-center gap-3 flex-wrap">
+										<h2 className="text-2xl font-bold text-gray-900">
+											{selectedLabel
+												? `Questions tagged with "${selectedLabel.name}"`
+												: searchTerm
+													? `Search Results for "${searchTerm}"`
+													: "Latest Questions"}
+											{(searchTerm || selectedLabel) && (
+												<span className="text-sm font-normal text-gray-500 ml-2">
+													({filteredQuestions.length} results)
+												</span>
+											)}
+										</h2>
+										{selectedLabel && (
+											<button
+												onClick={handleClearLabelFilter}
+												className="text-sm text-[#281d80] hover:text-[#1f1566] underline cursor-pointer"
+											>
+												Clear filter
+											</button>
 										)}
-									</h2>
+									</div>
 									{isLoggedIn && <AskQuestionButton onNavigate={navigate} />}
 								</div>
 							</div>
@@ -156,6 +232,17 @@ function Home() {
 														question.body || question.content,
 													)}
 												</p>
+												{question.labels && question.labels.length > 0 && (
+													<div className="flex flex-wrap gap-2 mt-3">
+														{question.labels.map((label) => (
+															<LabelBadge
+																key={label.id}
+																label={label}
+																onClick={handleLabelClick}
+															/>
+														))}
+													</div>
+												)}
 												<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
 													<span>
 														Asked by{" "}
