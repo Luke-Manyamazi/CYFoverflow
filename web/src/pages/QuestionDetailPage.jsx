@@ -1,10 +1,11 @@
+import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Editor } from "@tinymce/tinymce-react";
 
-import { useAuth } from "../contexts/useAuth";
-import Sidebar from "../components/sidebar";
 import AnswerForm from "../components/AnswerForm";
+import LabelBadge from "../components/LabelBadge";
+import Sidebar from "../components/sidebar";
+import { useAuth } from "../contexts/useAuth";
 
 function QuestionDetailPage() {
 	const { id } = useParams();
@@ -39,7 +40,6 @@ function QuestionDetailPage() {
 	useEffect(() => {
 		fetchQuestion();
 	}, [fetchQuestion]);
-
 
 	const handleAnswerClick = () => {
 		if (!isLoggedIn) {
@@ -92,7 +92,9 @@ function QuestionDetailPage() {
 						<main className="flex-1">
 							<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
 								<div className="text-center py-8">
-									<p className="text-red-600 mb-4">{error || "Question not found"}</p>
+									<p className="text-red-600 mb-4">
+										{error || "Question not found"}
+									</p>
 									<button
 										onClick={() => navigate("/")}
 										className="bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 cursor-pointer"
@@ -117,7 +119,9 @@ function QuestionDetailPage() {
 					<main className="flex-1">
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
 							<div className="flex justify-between items-start mb-4">
-								<h1 className="text-3xl font-bold text-gray-900">{question.title}</h1>
+								<h1 className="text-3xl font-bold text-gray-900">
+									{question.title}
+								</h1>
 								<button
 									onClick={handleAnswerClick}
 									className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
@@ -126,23 +130,29 @@ function QuestionDetailPage() {
 								</button>
 							</div>
 
-							<div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
+							<div className="flex items-center gap-4 text-sm text-gray-600 mb-6 flex-wrap">
 								<span>
-									Asked by <span className="font-semibold">{question.author_name || "Anonymous"}</span>
+									Asked by{" "}
+									<span className="font-semibold">
+										{question.author_name || "Anonymous"}
+									</span>
 								</span>
 								<span>•</span>
-								<span>{new Date(question.created_at).toLocaleDateString()}</span>
+								<span>
+									{new Date(question.created_at).toLocaleDateString()}
+								</span>
 								{question.labels && question.labels.length > 0 && (
 									<>
 										<span>•</span>
-										<div className="flex gap-2">
+										<div className="flex gap-2 flex-wrap">
 											{question.labels.map((label) => (
-												<span
+												<LabelBadge
 													key={label.id}
-													className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
-												>
-													{label.name}
-												</span>
+													label={label}
+													onClick={(l) => {
+														navigate("/", { state: { labelId: l.id } });
+													}}
+												/>
 											))}
 										</div>
 									</>
@@ -233,7 +243,9 @@ function QuestionDetailPage() {
 
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 							<h2 className="text-2xl font-bold text-gray-900 mb-4">Answers</h2>
-							<p className="text-gray-600">No answers yet. Be the first to answer!</p>
+							<p className="text-gray-600">
+								No answers yet. Be the first to answer!
+							</p>
 						</div>
 					</main>
 				</div>
@@ -243,4 +255,3 @@ function QuestionDetailPage() {
 }
 
 export default QuestionDetailPage;
-
