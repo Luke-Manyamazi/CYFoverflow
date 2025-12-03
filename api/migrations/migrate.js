@@ -51,9 +51,16 @@ await waitForDatabase();
 
 const count = rawCount ? parseInt(rawCount, 10) : undefined;
 
-if (direction === "redo") {
-	await runner({ ...migrationConfig, count, direction: "down" });
-	await runner({ ...migrationConfig, count: count ?? 1, direction: "up" });
-} else {
-	await runner({ ...migrationConfig, count, direction });
+try {
+	logger.info("Starting migrations...");
+	if (direction === "redo") {
+		await runner({ ...migrationConfig, count, direction: "down" });
+		await runner({ ...migrationConfig, count: count ?? 1, direction: "up" });
+	} else {
+		await runner({ ...migrationConfig, count, direction });
+	}
+	logger.info("Migrations completed successfully");
+} catch (error) {
+	logger.error("Migration failed: %O", error);
+	throw error;
 }
