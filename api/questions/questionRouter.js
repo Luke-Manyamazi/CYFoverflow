@@ -60,13 +60,10 @@ router.get("/", async (req, res) => {
 		const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
 		const page = req.query.page ? parseInt(req.query.page, 10) : null;
 
-		// If limit is provided without page, it's for recent questions (no pagination)
-		// If page is provided, it's for pagination (limit defaults to 10 if not provided)
 		const paginationLimit = page ? limit || 10 : limit;
 
 		const questions = await getAllQuestions(paginationLimit, page);
 
-		// If pagination is requested, return paginated response
 		if (page) {
 			const total = await getTotalQuestionsCount();
 			const totalPages = Math.ceil(total / paginationLimit);
@@ -81,7 +78,6 @@ router.get("/", async (req, res) => {
 				},
 			});
 		} else {
-			// Simple response for recent questions (no pagination)
 			res.json(questions);
 		}
 	} catch (error) {

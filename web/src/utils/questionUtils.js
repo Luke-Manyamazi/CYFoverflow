@@ -6,9 +6,12 @@
 export const getFirstLinePreview = (html) => {
 	if (!html) return "No description provided";
 
-	// Create a temporary div to parse HTML
 	const tempDiv = document.createElement("div");
 	tempDiv.innerHTML = html;
+
+	// Remove code blocks and pre elements (we don't want code in preview)
+	tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
+	tempDiv.querySelectorAll("code").forEach((el) => el.remove());
 
 	// Remove template-specific elements that don't contain user content
 	tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
@@ -21,31 +24,37 @@ export const getFirstLinePreview = (html) => {
 	for (let p of paragraphs) {
 		const text = p.textContent.trim();
 
-		// Skip empty paragraphs or template placeholders
 		if (
 			text &&
 			!text.includes("Problem Summary") &&
 			!text.includes("What I've Already Tried") &&
 			!text.includes("Describe your problem here") &&
 			!text.includes("Explain what you tried here") &&
+			!text.includes("Provide a concise summary") &&
+			!text.includes("Explain your solution") &&
+			!text.includes("Any additional context") &&
 			text.length > 5
 		) {
-			// Minimum content length
-			// Return first meaningful content, truncated if needed
 			return text.length > 100 ? text.substring(0, 100) + "..." : text;
 		}
 	}
 
-	// If no meaningful paragraphs found, try to get any text content
 	let fallbackText = tempDiv.textContent || tempDiv.innerText || "";
 	fallbackText = fallbackText
 		.replace(/Problem Summary/g, "")
 		.replace(/What I've Already Tried/g, "")
+		.replace(/Answer Summary/g, "")
+		.replace(/Solution/g, "")
+		.replace(/Additional Notes/g, "")
 		.replace(/\/\/ Your code here/g, "")
+		.replace(/\/\/ Your code solution here/g, "")
 		.replace(/\s+/g, " ")
 		.trim();
 
-	// Get first sentence or first 80 chars
+	if (!fallbackText || fallbackText.length < 10) {
+		return "Question contains code only. Click to view full details.";
+	}
+
 	const firstSentence = fallbackText.split(".")[0];
 	if (firstSentence && firstSentence.length > 10) {
 		return firstSentence.length > 100
@@ -53,7 +62,6 @@ export const getFirstLinePreview = (html) => {
 			: firstSentence;
 	}
 
-	// Final fallback
 	return fallbackText.length > 100
 		? fallbackText.substring(0, 100) + "..."
 		: fallbackText || "No description provided";

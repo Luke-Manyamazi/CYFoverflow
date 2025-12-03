@@ -4,14 +4,14 @@ import Navbar from "./components/Navbar";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { SearchProvider } from "./contexts/SearchContext";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import QuestionPage from "./pages/QuestionPage";
-import SignUp from "./pages/SignUp";
-import QuestionsPage from "./pages/QuestionsPage";
 import LabelsPage from "./pages/LabelsPage";
+import Login from "./pages/Login";
 import MyQuestionsPage from "./pages/MyQuestionsPage";
 import MyResponsesPage from "./pages/MyResponsesPage";
 import QuestionDetailPage from "./pages/QuestionDetailPage";
+import QuestionPage from "./pages/QuestionPage";
+import QuestionsPage from "./pages/QuestionsPage";
+import SignUp from "./pages/SignUp";
 import "./App.css";
 
 function App() {
@@ -27,8 +27,8 @@ function App() {
 							<Route path="/login" element={<Login />} />
 							<Route path="/signup" element={<SignUp />} />
 							<Route path="/ask" element={<QuestionPage />} />
-							
-							{/* New Routes */}
+
+							<Route path="/questions/:id" element={<QuestionDetailPage />} />
 							<Route path="/questions" element={<QuestionsPage />} />
 							<Route path="/labels" element={<LabelsPage />} />
 							<Route path="/my-questions" element={<MyQuestionsPage />} />
