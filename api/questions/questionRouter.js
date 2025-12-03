@@ -12,6 +12,7 @@ import {
 	deleteQuestion,
 	getAllLabels,
 	searchQuestionsByLabels,
+	markQuestionSolved,
 } from "./questionService.js";
 
 const router = express.Router();
@@ -137,6 +138,19 @@ router.post("/search/by-labels", async (req, res) => {
 		res
 			.status(500)
 			.json({ error: error.message || "Failed to search questions by labels" });
+	}
+});
+
+router.patch("/:id/solve", authenticateToken(), async (req, res) => {
+	try {
+		const { id } = req.params; // questionId
+		const { isSolved } = req.body;
+
+		const updated = await markQuestionSolved(Number(id), req.user.id, isSolved);
+		res.json(updated);
+	} catch (error) {
+		logger.error("Mark question solved error: %0", error);
+		res.status(500).json({ error: error.message });
 	}
 });
 

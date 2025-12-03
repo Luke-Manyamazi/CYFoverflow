@@ -107,3 +107,17 @@ export const searchQuestionsByLabels = async (labelId = []) => {
 
 	return repository.searchQuestionsByLabelsDB(labelId);
 };
+
+export const markQuestionSolved = async (id, userId, isSolved) => {
+	const question = await repository.getQuestionByIdDB(id);
+
+	if (!question) {
+		throw new Error("Question not found");
+	}
+
+	if (question.user_id !== userId) {
+		throw new Error("You are not authorised to change solved status");
+	}
+
+	return repository.updateSolvedStatusDB(id, isSolved);
+};

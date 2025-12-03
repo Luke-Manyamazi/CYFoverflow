@@ -117,6 +117,7 @@ const AskQuestionPage = () => {
 			browser: metaData.browser || null,
 			os: metaData.os || null,
 			documentationLink: metaData.documentationLink || null,
+			labelId: [],
 		};
 
 		try {
