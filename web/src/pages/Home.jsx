@@ -2,14 +2,26 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/useAuth";
+import Sidebar from "../components/sidebar";
+import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
+import { useSearch } from "../contexts/SearchContext";
+
+const AskQuestionButton = ({ className = "", children = "Ask Question", onNavigate }) => (
+	<button
+		onClick={() => onNavigate("/ask")}
+		className={`bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${className}`}
+	>
+		{children}
+	</button>
+);
 
 function Home() {
 	const navigate = useNavigate();
 	const { isLoggedIn, user } = useAuth();
+	const { searchTerm } = useSearch();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [searchTerm, setSearchTerm] = useState("");
 
 	useEffect(() => {
 		fetchLatestQuestions();
@@ -34,78 +46,20 @@ function Home() {
 		}
 	};
 
-	// Function to extract the first meaningful line from any template
-	const getFirstLinePreview = (html) => {
-		if (!html) return "No description provided";
-
-		// Create a temporary div to parse HTML
-		const tempDiv = document.createElement("div");
-		tempDiv.innerHTML = html;
-
-		// Remove template-specific elements that don't contain user content
-		tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
-		tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
-
-		// Get all paragraph elements
-		const paragraphs = tempDiv.querySelectorAll("p");
-
-		// Find the first paragraph that has actual user content (not empty or placeholder)
-		for (let p of paragraphs) {
-			const text = p.textContent.trim();
-
-			// Skip empty paragraphs or template placeholders
-			if (
-				text &&
-				!text.includes("Problem Summary") &&
-				!text.includes("What I've Already Tried") &&
-				!text.includes("Describe your problem here") &&
-				!text.includes("Explain what you tried here") &&
-				text.length > 5
-			) {
-				// Minimum content length
-				// Return first meaningful content, truncated if needed
-				return text.length > 100 ? text.substring(0, 100) + "..." : text;
-			}
-		}
-
-		// If no meaningful paragraphs found, try to get any text content
-		let fallbackText = tempDiv.textContent || tempDiv.innerText || "";
-		fallbackText = fallbackText
-			.replace(/Problem Summary/g, "")
-			.replace(/What I've Already Tried/g, "")
-			.replace(/\/\/ Your code here/g, "")
-			.replace(/\s+/g, " ")
-			.trim();
-
-		// Get first sentence or first 80 chars
-		const firstSentence = fallbackText.split(".")[0];
-		if (firstSentence && firstSentence.length > 10) {
-			return firstSentence.length > 100
-				? firstSentence.substring(0, 100) + "..."
-				: firstSentence;
-		}
-
-		// Final fallback
-		return fallbackText.length > 100
-			? fallbackText.substring(0, 100) + "..."
-			: fallbackText || "No description provided";
-	};
-
 	// Filter questions based on search term
-	const filteredQuestions = questions.filter(
-		(question) =>
-			question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(question.body &&
-				question.body.toLowerCase().includes(searchTerm.toLowerCase())) ||
-			(question.author_name &&
-				question.author_name.toLowerCase().includes(searchTerm.toLowerCase())),
-	);
+	const filteredQuestions = filterQuestions(questions, searchTerm);
 
-	const handleSearch = (e) => {
-		e.preventDefault();
-		// For now, I am filtering client-side
-
-		console.log("Searching for:", searchTerm);
+	const handleQuestionClick = (questionId) => {
+		if (isLoggedIn) {
+			navigate(`/questions/${questionId}`);
+		} else {
+			navigate("/login", {
+				state: {
+					message: "Please log in to view questions",
+					returnTo: `/questions/${questionId}`,
+				},
+			});
+		}
 	};
 
 	return (
@@ -116,50 +70,7 @@ function Home() {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div className="flex gap-8">
 					{/* Sidebar */}
-					<aside className="w-64 flex-shrink-0">
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-							<nav>
-								<ul className="space-y-2">
-									{/* Public Items */}
-									<li>
-										<button className="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-3 text-gray-700">
-											<span>📋</span>
-											<span className="font-medium">Questions</span>
-										</button>
-									</li>
-									<li>
-										<button className="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-3 text-gray-700">
-											<span>🏷️</span>
-											<span className="font-medium">Tags</span>
-										</button>
-									</li>
-
-									{/* Private Items (only show when logged in) */}
-									{isLoggedIn && (
-										<>
-											<li className="border-t border-gray-200 mt-4 pt-4">
-												<h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-													Personal
-												</h3>
-											</li>
-											<li>
-												<button className="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-3 text-gray-700">
-													<span>❓</span>
-													<span className="font-medium">My Questions</span>
-												</button>
-											</li>
-											<li>
-												<button className="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-3 text-gray-700">
-													<span>💬</span>
-													<span className="font-medium">My Responses</span>
-												</button>
-											</li>
-										</>
-									)}
-								</ul>
-							</nav>
-						</div>
-					</aside>
+					<Sidebar />
 
 					{/* Main Content Area */}
 					<main className="flex-1">
@@ -186,73 +97,6 @@ function Home() {
 							)}
 						</div>
 
-						{/* Search Bar Section */}
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-							<div className="max-w-3xl mx-auto">
-								<form onSubmit={handleSearch} className="flex gap-4">
-									<div className="flex-1 relative">
-										<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-											<svg
-												className="h-5 w-5 text-gray-400"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth={2}
-													d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-												/>
-											</svg>
-										</div>
-										<input
-											type="text"
-											placeholder="Search questions, topics, or users..."
-											value={searchTerm}
-											onChange={(e) => setSearchTerm(e.target.value)}
-											className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#281d80] focus:border-[#281d80] transition-all duration-200"
-										/>
-									</div>
-									<button
-										type="submit"
-										className="bg-[#281d80] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
-									>
-										<svg
-											className="h-5 w-5"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-											/>
-										</svg>
-										Search
-									</button>
-								</form>
-
-								{/* Search Tips */}
-								<div className="mt-4 flex flex-wrap gap-2 justify-center text-sm text-gray-500">
-									<span className="bg-gray-100 px-3 py-1 rounded-full">
-										Try: JavaScript
-									</span>
-									<span className="bg-gray-100 px-3 py-1 rounded-full">
-										React
-									</span>
-									<span className="bg-gray-100 px-3 py-1 rounded-full">
-										Node.js
-									</span>
-									<span className="bg-gray-100 px-3 py-1 rounded-full">
-										CSS
-									</span>
-								</div>
-							</div>
-						</div>
-
 						{/* Latest Questions Section */}
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200">
 							<div className="p-6 border-b border-gray-200">
@@ -267,14 +111,7 @@ function Home() {
 											</span>
 										)}
 									</h2>
-									{isLoggedIn && (
-										<button
-											onClick={() => navigate("/ask")}
-											className="bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg"
-										>
-											Ask Question
-										</button>
-									)}
+									{isLoggedIn && <AskQuestionButton onNavigate={navigate} />}
 								</div>
 							</div>
 
@@ -289,7 +126,7 @@ function Home() {
 										{error}
 										<button
 											onClick={fetchLatestQuestions}
-											className="block mx-auto mt-4 bg-[#281d80] text-white px-4 py-2 rounded hover:bg-[#1f1566]"
+											className="block mx-auto mt-4 bg-[#281d80] text-white px-4 py-2 rounded hover:bg-[#1f1566] cursor-pointer"
 										>
 											Try Again
 										</button>
@@ -302,31 +139,11 @@ function Home() {
 												role="button"
 												tabIndex={0}
 												className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
-												onClick={() => {
-													if (isLoggedIn) {
-														navigate(`/questions/${question.id}`);
-													} else {
-														navigate("/login", {
-															state: {
-																message: "Please log in to view questions",
-																returnTo: `/questions/${question.id}`,
-															},
-														});
-													}
-												}}
+												onClick={() => handleQuestionClick(question.id)}
 												onKeyDown={(e) => {
 													if (e.key === "Enter" || e.key === " ") {
 														e.preventDefault();
-														if (isLoggedIn) {
-															navigate(`/questions/${question.id}`);
-														} else {
-															navigate("/login", {
-																state: {
-																	message: "Please log in to view questions",
-																	returnTo: `/questions/${question.id}`,
-																},
-															});
-														}
+														handleQuestionClick(question.id);
 													}
 												}}
 											>
@@ -375,12 +192,12 @@ function Home() {
 											Try different search terms or ask a new question
 										</p>
 										{isLoggedIn && (
-											<button
-												onClick={() => navigate("/ask")}
-												className="bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200"
+											<AskQuestionButton
+												className="shadow-md hover:shadow-lg"
+												onNavigate={navigate}
 											>
 												Ask a Question
-											</button>
+											</AskQuestionButton>
 										)}
 									</div>
 								) : (
@@ -406,12 +223,12 @@ function Home() {
 											community!
 										</p>
 										{isLoggedIn && (
-											<button
-												onClick={() => navigate("/ask")}
-												className="bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200"
+											<AskQuestionButton
+												className="shadow-md hover:shadow-lg"
+												onNavigate={navigate}
 											>
 												Ask First Question
-											</button>
+											</AskQuestionButton>
 										)}
 									</div>
 								)}

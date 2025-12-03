@@ -41,7 +41,7 @@ function Login() {
 							Or{" "}
 							<Link
 								to="/signup"
-								className="font-semibold text-[#281d80] hover:text-[#ed4d4e] transition-colors"
+								className="font-semibold text-[#281d80] hover:text-[#ed4d4e] transition-colors cursor-pointer"
 							>
 								create a new account
 							</Link>
@@ -98,7 +98,7 @@ function Login() {
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors"
+										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors cursor-pointer"
 										aria-label={
 											showPassword ? "Hide password" : "Show password"
 										}
@@ -115,7 +115,7 @@ function Login() {
 
 						<button
 							type="submit"
-							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] transition-all shadow-md hover:shadow-lg"
+							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] transition-all shadow-md hover:shadow-lg cursor-pointer"
 						>
 							Sign in
 						</button>
