@@ -10,6 +10,10 @@ export const getFirstLinePreview = (html) => {
 	const tempDiv = document.createElement("div");
 	tempDiv.innerHTML = html;
 
+	// Remove code blocks and pre elements (we don't want code in preview)
+	tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
+	tempDiv.querySelectorAll("code").forEach((el) => el.remove());
+	
 	// Remove template-specific elements that don't contain user content
 	tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
 	tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
@@ -28,9 +32,11 @@ export const getFirstLinePreview = (html) => {
 			!text.includes("What I've Already Tried") &&
 			!text.includes("Describe your problem here") &&
 			!text.includes("Explain what you tried here") &&
+			!text.includes("Provide a concise summary") &&
+			!text.includes("Explain your solution") &&
+			!text.includes("Any additional context") &&
 			text.length > 5
 		) {
-			// Minimum content length
 			// Return first meaningful content, truncated if needed
 			return text.length > 100 ? text.substring(0, 100) + "..." : text;
 		}
@@ -41,9 +47,18 @@ export const getFirstLinePreview = (html) => {
 	fallbackText = fallbackText
 		.replace(/Problem Summary/g, "")
 		.replace(/What I've Already Tried/g, "")
+		.replace(/Answer Summary/g, "")
+		.replace(/Solution/g, "")
+		.replace(/Additional Notes/g, "")
 		.replace(/\/\/ Your code here/g, "")
+		.replace(/\/\/ Your code solution here/g, "")
 		.replace(/\s+/g, " ")
 		.trim();
+
+	// Check if there's any meaningful text left (not just whitespace or template text)
+	if (!fallbackText || fallbackText.length < 10) {
+		return "Question contains code only. Click to view full details.";
+	}
 
 	// Get first sentence or first 80 chars
 	const firstSentence = fallbackText.split(".")[0];
