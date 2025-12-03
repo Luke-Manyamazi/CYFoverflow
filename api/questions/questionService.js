@@ -21,6 +21,7 @@ export const createQuestion = async (
 
 	if (labelId == null) labelId = [];
 	if (!Array.isArray(labelId)) throw new Error("Labels must be an array");
+
 	if (labelId.length > 3) throw new Error("Maximum 3 labels allowed");
 
 	return repository.createQuestionDB(
