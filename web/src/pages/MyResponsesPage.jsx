@@ -1,4 +1,4 @@
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/Sidebar";
 
 function MyResponsesPage() {
 	return (
@@ -9,8 +9,12 @@ function MyResponsesPage() {
 
 					<main className="flex-1">
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-							<h1 className="text-2xl font-bold text-gray-900 mb-4">My Responses</h1>
-							<p className="text-gray-600">My Responses page - Implementation pending</p>
+							<h1 className="text-2xl font-bold text-gray-900 mb-4">
+								My Responses
+							</h1>
+							<p className="text-gray-600">
+								My Responses page - Implementation pending
+							</p>
 						</div>
 					</main>
 				</div>
@@ -20,4 +24,3 @@ function MyResponsesPage() {
 }
 
 export default MyResponsesPage;
-

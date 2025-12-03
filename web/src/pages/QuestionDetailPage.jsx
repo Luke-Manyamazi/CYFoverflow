@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import AnswerForm from "../components/AnswerForm";
 import LabelBadge from "../components/LabelBadge";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
 
 function QuestionDetailPage() {

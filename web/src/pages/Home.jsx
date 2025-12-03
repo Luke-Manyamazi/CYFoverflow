@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/Sidebar";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
