@@ -95,7 +95,7 @@ function createDbConfig(source) {
 
 		return {
 			connectionString: databaseUrl.toString(),
-			connectionTimeoutMillis: 5000,
+			connectionTimeoutMillis: 10000,
 			ssl:
 				localDb || sslMode === "disable"
 					? false
@@ -123,7 +123,7 @@ function createDbConfig(source) {
 		host,
 		port,
 		database,
-		connectionTimeoutMillis: 5000,
+		connectionTimeoutMillis: 10000,
 		ssl: false,
 	};
 }
