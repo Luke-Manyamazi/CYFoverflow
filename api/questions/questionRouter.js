@@ -12,7 +12,7 @@ import {
 	deleteQuestion,
 	getAllLabels,
 	searchQuestionsByLabels,
-	markQuestionSolved,
+	getTotalQuestionsCount,
 } from "./questionService.js";
 
 const router = express.Router();
@@ -55,10 +55,31 @@ router.post("/", authenticateToken(), async (req, res) => {
 	}
 });
 
-router.get("/", async (__, res) => {
+router.get("/", async (req, res) => {
 	try {
-		const questions = await getAllQuestions();
-		res.json(questions);
+		const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+		const page = req.query.page ? parseInt(req.query.page, 10) : null;
+
+		const paginationLimit = page ? limit || 10 : limit;
+
+		const questions = await getAllQuestions(paginationLimit, page);
+
+		if (page) {
+			const total = await getTotalQuestionsCount();
+			const totalPages = Math.ceil(total / paginationLimit);
+
+			res.json({
+				questions,
+				pagination: {
+					currentPage: page,
+					totalPages,
+					totalItems: total,
+					itemsPerPage: paginationLimit,
+				},
+			});
+		} else {
+			res.json(questions);
+		}
 	} catch (error) {
 		logger.error("Get questions error: %0", error);
 		res.status(500).json({ error: "failed to fetch questions" });

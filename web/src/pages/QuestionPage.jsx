@@ -81,9 +81,29 @@ const AskQuestionPage = () => {
 		}
 
 		const plainText = editorRef.current.getContent({ format: "text" });
+		const htmlContent = editorRef.current.getContent();
 
 		if (!title.trim()) {
 			setError("Please enter a title for your question.");
+			return;
+		}
+
+		// Check if content has meaningful text (not just code blocks)
+		const tempDiv = document.createElement("div");
+		tempDiv.innerHTML = htmlContent;
+
+		// Remove code blocks to check if there's any text content
+		tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("code").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
+
+		const textOnly = tempDiv.textContent.trim();
+		const hasMeaningfulText = textOnly.length > 20 &&
+			!textOnly.match(/^(Problem Summary|What I've Already Tried|Describe|Explain|Provide|Any additional).*$/i);
+
+		if (!hasMeaningfulText) {
+			setError("Please provide a description explaining your question. Code blocks alone are not sufficient.");
 			return;
 		}
 
@@ -416,7 +436,7 @@ const AskQuestionPage = () => {
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] transition-all shadow-md hover:shadow-lg"
+							className="w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] transition-all shadow-md hover:shadow-lg cursor-pointer disabled:cursor-not-allowed"
 						>
 							{isSubmitting ? "Posting..." : "Post Your Question"}
 						</button>

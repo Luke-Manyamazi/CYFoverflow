@@ -19,8 +19,9 @@ export const createQuestion = async (
 		throw new Error("Content is required");
 	}
 
+	if (labelId == null) labelId = [];
 	if (!Array.isArray(labelId)) throw new Error("Labels must be an array");
-	if (labelId.length < 1) throw new Error("At least 1 label required");
+
 	if (labelId.length > 3) throw new Error("Maximum 3 labels allowed");
 
 	return repository.createQuestionDB(
@@ -35,8 +36,12 @@ export const createQuestion = async (
 	);
 };
 
-export const getAllQuestions = async () => {
-	return repository.getAllQuestionsDB();
+export const getAllQuestions = async (limit = null, page = null) => {
+	return repository.getAllQuestionsDB(limit, page);
+};
+
+export const getTotalQuestionsCount = async () => {
+	return repository.getTotalQuestionsCountDB();
 };
 
 export const getQuestionById = async (id) => {
