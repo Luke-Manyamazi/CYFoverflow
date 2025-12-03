@@ -42,12 +42,10 @@ export const getAllQuestionsDB = async (limit = null, page = null) => {
 	const params = [];
 
 	if (limit && page) {
-		// Pagination: calculate offset
 		const offset = (page - 1) * limit;
 		query += ` LIMIT $1 OFFSET $2`;
 		params.push(limit, offset);
 	} else if (limit) {
-		// Simple limit (for recent questions)
 		query += ` LIMIT $1`;
 		params.push(limit);
 	}
