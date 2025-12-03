@@ -162,4 +162,17 @@ router.post("/search/by-labels", async (req, res) => {
 	}
 });
 
+router.patch("/:id/solve", authenticateToken(), async (req, res) => {
+	try {
+		const { id } = req.params; // questionId
+		const { isSolved } = req.body;
+
+		const updated = await markQuestionSolved(Number(id), req.user.id, isSolved);
+		res.json(updated);
+	} catch (error) {
+		logger.error("Mark question solved error: %0", error);
+		res.status(500).json({ error: error.message });
+	}
+});
+
 export default router;

@@ -170,3 +170,15 @@ export const searchQuestionsByLabelsDB = async (labelId = []) => {
 	}
 	return questions;
 };
+
+export const updateSolvedStatusDB = async (id, isSolved) => {
+	const result = await db.query(
+		`UPDATE questions 
+         SET is_solved = $1, updated_at = NOW() 
+         WHERE id = $2 
+         RETURNING *`,
+		[isSolved, id],
+	);
+
+	return result.rows[0];
+};
