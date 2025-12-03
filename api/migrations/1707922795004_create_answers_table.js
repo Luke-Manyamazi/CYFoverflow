@@ -2,9 +2,8 @@
  * @param {import("node-pg-migrate").MigrationBuilder} pgm
  */
 export async function up(pgm) {
-	pgm.createTable("questions", {
+	pgm.createTable("answers", {
 		id: { type: "serial", primaryKey: true },
-		title: { type: "text", notNull: true },
 		content: { type: "text", notNull: true },
 		user_id: {
 			type: "integer",
@@ -12,14 +11,11 @@ export async function up(pgm) {
 			references: "users(id)",
 			onDelete: "CASCADE",
 		},
-		template_type: { type: "text", notNull: false },
-		browser: { type: "text", notNull: false }, // For bug-report template
-		os: { type: "text", notNull: false }, // For bug-report template
-		documentation_link: { type: "text", notNull: false }, // For how-to template
-		is_solved: {
-			type: "boolean",
+		question_id: {
+			type: "integer",
 			notNull: true,
-			default: false,
+			references: "questions(id)",
+			onDelete: "CASCADE",
 		},
 		created_at: {
 			type: "timestamp",
@@ -33,11 +29,10 @@ export async function up(pgm) {
 		},
 	});
 }
-
 /**
  * @param {import("node-pg-migrate").MigrationBuilder} pgm
  */
 
 export async function down(pgm) {
-	pgm.dropTable("questions");
+	pgm.dropTable("answers");
 }
