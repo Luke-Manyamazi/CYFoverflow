@@ -1,5 +1,5 @@
 import { Editor } from "@tinymce/tinymce-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/useAuth";
@@ -9,14 +9,11 @@ import { TEMPLATES } from "./templates";
 const AskQuestionPage = () => {
 	const navigate = useNavigate();
 	const { token, isLoggedIn } = useAuth();
-	// Controls the View (null = Selection Grid, 'id' = Editor Form)
+
 	const [activeTemplate, setActiveTemplate] = useState(null);
 
-	// Stores the initial HTML for the Editor to load (Static)
-	// I did separate this from 'content' to prevent cursor jumping.
 	const [initialContent, setInitialContent] = useState("");
 
-	// Stores the live HTML as the user types
 	const [content, setContent] = useState("");
 	const [title, setTitle] = useState("");
 
@@ -25,25 +22,39 @@ const AskQuestionPage = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const editorRef = useRef(null);
 
-	// Template specific metadata
+	const [labels, setLabels] = useState([]);
+	const [selectedLabels, setSelectedLabels] = useState([]);
+
 	const [templateFields, setTemplateFields] = useState({
 		"bug-report": { browser: "", os: "" },
 		"how-to": { documentationLink: "" },
 	});
 
-	// --- HANDLERS ---
+	useEffect(() => {
+		if (activeTemplate) {
+			fetchLabels();
+		}
+	}, [activeTemplate]);
+
+	const fetchLabels = async () => {
+		try {
+			const response = await fetch("/api/questions/labels/all");
+			if (response.ok) {
+				const data = await response.json();
+				setLabels(data);
+			}
+		} catch (err) {
+			console.error("Error fetching labels:", err);
+		}
+	};
 
 	const handleTemplateSelect = (template) => {
-		// Set the static content for the Editor's initialization
 		setInitialContent(template.content);
 
-		// Set the live content state (so it's ready if they hit submit immediately)
 		setContent(template.content);
 
-		// Switch view to the form
 		setActiveTemplate(template.id);
 
-		// Reset validation
 		setCharCount(0);
 		setError(null);
 	};
@@ -59,14 +70,28 @@ const AskQuestionPage = () => {
 			setContent("");
 			setTitle("");
 			setError(null);
+			setSelectedLabels([]);
 		}
 	};
 
+	const handleLabelToggle = (labelId) => {
+		setSelectedLabels((prev) => {
+			if (prev.includes(labelId)) {
+				return prev.filter((id) => id !== labelId);
+			} else {
+				if (prev.length >= 3) {
+					setError("You can select a maximum of 3 labels.");
+					return prev;
+				}
+				setError(null);
+				return [...prev, labelId];
+			}
+		});
+	};
+
 	const handleEditorChange = (newContent, editor) => {
-		// Update live state
 		setContent(newContent);
 
-		// Calculate text length (ignoring the CSS placeholders)
 		const textLength = editor.getContent({ format: "text" }).trim().length;
 		setCharCount(textLength);
 	};
@@ -88,22 +113,25 @@ const AskQuestionPage = () => {
 			return;
 		}
 
-		// Check if content has meaningful text (not just code blocks)
 		const tempDiv = document.createElement("div");
 		tempDiv.innerHTML = htmlContent;
 
-		// Remove code blocks to check if there's any text content
 		tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
 		tempDiv.querySelectorAll("code").forEach((el) => el.remove());
 		tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
 		tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
 
 		const textOnly = tempDiv.textContent.trim();
-		const hasMeaningfulText = textOnly.length > 20 &&
-			!textOnly.match(/^(Problem Summary|What I've Already Tried|Describe|Explain|Provide|Any additional).*$/i);
+		const hasMeaningfulText =
+			textOnly.length > 20 &&
+			!textOnly.match(
+				/^(Problem Summary|What I've Already Tried|Describe|Explain|Provide|Any additional).*$/i,
+			);
 
 		if (!hasMeaningfulText) {
-			setError("Please provide a description explaining your question. Code blocks alone are not sufficient.");
+			setError(
+				"Please provide a description explaining your question. Code blocks alone are not sufficient.",
+			);
 			return;
 		}
 
@@ -119,13 +147,12 @@ const AskQuestionPage = () => {
 			metaData = templateFields[activeTemplate];
 		}
 
-		// Remove placeholder attributes/classes so they aren't saved to DB
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(content, "text/html");
 
 		doc.querySelectorAll(".template-placeholder").forEach((el) => {
-			el.classList.remove("template-placeholder"); // Remove class
-			el.removeAttribute("data-placeholder"); // Remove attribute
+			el.classList.remove("template-placeholder");
+			el.removeAttribute("data-placeholder");
 		});
 
 		const cleanContent = doc.body.innerHTML;
@@ -137,6 +164,7 @@ const AskQuestionPage = () => {
 			browser: metaData.browser || null,
 			os: metaData.os || null,
 			documentationLink: metaData.documentationLink || null,
+			labelId: selectedLabels,
 		};
 
 		try {
@@ -340,6 +368,35 @@ const AskQuestionPage = () => {
 								{charCount} characters (min 50)
 							</span>
 						</div>
+
+						{/* Labels Selection */}
+						<fieldset>
+							<legend className="block text-sm font-semibold text-gray-700 mb-2">
+								Tags (Optional - Select up to 3)
+							</legend>
+							<div className="flex flex-wrap gap-2">
+								{labels.map((label) => (
+									<button
+										key={label.id}
+										type="button"
+										onClick={() => handleLabelToggle(label.id)}
+										disabled={isSubmitting}
+										className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+											selectedLabels.includes(label.id)
+												? "bg-[#281d80] text-white shadow-md"
+												: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+										}`}
+									>
+										{label.name}
+									</button>
+								))}
+							</div>
+							{selectedLabels.length > 0 && (
+								<p className="mt-2 text-xs text-gray-500">
+									{selectedLabels.length} of 3 labels selected
+								</p>
+							)}
+						</fieldset>
 
 						{/* Template Specific Fields */}
 						{activeTemplate === "bug-report" && (
