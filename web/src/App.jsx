@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { SearchProvider } from "./contexts/SearchContext";
+import EditQuestion from "./pages/EditQuestion.jsx";
 import Home from "./pages/Home";
 import LabelsPage from "./pages/LabelsPage";
 import Login from "./pages/Login";
@@ -33,6 +34,8 @@ function App() {
 							<Route path="/labels" element={<LabelsPage />} />
 							<Route path="/my-questions" element={<MyQuestionsPage />} />
 							<Route path="/my-responses" element={<MyResponsesPage />} />
+
+							<Route path="/questions/:id/edit" element={<EditQuestion />} />
 						</Routes>
 					</div>
 				</Router>
