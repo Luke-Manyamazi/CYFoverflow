@@ -23,7 +23,7 @@ router.get("/my-questions", authenticateToken(), async (req, res) => {
 		const questions = await getQuestionsByUserId(req.user.id);
 		res.json(questions);
 	} catch (error) {
-		logger.error("Get my questions error: %0", error);
+		logger.error("Get my questions error: %O", error);
 		res.status(500).json({ error: "failed to fetch user's questions" });
 	}
 });
@@ -51,7 +51,7 @@ router.post("/", authenticateToken(), async (req, res) => {
 		);
 		res.status(201).json(question);
 	} catch (error) {
-		logger.error("Create a question error: %0", error);
+		logger.error("Create a question error: %O", error);
 		res.status(500).json({ error: "failed to create question" });
 	}
 });
@@ -82,7 +82,7 @@ router.get("/", async (req, res) => {
 			res.json(questions);
 		}
 	} catch (error) {
-		logger.error("Get questions error: %0", error);
+		logger.error("Get questions error: %O", error);
 		res.status(500).json({ error: "failed to fetch questions" });
 	}
 });
@@ -93,7 +93,7 @@ router.get("/:id", async (req, res) => {
 		const question = await getQuestionById(Number(id));
 		res.json(question);
 	} catch (error) {
-		logger.error("get a question by id error: %0", error);
+		logger.error("get a question by id error: %O", error);
 		res.status(500).json({ error: " question not found " });
 	}
 });
@@ -124,7 +124,7 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 		);
 		res.status(201).json(question);
 	} catch (error) {
-		logger.error("update a question error: %0", error);
+		logger.error("update a question error: %O", error);
 		res.status(500).json({ error: "failed to update question" });
 	}
 });
@@ -135,7 +135,7 @@ router.delete("/:id", authenticateToken(), async (req, res) => {
 		await deleteQuestion(Number(id), req.user.id);
 		res.status(200).json({ message: "Question deleted successfully" });
 	} catch (error) {
-		logger.error("delete a question error: %0", error);
+		logger.error("delete a question error: %O", error);
 		res.status(500).json({ error: "failed to delete question" });
 	}
 });
@@ -145,7 +145,7 @@ router.get("/labels/all", async (__, res) => {
 		const labels = await getAllLabels();
 		res.json(labels);
 	} catch (error) {
-		logger.error("Get labels error: %0", error);
+		logger.error("Get labels error: %O", error);
 		res.status(500).json({ error: "failed to fetch labels" });
 	}
 });
@@ -156,7 +156,7 @@ router.post("/search/by-labels", async (req, res) => {
 		const questions = await searchQuestionsByLabels(labelId);
 		res.json(questions);
 	} catch (error) {
-		logger.error("Search questions by labels error: %0", error);
+		logger.error("Search questions by labels error: %O", error);
 		res
 			.status(500)
 			.json({ error: error.message || "Failed to search questions by labels" });
@@ -171,7 +171,7 @@ router.patch("/:id/solve", authenticateToken(), async (req, res) => {
 		const updated = await markQuestionSolved(Number(id), req.user.id, isSolved);
 		res.json(updated);
 	} catch (error) {
-		logger.error("Mark question solved error: %0", error);
+		logger.error("Mark question solved error: %O", error);
 		res.status(500).json({ error: error.message });
 	}
 });
