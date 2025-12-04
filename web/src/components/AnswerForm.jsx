@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
 import { Editor } from "@tinymce/tinymce-react";
+import { useState, useRef } from "react";
 
 const ANSWER_TEMPLATE = `
 	<div data-template="answer">
@@ -19,10 +19,13 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 	const [answerContent, setAnswerContent] = useState(ANSWER_TEMPLATE);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState("");
+	const [charCount, setCharCount] = useState(0);
 	const editorRef = useRef(null);
 
-	const handleEditorChange = (newContent) => {
+	const handleEditorChange = (newContent, editor) => {
 		setAnswerContent(newContent);
+		const textLength = editor.getContent({ format: "text" }).trim().length;
+		setCharCount(textLength);
 	};
 
 	const handleSubmit = async (e) => {
@@ -30,14 +33,39 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 		setSubmitError("");
 
 		const plainText = editorRef.current?.getContent({ format: "text" });
+		const htmlContent = editorRef.current?.getContent();
 
-		if (!plainText || plainText.trim().length < 20) {
-			setSubmitError("Your answer is too short. Please provide more detail.");
+		if (!plainText || plainText.trim().length < 50) {
+			setSubmitError(
+				"Your answer is too short. Please provide at least 50 characters of detail.",
+			);
+			return;
+		}
+
+		// Check for meaningful content (similar to question validation)
+		const tempDiv = document.createElement("div");
+		tempDiv.innerHTML = htmlContent;
+
+		tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("code").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
+		tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
+
+		const textOnly = tempDiv.textContent.trim();
+		const hasMeaningfulText =
+			textOnly.length > 20 &&
+			!textOnly.match(
+				/^(Answer Summary|Solution|Additional Notes|Provide|Explain|Any additional).*$/i,
+			);
+
+		if (!hasMeaningfulText) {
+			setSubmitError(
+				"Please provide a detailed explanation. Template placeholders alone are not sufficient.",
+			);
 			return;
 		}
 
 		setIsSubmitting(true);
-
 
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(answerContent, "text/html");
@@ -50,8 +78,7 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 		const cleanContent = doc.body.innerHTML;
 
 		try {
-			//TODO: Ask Sheetal for the endpoint
-			const response = await fetch(`/api/questions/${questionId}/answers`, {
+			const response = await fetch(`/api/answers`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -59,6 +86,7 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 				},
 				body: JSON.stringify({
 					content: cleanContent,
+					questionId: questionId,
 				}),
 			});
 
@@ -72,7 +100,9 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 			if (onSuccess) onSuccess();
 		} catch (err) {
 			console.error("Error submitting answer:", err);
-			setSubmitError(err.message || "Failed to submit answer. Please try again.");
+			setSubmitError(
+				err.message || "Failed to submit answer. Please try again.",
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -103,10 +133,37 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 								body { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; }
 								hr { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
 								pre { background: #f4f4f5; padding: 10px; border-radius: 5px; }
-								.template-placeholder { color: #9ca3af; font-style: italic; }
+								.template-placeholder { position: relative; }
+								.template-placeholder:not(.has-text)::before {
+									content: attr(data-placeholder);
+									position: absolute; left: 0; top: 0;
+									color: #9ca3af; font-style: italic; pointer-events: none;
+								}
 							`,
+							setup: (editor) => {
+								// Hide placeholder CSS when content is added
+								const togglePlaceholder = () => {
+									const placeholders = editor.dom.select(
+										".template-placeholder",
+									);
+									placeholders.forEach((node) => {
+										const hasText = node.textContent.trim().length > 0;
+										if (hasText) editor.dom.addClass(node, "has-text");
+										else editor.dom.removeClass(node, "has-text");
+									});
+								};
+								editor.on("init keyup change input", togglePlaceholder);
+							},
 						}}
 					/>
+				</div>
+
+				<div className="flex justify-end mt-2">
+					<span
+						className={`text-xs ${charCount < 50 ? "text-red-500" : "text-gray-500"}`}
+					>
+						{charCount} characters (min 50)
+					</span>
 				</div>
 
 				{submitError && (
@@ -138,4 +195,3 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 }
 
 export default AnswerForm;
-

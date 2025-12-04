@@ -40,8 +40,9 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { content } = req.body;
+		const userId = req.user.id;
 
-		const updated = await updateAnswer(id, content);
+		const updated = await updateAnswer(id, content, userId);
 		res.json(updated);
 	} catch (error) {
 		logger.error("Update answer error: %O", error);
@@ -52,8 +53,9 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
+		const userId = req.user.id;
 
-		await deleteAnswer(id);
+		await deleteAnswer(id, userId);
 		res.json({ message: "Answer deleted" });
 	} catch (error) {
 		logger.error("Delete answer error: %O", error);

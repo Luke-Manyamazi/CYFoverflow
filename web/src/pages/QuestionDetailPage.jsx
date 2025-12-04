@@ -2,6 +2,7 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import Answer from "../components/Answer";
 import AnswerForm from "../components/AnswerForm";
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
@@ -12,6 +13,7 @@ function QuestionDetailPage() {
 	const navigate = useNavigate();
 	const { isLoggedIn, token } = useAuth();
 	const [question, setQuestion] = useState(null);
+	const [answers, setAnswers] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [showAnswerForm, setShowAnswerForm] = useState(false);
@@ -37,9 +39,26 @@ function QuestionDetailPage() {
 		}
 	}, [id]);
 
+	const fetchAnswers = useCallback(async () => {
+		try {
+			const response = await fetch(`/api/answers/${id}`);
+
+			if (!response.ok) {
+				throw new Error("Failed to fetch answers");
+			}
+
+			const data = await response.json();
+			setAnswers(data || []);
+		} catch (err) {
+			console.error("Error fetching answers:", err);
+			setAnswers([]);
+		}
+	}, [id]);
+
 	useEffect(() => {
 		fetchQuestion();
-	}, [fetchQuestion]);
+		fetchAnswers();
+	}, [fetchQuestion, fetchAnswers]);
 
 	const handleAnswerClick = () => {
 		if (!isLoggedIn) {
@@ -57,6 +76,7 @@ function QuestionDetailPage() {
 	const handleAnswerSuccess = () => {
 		setShowAnswerForm(false);
 		fetchQuestion();
+		fetchAnswers();
 	};
 
 	const handleAnswerCancel = () => {
@@ -119,12 +139,33 @@ function QuestionDetailPage() {
 					<main className="flex-1">
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
 							<div className="flex justify-between items-start mb-4">
-								<h1 className="text-3xl font-bold text-gray-900">
-									{question.title}
-								</h1>
+								<div className="flex-1">
+									<div className="flex items-center gap-3 mb-2">
+										<h1 className="text-3xl font-bold text-gray-900">
+											{question.title}
+										</h1>
+										{question.answer_count > 0 && (
+											<span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
+												<svg
+													className="w-4 h-4"
+													fill="currentColor"
+													viewBox="0 0 20 20"
+												>
+													<path
+														fillRule="evenodd"
+														d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+														clipRule="evenodd"
+													/>
+												</svg>
+												{question.answer_count}{" "}
+												{question.answer_count === 1 ? "Answer" : "Answers"}
+											</span>
+										)}
+									</div>
+								</div>
 								<button
 									onClick={handleAnswerClick}
-									className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+									className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ml-4"
 								>
 									Answer
 								</button>
@@ -139,7 +180,16 @@ function QuestionDetailPage() {
 								</span>
 								<span>•</span>
 								<span>
-									{new Date(question.created_at).toLocaleDateString()}
+									{new Date(question.created_at).toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+										hour: "2-digit",
+										minute: "2-digit",
+									})}
+									{question.updated_at !== question.created_at && (
+										<span className="ml-2 italic text-gray-500">(edited)</span>
+									)}
 								</span>
 								{question.labels && question.labels.length > 0 && (
 									<>
@@ -163,7 +213,7 @@ function QuestionDetailPage() {
 								<Editor
 									tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js"
 									onInit={(evt, editor) => (editorRef.current = editor)}
-									initialValue={question.content}
+									initialValue={question.content || question.body}
 									disabled={true}
 									init={{
 										readonly: true,
@@ -242,10 +292,24 @@ function QuestionDetailPage() {
 						)}
 
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-							<h2 className="text-2xl font-bold text-gray-900 mb-4">Answers</h2>
-							<p className="text-gray-600">
-								No answers yet. Be the first to answer!
-							</p>
+							<h2 className="text-2xl font-bold text-gray-900 mb-4">
+								Answers ({answers.length})
+							</h2>
+							{answers.length === 0 ? (
+								<p className="text-gray-600">
+									No answers yet. Be the first to answer!
+								</p>
+							) : (
+								<div className="space-y-4">
+									{answers.map((answer) => (
+										<Answer
+											key={answer.id}
+											answer={answer}
+											onDelete={fetchAnswers}
+										/>
+									))}
+								</div>
+							)}
 						</div>
 					</main>
 				</div>

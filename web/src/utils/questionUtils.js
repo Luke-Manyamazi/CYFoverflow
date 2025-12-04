@@ -83,8 +83,7 @@ export const filterQuestions = (questions, searchTerm) => {
 	return questions.filter(
 		(question) =>
 			question.title?.toLowerCase().includes(term) ||
-			question.body?.toLowerCase().includes(term) ||
-			question.content?.toLowerCase().includes(term) ||
+			(question.content || question.body)?.toLowerCase().includes(term) ||
 			question.author_name?.toLowerCase().includes(term) ||
 			question.author?.name?.toLowerCase().includes(term),
 	);
