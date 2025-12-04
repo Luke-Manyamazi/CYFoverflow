@@ -89,6 +89,34 @@ async function fixMigrationNames(client) {
 		console.log(`  - ${m.name} (run on: ${m.run_on})`);
 	});
 
+	// Check what columns exist in questions table
+	const questionsColumns = await client.query(`
+		SELECT column_name, data_type, is_nullable
+		FROM information_schema.columns
+		WHERE table_name = 'questions'
+		ORDER BY column_name
+	`);
+	console.log("\nColumns in 'questions' table:");
+	questionsColumns.rows.forEach((c) => {
+		console.log(
+			`  - ${c.column_name} (${c.data_type}, nullable: ${c.is_nullable})`,
+		);
+	});
+
+	// Check what columns exist in answers table
+	const answersColumns = await client.query(`
+		SELECT column_name, data_type, is_nullable
+		FROM information_schema.columns
+		WHERE table_name = 'answers'
+		ORDER BY column_name
+	`);
+	console.log("\nColumns in 'answers' table:");
+	answersColumns.rows.forEach((c) => {
+		console.log(
+			`  - ${c.column_name} (${c.data_type}, nullable: ${c.is_nullable})`,
+		);
+	});
+
 	// Extract name pattern (everything after timestamp) from migration files
 	const filePatterns = new Map();
 	for (const fileName of migrationFiles) {
