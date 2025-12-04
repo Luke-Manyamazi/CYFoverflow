@@ -7,6 +7,7 @@
  */
 /* eslint-disable no-console -- CLI script requires console output */
 
+import { readdir } from "node:fs/promises";
 import { parseArgs } from "node:util";
 
 import { runner } from "node-pg-migrate";
@@ -63,66 +64,91 @@ async function fixMigrationNames(client) {
 	`);
 
 	const migrationsTableExists = tableCheck.rows[0].exists;
-	if (migrationsTableExists) {
-		// Check current migrations
-		const currentMigrations = await client.query(
+	if (!migrationsTableExists) {
+		console.log("Migrations table does not exist. Nothing to fix.");
+		return;
+	}
+
+	// Get all migration files from disk
+	const migrationsDir = migrationConfig.dir;
+	const files = await readdir(migrationsDir);
+	const migrationFiles = files
+		.filter((f) => /^\d+_.+\.js$/.test(f))
+		.map((f) => f.replace(/\.js$/, ""))
+		.sort();
+
+	console.log("\nMigration files on disk:");
+	migrationFiles.forEach((f) => console.log(`  - ${f}`));
+
+	// Get all migrations from database
+	const dbMigrations = await client.query(
+		"SELECT * FROM migrations ORDER BY run_on",
+	);
+	console.log("\nMigrations in database:");
+	dbMigrations.rows.forEach((m) => {
+		console.log(`  - ${m.name} (run on: ${m.run_on})`);
+	});
+
+	// Extract name pattern (everything after timestamp) from migration files
+	const filePatterns = new Map();
+	for (const fileName of migrationFiles) {
+		const match = fileName.match(/^\d+_(.+)$/);
+		if (match) {
+			const pattern = match[1];
+			filePatterns.set(pattern, fileName);
+		}
+	}
+
+	// Find mismatches: database has migration with same pattern but different timestamp
+	let fixedCount = 0;
+	for (const dbMigration of dbMigrations.rows) {
+		const match = dbMigration.name.match(/^\d+_(.+)$/);
+		if (!match) continue;
+
+		const pattern = match[1];
+		const correctFileName = filePatterns.get(pattern);
+
+		// If file exists with same pattern but different name, fix it
+		if (correctFileName && correctFileName !== dbMigration.name) {
+			console.log(
+				`\n⚠️  Found mismatch: ${dbMigration.name} → ${correctFileName}`,
+			);
+
+			// Check if correct name already exists
+			const existing = await client.query(
+				"SELECT * FROM migrations WHERE name = $1",
+				[correctFileName],
+			);
+
+			if (existing.rows.length > 0) {
+				console.log(`  Removing duplicate: ${dbMigration.name}`);
+				await client.query("DELETE FROM migrations WHERE name = $1", [
+					dbMigration.name,
+				]);
+			} else {
+				console.log(`  Updating: ${dbMigration.name} → ${correctFileName}`);
+				await client.query("UPDATE migrations SET name = $1 WHERE name = $2", [
+					correctFileName,
+					dbMigration.name,
+				]);
+			}
+			fixedCount++;
+		}
+	}
+
+	if (fixedCount > 0) {
+		console.log(`\n✓ Fixed ${fixedCount} migration name(s)`);
+
+		// Show updated list
+		const verify = await client.query(
 			"SELECT * FROM migrations ORDER BY run_on",
 		);
-		console.log("\nCurrent migrations in database:");
-		currentMigrations.rows.forEach((m) => {
+		console.log("\nUpdated migrations:");
+		verify.rows.forEach((m) => {
 			console.log(`  - ${m.name} (run on: ${m.run_on})`);
 		});
-
-		// Check if the problematic migration exists
-		const oldMigration = await client.query(
-			"SELECT * FROM migrations WHERE name = $1",
-			["1707922794590_welcome-message"],
-		);
-
-		if (oldMigration.rows.length > 0) {
-			// Check if new migration name already exists
-			const newMigration = await client.query(
-				"SELECT * FROM migrations WHERE name = $1",
-				["1707000000001_welcome-message"],
-			);
-
-			if (newMigration.rows.length > 0) {
-				console.log(
-					"\nMigration '1707000000001_welcome-message' already exists.",
-				);
-				console.log("Removing old migration record...");
-				await client.query("DELETE FROM migrations WHERE name = $1", [
-					"1707922794590_welcome-message",
-				]);
-				console.log("✓ Old migration record removed");
-			} else {
-				// Update the migration name
-				console.log("\nUpdating migration name...");
-				const result = await client.query(
-					"UPDATE migrations SET name = $1 WHERE name = $2",
-					["1707000000001_welcome-message", "1707922794590_welcome-message"],
-				);
-				console.log(`✓ Updated ${result.rowCount} migration record(s)`);
-			}
-
-			// Verify the fix
-			const verify = await client.query(
-				"SELECT * FROM migrations ORDER BY run_on",
-			);
-			console.log("\nUpdated migrations:");
-			verify.rows.forEach((m) => {
-				console.log(`  - ${m.name} (run on: ${m.run_on})`);
-			});
-
-			console.log("\n✓ Migration name fixed successfully!");
-		} else {
-			console.log(
-				"\nNo migration with name '1707922794590_welcome-message' found.",
-			);
-			console.log("Migration name is already correct or doesn't exist.");
-		}
 	} else {
-		console.log("Migrations table does not exist. Nothing to fix.");
+		console.log("\n✓ No migration name mismatches found.");
 	}
 }
 
