@@ -13,6 +13,7 @@ import {
 	getAllLabels,
 	searchQuestionsByLabels,
 	getTotalQuestionsCount,
+	markQuestionSolved,
 } from "./questionService.js";
 
 const router = express.Router();
