@@ -51,8 +51,7 @@ function Home() {
 				.catch(console.error);
 			navigate(location.pathname, { replace: true, state: {} });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [location.state?.labelId]);
+	}, [location.state?.labelId, location.pathname, navigate]);
 
 	const fetchLatestQuestions = async () => {
 		try {
@@ -110,7 +109,6 @@ function Home() {
 		setSelectedLabel(null);
 	};
 
-	// Filter questions based on search term
 	const filteredQuestions = filterQuestions(questions, searchTerm);
 
 	const handleQuestionClick = (questionId) => {
@@ -126,10 +124,15 @@ function Home() {
 		}
 	};
 
+	const handleEditClick = (e, question) => {
+		e.stopPropagation();
+		navigate(`/questions/${question.id}/edit`, {
+			state: { questionData: question },
+		});
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-50">
-			{/* Your existing Nav component will render automatically */}
-
 			{/* Main Content */}
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div className="flex gap-8">
@@ -209,53 +212,76 @@ function Home() {
 									</div>
 								) : filteredQuestions.length > 0 ? (
 									<div className="space-y-4">
-										{filteredQuestions.map((question) => (
-											<div
-												key={question.id}
-												role="button"
-												tabIndex={0}
-												className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
-												onClick={() => handleQuestionClick(question.id)}
-												onKeyDown={(e) => {
-													if (e.key === "Enter" || e.key === " ") {
-														e.preventDefault();
-														handleQuestionClick(question.id);
-													}
-												}}
-											>
-												<h3 className="font-semibold text-lg text-gray-900 mb-2">
-													{question.title}
-												</h3>
-												{/* Cleaned content display */}
-												<p className="text-gray-600 line-clamp-2">
-													{getFirstLinePreview(
-														question.body || question.content,
-													)}
-												</p>
-												{question.labels && question.labels.length > 0 && (
-													<div className="flex flex-wrap gap-2 mt-3">
-														{question.labels.map((label) => (
-															<LabelBadge
-																key={label.id}
-																label={label}
-																onClick={handleLabelClick}
-															/>
-														))}
+										{filteredQuestions.map((question) => {
+											const isAuthor =
+												isLoggedIn &&
+												user &&
+												(user.id == question.author?.id ||
+													user.id == question.user_id ||
+													user.id == question.author_id);
+
+											return (
+												<div
+													key={question.id}
+													role="button"
+													tabIndex={0}
+													className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
+													onClick={() => handleQuestionClick(question.id)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															handleQuestionClick(question.id);
+														}
+													}}
+												>
+													<div className="flex justify-between items-start">
+														<h3 className="font-semibold text-lg text-gray-900 mb-2">
+															{question.title}
+														</h3>
+
+														{isAuthor && (
+															<button
+																onClick={(e) => handleEditClick(e, question)}
+																className="z-10 text-sm font-medium text-gray-500 hover:text-[#281d80] hover:bg-gray-100 px-3 py-1 rounded transition-colors"
+																title="Edit your question"
+															>
+																✎ Edit
+															</button>
+														)}
 													</div>
-												)}
-												<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
-													<span>
-														Asked by{" "}
-														{question.author_name ||
-															question.author?.name ||
-															"Anonymous"}
-													</span>
-													<span>
-														{new Date(question.created_at).toLocaleDateString()}
-													</span>
+
+													<p className="text-gray-600 line-clamp-2">
+														{getFirstLinePreview(
+															question.body || question.content,
+														)}
+													</p>
+													{question.labels && question.labels.length > 0 && (
+														<div className="flex flex-wrap gap-2 mt-3">
+															{question.labels.map((label) => (
+																<LabelBadge
+																	key={label.id}
+																	label={label}
+																	onClick={handleLabelClick}
+																/>
+															))}
+														</div>
+													)}
+													<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
+														<span>
+															Asked by{" "}
+															{question.author_name ||
+																question.author?.name ||
+																"Anonymous"}
+														</span>
+														<span>
+															{new Date(
+																question.created_at,
+															).toLocaleDateString()}
+														</span>
+													</div>
 												</div>
-											</div>
-										))}
+											);
+										})}
 									</div>
 								) : searchTerm ? (
 									<div className="text-center py-8 text-gray-500">
