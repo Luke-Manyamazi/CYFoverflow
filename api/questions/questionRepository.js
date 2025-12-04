@@ -1,6 +1,7 @@
 import db from "../db.js";
 
 // Helper function to detect which column exists (prefer 'content', fallback to 'body')
+// Kept as safety measure in case of migration issues
 let contentColumnName = null;
 const getContentColumnName = async () => {
 	if (contentColumnName) return contentColumnName;
@@ -13,30 +14,12 @@ const getContentColumnName = async () => {
 		ORDER BY CASE WHEN column_name = 'content' THEN 1 ELSE 2 END
 	`);
 
-	// Log what columns we found
-	const logger = (await import("../utils/logger.js")).default;
-	logger.info("Detected columns in questions table:", {
-		foundColumns: result.rows.map((r) => r.column_name),
-		allColumns: (
-			await db.query(`
-			SELECT column_name
-			FROM information_schema.columns
-			WHERE table_name = 'questions'
-			ORDER BY column_name
-		`)
-		).rows.map((r) => r.column_name),
-	});
-
 	if (result.rows.length > 0) {
 		// Prefer 'content' if it exists, otherwise use 'body'
 		contentColumnName = result.rows[0].column_name;
-		logger.info(`Using column '${contentColumnName}' for questions content`);
 	} else {
 		// Default to 'content' if neither exists (shouldn't happen)
 		contentColumnName = "content";
-		logger.warn(
-			"Neither 'content' nor 'body' column found in questions table, defaulting to 'content'",
-		);
 	}
 
 	return contentColumnName;

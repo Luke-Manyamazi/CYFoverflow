@@ -163,12 +163,6 @@ const AskQuestionPage = () => {
 
 		if (!cleanContent || !cleanContent.trim()) {
 			setError("Question content cannot be empty. Please provide details.");
-			return;
-		}
-
-		// Final validation before sending
-		if (!cleanContent || cleanContent.trim().length === 0) {
-			setError("Question content cannot be empty. Please provide details.");
 			setIsSubmitting(false);
 			return;
 		}
@@ -182,17 +176,6 @@ const AskQuestionPage = () => {
 			documentationLink: metaData.documentationLink || null,
 			labelId: selectedLabels,
 		};
-
-		// Debug: Log the content being sent (remove in production if needed)
-		if (!questionData.content) {
-			console.error("ERROR: content is null/undefined before sending", {
-				htmlContent: htmlContent?.substring(0, 100),
-				cleanContent: cleanContent?.substring(0, 100),
-			});
-			setError("Failed to prepare question content. Please try again.");
-			setIsSubmitting(false);
-			return;
-		}
 
 		try {
 			const response = await fetch("/api/questions", {
