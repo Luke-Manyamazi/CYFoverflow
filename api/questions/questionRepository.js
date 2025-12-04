@@ -34,9 +34,14 @@ export const createQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
+	if (!content) {
+		throw new Error("Content is required");
+	}
 	const columnName = await getContentColumnName();
+	// Quote the column name to prevent SQL injection and ensure proper handling
+	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
-		`INSERT INTO questions (title, ${columnName}, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+		`INSERT INTO questions (title, ${quotedColumnName}, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
 		[title, content, templateType, userId, browser, os, documentationLink],
 	);
 
@@ -169,10 +174,15 @@ export const updateQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
+	if (!content) {
+		throw new Error("Content is required");
+	}
 	const columnName = await getContentColumnName();
+	// Quote the column name to prevent SQL injection and ensure proper handling
+	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
 		`UPDATE questions
-         SET title = $1, ${columnName} = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
+         SET title = $1, ${quotedColumnName} = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
 		[title, content, templateType, browser, os, documentationLink, id],
 	);
 	const question = result.rows[0];
