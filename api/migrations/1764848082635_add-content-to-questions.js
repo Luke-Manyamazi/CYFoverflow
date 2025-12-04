@@ -7,29 +7,49 @@
  * @returns {void | Promise<void>}
  */
 export async function up(pgm) {
-	// Check and add content column to questions table
-	const questionsContentExists = await pgm.db.query(`
-		SELECT EXISTS (
-			SELECT FROM information_schema.columns
-			WHERE table_name = 'questions' AND column_name = 'content'
-		);
+	// Check questions table columns
+	const questionsColumns = await pgm.db.query(`
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_name = 'questions'
+		AND column_name IN ('content', 'body');
 	`);
 
-	if (!questionsContentExists.rows[0].exists) {
+	const hasContent = questionsColumns.rows.some(
+		(r) => r.column_name === "content",
+	);
+	const hasBody = questionsColumns.rows.some((r) => r.column_name === "body");
+
+	if (hasBody && !hasContent) {
+		// Rename body to content
+		pgm.renameColumn("questions", "body", "content");
+	} else if (!hasContent && !hasBody) {
+		// Add content column if neither exists
 		pgm.addColumn("questions", {
 			content: { type: "text", notNull: true, default: "" },
 		});
 	}
 
-	// Check and add content column to answers table
-	const answersContentExists = await pgm.db.query(`
-		SELECT EXISTS (
-			SELECT FROM information_schema.columns
-			WHERE table_name = 'answers' AND column_name = 'content'
-		);
+	// Check answers table columns
+	const answersColumns = await pgm.db.query(`
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_name = 'answers'
+		AND column_name IN ('content', 'body');
 	`);
 
-	if (!answersContentExists.rows[0].exists) {
+	const answersHasContent = answersColumns.rows.some(
+		(r) => r.column_name === "content",
+	);
+	const answersHasBody = answersColumns.rows.some(
+		(r) => r.column_name === "body",
+	);
+
+	if (answersHasBody && !answersHasContent) {
+		// Rename body to content
+		pgm.renameColumn("answers", "body", "content");
+	} else if (!answersHasContent && !answersHasBody) {
+		// Add content column if neither exists
 		pgm.addColumn("answers", {
 			content: { type: "text", notNull: true, default: "" },
 		});
