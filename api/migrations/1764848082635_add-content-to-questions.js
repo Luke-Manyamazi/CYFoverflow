@@ -22,7 +22,17 @@ export async function up(pgm) {
 
 	if (hasBody && !hasContent) {
 		// Rename body to content
+		// First, ensure body can be nullable temporarily for rename
+		await pgm.db.query(`
+			ALTER TABLE questions
+			ALTER COLUMN body DROP NOT NULL;
+		`);
 		pgm.renameColumn("questions", "body", "content");
+		// Restore NOT NULL constraint on content
+		await pgm.db.query(`
+			ALTER TABLE questions
+			ALTER COLUMN content SET NOT NULL;
+		`);
 	} else if (hasBody && hasContent) {
 		// Both exist - copy data from body to content, then drop body
 		await pgm.db.query(`
@@ -55,7 +65,17 @@ export async function up(pgm) {
 
 	if (answersHasBody && !answersHasContent) {
 		// Rename body to content
+		// First, ensure body can be nullable temporarily for rename
+		await pgm.db.query(`
+			ALTER TABLE answers
+			ALTER COLUMN body DROP NOT NULL;
+		`);
 		pgm.renameColumn("answers", "body", "content");
+		// Restore NOT NULL constraint on content
+		await pgm.db.query(`
+			ALTER TABLE answers
+			ALTER COLUMN content SET NOT NULL;
+		`);
 	} else if (answersHasBody && answersHasContent) {
 		// Both exist - copy data from body to content, then drop body
 		await pgm.db.query(`
