@@ -180,7 +180,16 @@ function QuestionDetailPage() {
 								</span>
 								<span>•</span>
 								<span>
-									{new Date(question.created_at).toLocaleDateString()}
+									{new Date(question.created_at).toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+										hour: "2-digit",
+										minute: "2-digit",
+									})}
+									{question.updated_at !== question.created_at && (
+										<span className="ml-2 italic text-gray-500">(edited)</span>
+									)}
 								</span>
 								{question.labels && question.labels.length > 0 && (
 									<>
