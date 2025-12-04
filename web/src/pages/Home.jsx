@@ -223,26 +223,49 @@ function Home() {
 													}
 												}}
 											>
-												<h3 className="font-semibold text-lg text-gray-900 mb-2">
-													{question.title}
-												</h3>
+												<div className="flex items-start justify-between gap-3 mb-2">
+													<h3 className="font-semibold text-lg text-gray-900 flex-1">
+														{question.title}
+													</h3>
+													{question.answer_count > 0 && (
+														<span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full whitespace-nowrap">
+															<svg
+																className="w-3 h-3"
+																fill="currentColor"
+																viewBox="0 0 20 20"
+															>
+																<path
+																	fillRule="evenodd"
+																	d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+																	clipRule="evenodd"
+																/>
+															</svg>
+															{question.answer_count}{" "}
+															{question.answer_count === 1
+																? "Answer"
+																: "Answers"}
+														</span>
+													)}
+												</div>
 												{/* Cleaned content display */}
 												<p className="text-gray-600 line-clamp-2">
 													{getFirstLinePreview(
 														question.body || question.content,
 													)}
 												</p>
-												{question.labels && question.labels.length > 0 && (
-													<div className="flex flex-wrap gap-2 mt-3">
-														{question.labels.map((label) => (
-															<LabelBadge
-																key={label.id}
-																label={label}
-																onClick={handleLabelClick}
-															/>
-														))}
-													</div>
-												)}
+												{question.labels &&
+													Array.isArray(question.labels) &&
+													question.labels.length > 0 && (
+														<div className="flex flex-wrap gap-2 mt-3">
+															{question.labels.map((label) => (
+																<LabelBadge
+																	key={label.id}
+																	label={label}
+																	onClick={handleLabelClick}
+																/>
+															))}
+														</div>
+													)}
 												<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
 													<span>
 														Asked by{" "}
