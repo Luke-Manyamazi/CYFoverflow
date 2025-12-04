@@ -15,7 +15,7 @@ export const createQuestion = async (
 	if (!title) {
 		throw new Error("Title is required");
 	}
-	if (!content) {
+	if (!content || (typeof content === "string" && !content.trim())) {
 		throw new Error("Content is required");
 	}
 
@@ -26,7 +26,7 @@ export const createQuestion = async (
 
 	return repository.createQuestionDB(
 		title.trim(),
-		content.trim(),
+		typeof content === "string" ? content.trim() : content,
 		templateType,
 		userId,
 		browser,

@@ -14,7 +14,6 @@ const AskQuestionPage = () => {
 
 	const [initialContent, setInitialContent] = useState("");
 
-	const [content, setContent] = useState("");
 	const [title, setTitle] = useState("");
 
 	const [charCount, setCharCount] = useState(0);
@@ -51,8 +50,6 @@ const AskQuestionPage = () => {
 	const handleTemplateSelect = (template) => {
 		setInitialContent(template.content);
 
-		setContent(template.content);
-
 		setActiveTemplate(template.id);
 
 		setCharCount(0);
@@ -67,7 +64,6 @@ const AskQuestionPage = () => {
 		) {
 			setActiveTemplate(null);
 			setInitialContent("");
-			setContent("");
 			setTitle("");
 			setError(null);
 			setSelectedLabels([]);
@@ -90,8 +86,6 @@ const AskQuestionPage = () => {
 	};
 
 	const handleEditorChange = (newContent, editor) => {
-		setContent(newContent);
-
 		const textLength = editor.getContent({ format: "text" }).trim().length;
 		setCharCount(textLength);
 	};
@@ -105,8 +99,18 @@ const AskQuestionPage = () => {
 			return;
 		}
 
+		if (!editorRef.current) {
+			setError("Editor is not ready. Please wait a moment and try again.");
+			return;
+		}
+
 		const plainText = editorRef.current.getContent({ format: "text" });
 		const htmlContent = editorRef.current.getContent();
+
+		if (!htmlContent || !htmlContent.trim()) {
+			setError("Question content cannot be empty. Please provide details.");
+			return;
+		}
 
 		if (!title.trim()) {
 			setError("Please enter a title for your question.");
@@ -148,7 +152,7 @@ const AskQuestionPage = () => {
 		}
 
 		const parser = new DOMParser();
-		const doc = parser.parseFromString(content, "text/html");
+		const doc = parser.parseFromString(htmlContent, "text/html");
 
 		doc.querySelectorAll(".template-placeholder").forEach((el) => {
 			el.classList.remove("template-placeholder");
@@ -157,6 +161,12 @@ const AskQuestionPage = () => {
 
 		const cleanContent = doc.body.innerHTML;
 
+		if (!cleanContent || !cleanContent.trim()) {
+			setError("Question content cannot be empty. Please provide details.");
+			setIsSubmitting(false);
+			return;
+		}
+
 		const questionData = {
 			title: title,
 			content: cleanContent,
@@ -164,7 +174,7 @@ const AskQuestionPage = () => {
 			browser: metaData.browser || null,
 			os: metaData.os || null,
 			documentationLink: metaData.documentationLink || null,
-			labelId: [],
+			labelId: selectedLabels,
 		};
 
 		try {
@@ -182,7 +192,6 @@ const AskQuestionPage = () => {
 			if (!response.ok)
 				throw new Error(data.message || "Something went wrong.");
 
-			console.log("Question Created:", data);
 			navigate("/");
 		} catch (err) {
 			console.error("Submission Error:", err);

@@ -14,11 +14,18 @@ if (!direction || !["down", "redo", "up"].includes(direction)) {
 
 const { migrationConfig } = config.init();
 
+// Add logging to see what migrations will run
+const logger = (await import("../utils/logger.js")).default;
+logger.info(
+	`Running migrations: direction=${direction}, count=${rawCount || "all"}`,
+);
+
 const count = rawCount ? parseInt(rawCount, 10) : undefined;
 
 if (direction === "redo") {
 	await runner({ ...migrationConfig, count, direction: "down" });
 	await runner({ ...migrationConfig, count: count ?? 1, direction: "up" });
 } else {
-	await runner({ ...migrationConfig, count, direction });
+	const result = await runner({ ...migrationConfig, count, direction });
+	logger.info(`Migration ${direction} completed`, { result });
 }

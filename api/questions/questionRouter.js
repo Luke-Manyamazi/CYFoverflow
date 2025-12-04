@@ -39,6 +39,16 @@ router.post("/", authenticateToken(), async (req, res) => {
 			labelId,
 		} = req.body;
 
+		if (!content || (typeof content === "string" && !content.trim())) {
+			logger.error("Content is missing or empty from request body", {
+				bodyKeys: Object.keys(req.body),
+				hasTitle: !!title,
+				contentType: typeof content,
+				contentLength: typeof content === "string" ? content.length : 0,
+			});
+			return res.status(400).json({ message: "Content is required" });
+		}
+
 		const question = await createQuestion(
 			req.user.id,
 			title,
@@ -52,7 +62,10 @@ router.post("/", authenticateToken(), async (req, res) => {
 		res.status(201).json(question);
 	} catch (error) {
 		logger.error("Create a question error: %O", error);
-		res.status(500).json({ error: "failed to create question" });
+		const statusCode = error.message.includes("not found") ? 404 : 500;
+		res.status(statusCode).json({
+			error: error.message || "failed to create question",
+		});
 	}
 });
 
