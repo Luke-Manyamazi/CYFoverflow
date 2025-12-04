@@ -14,7 +14,6 @@ const AskQuestionPage = () => {
 
 	const [initialContent, setInitialContent] = useState("");
 
-	const [content, setContent] = useState("");
 	const [title, setTitle] = useState("");
 
 	const [charCount, setCharCount] = useState(0);
@@ -51,8 +50,6 @@ const AskQuestionPage = () => {
 	const handleTemplateSelect = (template) => {
 		setInitialContent(template.content);
 
-		setContent(template.content);
-
 		setActiveTemplate(template.id);
 
 		setCharCount(0);
@@ -67,7 +64,6 @@ const AskQuestionPage = () => {
 		) {
 			setActiveTemplate(null);
 			setInitialContent("");
-			setContent("");
 			setTitle("");
 			setError(null);
 			setSelectedLabels([]);
@@ -90,8 +86,6 @@ const AskQuestionPage = () => {
 	};
 
 	const handleEditorChange = (newContent, editor) => {
-		setContent(newContent);
-
 		const textLength = editor.getContent({ format: "text" }).trim().length;
 		setCharCount(textLength);
 	};
@@ -148,7 +142,7 @@ const AskQuestionPage = () => {
 		}
 
 		const parser = new DOMParser();
-		const doc = parser.parseFromString(content, "text/html");
+		const doc = parser.parseFromString(htmlContent, "text/html");
 
 		doc.querySelectorAll(".template-placeholder").forEach((el) => {
 			el.classList.remove("template-placeholder");
