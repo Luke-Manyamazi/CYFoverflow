@@ -11,6 +11,7 @@
 		"migration": "node -r dotenv/config ./migrations/migrate.js",
 		"migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js",
 		"migration:fix": "node -r dotenv/config ./migrations/fix-migration-name.js",
+		"migration:reset": "node -r dotenv/config ./migrations/fix-migration-name.js --reset",
 		"lint:eslint": "eslint ."
 	},
 	"dependencies": {
