@@ -39,10 +39,12 @@ router.post("/", authenticateToken(), async (req, res) => {
 			labelId,
 		} = req.body;
 
-		if (!content) {
-			logger.error("Content is missing from request body", {
+		if (!content || (typeof content === "string" && !content.trim())) {
+			logger.error("Content is missing or empty from request body", {
 				bodyKeys: Object.keys(req.body),
 				hasTitle: !!title,
+				contentType: typeof content,
+				contentLength: typeof content === "string" ? content.length : 0,
 			});
 			return res.status(400).json({ message: "Content is required" });
 		}

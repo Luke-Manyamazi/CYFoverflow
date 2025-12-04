@@ -99,8 +99,18 @@ const AskQuestionPage = () => {
 			return;
 		}
 
+		if (!editorRef.current) {
+			setError("Editor is not ready. Please wait a moment and try again.");
+			return;
+		}
+
 		const plainText = editorRef.current.getContent({ format: "text" });
 		const htmlContent = editorRef.current.getContent();
+
+		if (!htmlContent || !htmlContent.trim()) {
+			setError("Question content cannot be empty. Please provide details.");
+			return;
+		}
 
 		if (!title.trim()) {
 			setError("Please enter a title for your question.");
@@ -151,6 +161,18 @@ const AskQuestionPage = () => {
 
 		const cleanContent = doc.body.innerHTML;
 
+		if (!cleanContent || !cleanContent.trim()) {
+			setError("Question content cannot be empty. Please provide details.");
+			return;
+		}
+
+		// Final validation before sending
+		if (!cleanContent || cleanContent.trim().length === 0) {
+			setError("Question content cannot be empty. Please provide details.");
+			setIsSubmitting(false);
+			return;
+		}
+
 		const questionData = {
 			title: title,
 			content: cleanContent,
@@ -160,6 +182,17 @@ const AskQuestionPage = () => {
 			documentationLink: metaData.documentationLink || null,
 			labelId: selectedLabels,
 		};
+
+		// Debug: Log the content being sent (remove in production if needed)
+		if (!questionData.content) {
+			console.error("ERROR: content is null/undefined before sending", {
+				htmlContent: htmlContent?.substring(0, 100),
+				cleanContent: cleanContent?.substring(0, 100),
+			});
+			setError("Failed to prepare question content. Please try again.");
+			setIsSubmitting(false);
+			return;
+		}
 
 		try {
 			const response = await fetch("/api/questions", {
