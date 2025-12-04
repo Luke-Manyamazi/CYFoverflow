@@ -7,7 +7,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node --inspect --watch --watch-path . server.js",
-		"start": "npm run migration:fix && npm run migration up && node server.js",
+		"start": "npm run migration up && node server.js",
 		"migration": "node -r dotenv/config ./migrations/migrate.js",
 		"migration:create": "node-pg-migrate create --template-file-name ./migrations/template.js",
 		"migration:fix": "node -r dotenv/config ./migrations/fix-migration-name.js",

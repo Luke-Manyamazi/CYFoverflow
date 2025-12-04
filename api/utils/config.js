@@ -49,7 +49,7 @@ const createConfig = (overrides) => {
 		migrationConfig: {
 			databaseUrl: dbConfig,
 			dir: migrationsDir,
-			ignorePattern: "(migrate|template)\\.js$",
+			ignorePattern: "(migrate|template|fix-migration-name)\\.js$",
 			logger,
 			migrationsTable: "migrations",
 			verbose: true,

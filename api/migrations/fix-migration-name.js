@@ -19,7 +19,7 @@ try {
 	// Check if migrations table exists
 	const tableCheck = await client.query(`
 		SELECT EXISTS (
-			SELECT FROM information_schema.tables 
+			SELECT FROM information_schema.tables
 			WHERE table_name = 'migrations'
 		);
 	`);
