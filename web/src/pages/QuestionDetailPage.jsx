@@ -163,7 +163,7 @@ function QuestionDetailPage() {
 								<Editor
 									tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js"
 									onInit={(evt, editor) => (editorRef.current = editor)}
-									initialValue={question.content}
+									initialValue={question.content || question.body}
 									disabled={true}
 									init={{
 										readonly: true,

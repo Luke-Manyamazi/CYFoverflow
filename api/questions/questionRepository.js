@@ -11,7 +11,7 @@ export const createQuestionDB = async (
 	labelId,
 ) => {
 	const result = await db.query(
-		"INSERT INTO questions (title, content, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+		"INSERT INTO questions (title, body, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
 		[title, content, templateType, userId, browser, os, documentationLink],
 	);
 
@@ -24,7 +24,6 @@ export const createQuestionDB = async (
 					[question.id, label],
 				);
 			} catch (error) {
-				// If foreign key constraint fails, label doesn't exist
 				if (error.code === "23503") {
 					throw new Error(`Label with ID ${label} does not exist`);
 				}
@@ -124,9 +123,10 @@ export const updateQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
+	// Temporary: Use 'body' column until migration renames it to 'content'
 	const result = await db.query(
 		`UPDATE questions
-         SET title = $1, content = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
+         SET title = $1, body = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
 		[title, content, templateType, browser, os, documentationLink, id],
 	);
 	const question = result.rows[0];
