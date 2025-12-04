@@ -34,6 +34,9 @@ export const createQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
+	if (!content) {
+		throw new Error("Content cannot be null or undefined in repository");
+	}
 	const columnName = await getContentColumnName();
 	const result = await db.query(
 		`INSERT INTO questions (title, ${columnName}, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,

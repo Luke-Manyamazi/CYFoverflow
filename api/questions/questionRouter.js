@@ -39,6 +39,14 @@ router.post("/", authenticateToken(), async (req, res) => {
 			labelId,
 		} = req.body;
 
+		if (!content) {
+			logger.error("Content is missing from request body", {
+				bodyKeys: Object.keys(req.body),
+				hasTitle: !!title,
+			});
+			return res.status(400).json({ message: "Content is required" });
+		}
+
 		const question = await createQuestion(
 			req.user.id,
 			title,
