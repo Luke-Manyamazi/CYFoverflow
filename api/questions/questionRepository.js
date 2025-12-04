@@ -1,5 +1,29 @@
 import db from "../db.js";
 
+// Helper function to detect which column exists (prefer 'content', fallback to 'body')
+let contentColumnName = null;
+const getContentColumnName = async () => {
+	if (contentColumnName) return contentColumnName;
+
+	const result = await db.query(`
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_name = 'questions'
+		AND column_name IN ('content', 'body')
+		ORDER BY CASE WHEN column_name = 'content' THEN 1 ELSE 2 END
+	`);
+
+	if (result.rows.length > 0) {
+		// Prefer 'content' if it exists, otherwise use 'body'
+		contentColumnName = result.rows[0].column_name;
+	} else {
+		// Default to 'content' if neither exists (shouldn't happen)
+		contentColumnName = "content";
+	}
+
+	return contentColumnName;
+};
+
 export const createQuestionDB = async (
 	title,
 	content,
@@ -10,8 +34,9 @@ export const createQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
+	const columnName = await getContentColumnName();
 	const result = await db.query(
-		"INSERT INTO questions (title, body, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+		`INSERT INTO questions (title, ${columnName}, template_type, user_id, browser, os, documentation_link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
 		[title, content, templateType, userId, browser, os, documentationLink],
 	);
 
@@ -41,9 +66,15 @@ export const createQuestionDB = async (
 };
 
 export const getAllQuestionsDB = async (limit = null, page = null) => {
-	let query = `SELECT q.*, u.name as author_name
+	let query = `SELECT q.*, u.name as author_name,
+         COALESCE(answer_counts.answer_count, 0) as answer_count
          FROM questions q
          JOIN users u ON q.user_id = u.id
+         LEFT JOIN (
+             SELECT question_id, COUNT(*) as answer_count
+             FROM answers
+             GROUP BY question_id
+         ) answer_counts ON q.id = answer_counts.question_id
          ORDER BY q.created_at DESC`;
 
 	const params = [];
@@ -80,9 +111,15 @@ export const getTotalQuestionsCountDB = async () => {
 };
 export const getQuestionsByUserIdDB = async (userId) => {
 	const result = await db.query(
-		`SELECT q.*, u.name as author_name
+		`SELECT q.*, u.name as author_name,
+         COALESCE(answer_counts.answer_count, 0) as answer_count
          FROM questions q
          JOIN users u ON q.user_id = u.id
+         LEFT JOIN (
+             SELECT question_id, COUNT(*) as answer_count
+             FROM answers
+             GROUP BY question_id
+         ) answer_counts ON q.id = answer_counts.question_id
          WHERE q.user_id = $1
          ORDER BY q.created_at DESC`,
 		[userId],
@@ -91,7 +128,16 @@ export const getQuestionsByUserIdDB = async (userId) => {
 };
 export const getQuestionByIdDB = async (id) => {
 	const result = await db.query(
-		`SELECT q.*, u.name as author_name FROM questions q Join users u ON q.user_id = u.id WHERE q.id = $1`,
+		`SELECT q.*, u.name as author_name,
+         COALESCE(answer_counts.answer_count, 0) as answer_count
+         FROM questions q
+         JOIN users u ON q.user_id = u.id
+         LEFT JOIN (
+             SELECT question_id, COUNT(*) as answer_count
+             FROM answers
+             GROUP BY question_id
+         ) answer_counts ON q.id = answer_counts.question_id
+         WHERE q.id = $1`,
 		[id],
 	);
 	const question = result.rows[0];
@@ -123,10 +169,10 @@ export const updateQuestionDB = async (
 	documentationLink = null,
 	labelId,
 ) => {
-	// Temporary: Use 'body' column until migration renames it to 'content'
+	const columnName = await getContentColumnName();
 	const result = await db.query(
 		`UPDATE questions
-         SET title = $1, body = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
+         SET title = $1, ${columnName} = $2, template_type = $3, browser = $4, os = $5, documentation_link = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
 		[title, content, templateType, browser, os, documentationLink, id],
 	);
 	const question = result.rows[0];
@@ -159,10 +205,16 @@ export const getAllLabelsDB = async () => {
 
 export const searchQuestionsByLabelsDB = async (labelId = []) => {
 	const result = await db.query(
-		`SELECT DISTINCT q.*, u.name as author_name
+		`SELECT DISTINCT q.*, u.name as author_name,
+         COALESCE(answer_counts.answer_count, 0) as answer_count
          FROM questions q
          JOIN users u ON q.user_id = u.id
          JOIN question_labels ql ON q.id = ql.question_id
+         LEFT JOIN (
+             SELECT question_id, COUNT(*) as answer_count
+             FROM answers
+             GROUP BY question_id
+         ) answer_counts ON q.id = answer_counts.question_id
          WHERE ql.label_id = ANY($1::int[])
          ORDER BY q.created_at DESC`,
 		[labelId],

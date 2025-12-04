@@ -6,11 +6,15 @@ export const createAnswer = (content, userId, questionId) => {
 	if (!content) {
 		throw new Error("Content is required");
 	}
-	return repository.createAnswerDB(content, userId, questionId);
+	return repository.createAnswerDB({
+		content,
+		user_id: userId,
+		question_id: questionId,
+	});
 };
 
 export const getAnswersByQuestionId = async (questionId) => {
-	const answers = await repository.getAnswersByQuestionIdDB(questionId);
+	const answers = await repository.getAnswerByQuestionIdDB(questionId);
 	if (!answers) {
 		logger.error("Error not found Question" + questionId);
 	}
