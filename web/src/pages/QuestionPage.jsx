@@ -164,7 +164,7 @@ const AskQuestionPage = () => {
 			browser: metaData.browser || null,
 			os: metaData.os || null,
 			documentationLink: metaData.documentationLink || null,
-			labelId: [],
+			labelId: selectedLabels,
 		};
 
 		try {
@@ -182,7 +182,6 @@ const AskQuestionPage = () => {
 			if (!response.ok)
 				throw new Error(data.message || "Something went wrong.");
 
-			console.log("Question Created:", data);
 			navigate("/");
 		} catch (err) {
 			console.error("Submission Error:", err);
