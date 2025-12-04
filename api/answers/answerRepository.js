@@ -25,14 +25,9 @@ const getAnswerContentColumnName = async () => {
 };
 
 export const createAnswerDB = async ({ content, user_id, question_id }) => {
-	if (!content) {
-		throw new Error("Content is required");
-	}
 	const columnName = await getAnswerContentColumnName();
-	// Quote the column name to prevent SQL injection and ensure proper handling
-	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
-		`INSERT INTO answers(${quotedColumnName},user_id, question_id)
+		`INSERT INTO answers(${columnName},user_id, question_id)
         VALUES($1, $2, $3)
         RETURNING *`,
 		[content, user_id, question_id],
@@ -42,10 +37,8 @@ export const createAnswerDB = async ({ content, user_id, question_id }) => {
 
 export const getAnswerByQuestionIdDB = async (questionId) => {
 	const columnName = await getAnswerContentColumnName();
-	// Quote the column name to prevent SQL injection and ensure proper handling
-	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
-		`SELECT a.id, a.${quotedColumnName} AS content, a.user_id, a.question_id, a.created_at, a.updated_at, u.name AS author_name
+		`SELECT a.id, a.${columnName} AS content, a.user_id, a.question_id, a.created_at, a.updated_at, u.name AS author_name
         FROM answers a
         JOIN users u ON a.user_id = u.id
         WHERE a.question_id = $1
@@ -56,15 +49,10 @@ export const getAnswerByQuestionIdDB = async (questionId) => {
 };
 
 export const updateAnswerDB = async (id, content) => {
-	if (!content) {
-		throw new Error("Content is required");
-	}
 	const columnName = await getAnswerContentColumnName();
-	// Quote the column name to prevent SQL injection and ensure proper handling
-	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
 		`UPDATE answers
-        SET ${quotedColumnName} = $1,
+        SET ${columnName} = $1,
         updated_at = NOW()
         WHERE id = $2
         RETURNING *`,
@@ -80,10 +68,8 @@ export const deleteAnswerDB = async (id) => {
 
 export const getAnswerByIdDB = async (id) => {
 	const columnName = await getAnswerContentColumnName();
-	// Quote the column name to prevent SQL injection and ensure proper handling
-	const quotedColumnName = `"${columnName}"`;
 	const result = await db.query(
-		`SELECT id, ${quotedColumnName} AS content, user_id, question_id, created_at, updated_at FROM answers WHERE id = $1`,
+		`SELECT id, ${columnName} AS content, user_id, question_id, created_at, updated_at FROM answers WHERE id = $1`,
 		[id],
 	);
 	return result.rows[0];
