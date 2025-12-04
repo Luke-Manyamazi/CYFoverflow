@@ -18,10 +18,18 @@ export const createQuestionDB = async (
 	const question = result.rows[0];
 	if (labelId && labelId.length > 0) {
 		for (const label of labelId) {
-			await db.query(
-				"INSERT INTO question_labels (question_id, label_id) VALUES($1, $2)",
-				[question.id, label],
-			);
+			try {
+				await db.query(
+					"INSERT INTO question_labels (question_id, label_id) VALUES($1, $2)",
+					[question.id, label],
+				);
+			} catch (error) {
+				// If foreign key constraint fails, label doesn't exist
+				if (error.code === "23503") {
+					throw new Error(`Label with ID ${label} does not exist`);
+				}
+				throw error;
+			}
 		}
 	}
 

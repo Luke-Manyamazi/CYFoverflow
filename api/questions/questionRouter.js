@@ -52,7 +52,10 @@ router.post("/", authenticateToken(), async (req, res) => {
 		res.status(201).json(question);
 	} catch (error) {
 		logger.error("Create a question error: %O", error);
-		res.status(500).json({ error: "failed to create question" });
+		const statusCode = error.message.includes("not found") ? 404 : 500;
+		res.status(statusCode).json({
+			error: error.message || "failed to create question",
+		});
 	}
 });
 
