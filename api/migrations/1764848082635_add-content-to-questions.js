@@ -23,6 +23,14 @@ export async function up(pgm) {
 	if (hasBody && !hasContent) {
 		// Rename body to content
 		pgm.renameColumn("questions", "body", "content");
+	} else if (hasBody && hasContent) {
+		// Both exist - copy data from body to content, then drop body
+		await pgm.db.query(`
+			UPDATE questions
+			SET content = COALESCE(content, body)
+			WHERE body IS NOT NULL;
+		`);
+		pgm.dropColumn("questions", "body");
 	} else if (!hasContent && !hasBody) {
 		// Add content column if neither exists
 		pgm.addColumn("questions", {
@@ -48,6 +56,14 @@ export async function up(pgm) {
 	if (answersHasBody && !answersHasContent) {
 		// Rename body to content
 		pgm.renameColumn("answers", "body", "content");
+	} else if (answersHasBody && answersHasContent) {
+		// Both exist - copy data from body to content, then drop body
+		await pgm.db.query(`
+			UPDATE answers
+			SET content = COALESCE(content, body)
+			WHERE body IS NOT NULL;
+		`);
+		pgm.dropColumn("answers", "body");
 	} else if (!answersHasContent && !answersHasBody) {
 		// Add content column if neither exists
 		pgm.addColumn("answers", {
