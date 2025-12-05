@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
+import { getFirstLinePreview } from "../utils/questionUtils";
 
 function MyQuestionsPage() {
-	const { token, isLoggedIn } = useAuth();
+	const navigate = useNavigate();
+	const { token, isLoggedIn, user } = useAuth();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+
+	const handleQuestionClick = (questionId) => {
+		navigate(`/questions/${questionId}`);
+	};
+
+	const handleEditClick = (e, question) => {
+		e.stopPropagation();
+		navigate(`/questions/${question.id}/edit`, {
+			state: { questionData: question },
+		});
+	};
 
 	useEffect(() => {
 		const fetchMyQuestions = async () => {
@@ -57,22 +72,90 @@ function MyQuestionsPage() {
 								</p>
 							)}
 							<div className="space-y-4 mt-6">
-								{questions.map((q) => (
+								{questions.map((question) => (
 									<div
-										key={q.id}
-										className="border border-gray-200 rounded-lg p-4 hover:shadow transition"
+										key={question.id}
+										role="button"
+										tabIndex={0}
+										className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
+										onClick={() => handleQuestionClick(question.id)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" || e.key === " ") {
+												e.preventDefault();
+												handleQuestionClick(question.id);
+											}
+										}}
 									>
-										<h2 className="text-lg font-semibold text-lg text-gray-900 mb-2">
-											{q.title}
-										</h2>
+										<div className="flex justify-between items-start">
+											<div className="flex items-center gap-3 flex-1">
+												<h3 className="font-semibold text-lg text-gray-900 mb-2">
+													{question.title}
+												</h3>
+												{question.answer_count > 0 && (
+													<span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
+														<svg
+															className="w-3 h-3"
+															fill="currentColor"
+															viewBox="0 0 20 20"
+														>
+															<path
+																fillRule="evenodd"
+																d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+																clipRule="evenodd"
+															/>
+														</svg>
+														{question.answer_count}{" "}
+														{question.answer_count === 1 ? "Answer" : "Answers"}
+													</span>
+												)}
+											</div>
 
-										<p className="text-sm text-gray-600 mt-1 line-clamp-2">
-											{q.content.replace(/<[^>]+>/g, "").slice(0, 200)}...
-										</p>
+											<button
+												onClick={(e) => handleEditClick(e, question)}
+												className="z-10 text-sm font-medium text-gray-500 hover:text-[#281d80] hover:bg-gray-100 px-3 py-1 rounded transition-colors"
+												title="Edit your question"
+											>
+												✎ Edit
+											</button>
+										</div>
 
-										<p className="text-xs text-gray-400 mt-2">
-											Posted on {new Date(q.created_at).toLocaleDateString()}
+										<p className="text-gray-600 line-clamp-2">
+											{getFirstLinePreview(question.body || question.content)}
 										</p>
+										{question.labels &&
+											Array.isArray(question.labels) &&
+											question.labels.length > 0 && (
+												<div className="flex flex-wrap gap-2 mt-3">
+													{question.labels.map((label) => (
+														<LabelBadge
+															key={label.id}
+															label={label}
+															onClick={() => {}}
+														/>
+													))}
+												</div>
+											)}
+										<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
+											<span>
+												Asked by{" "}
+												{question.author_name ||
+													question.author?.name ||
+													user?.name ||
+													"Anonymous"}
+											</span>
+											<span>
+												{new Date(question.created_at).toLocaleDateString(
+													"en-US",
+													{
+														year: "numeric",
+														month: "short",
+														day: "numeric",
+														hour: "2-digit",
+														minute: "2-digit",
+													},
+												)}
+											</span>
+										</div>
 									</div>
 								))}
 							</div>

@@ -128,7 +128,21 @@ export const getQuestionsByUserIdDB = async (userId) => {
          ORDER BY q.created_at DESC`,
 		[userId],
 	);
-	return result.rows;
+	const questions = result.rows;
+
+	// Fetch labels for each question (same as getAllQuestionsDB)
+	for (let question of questions) {
+		const labelResult = await db.query(
+			`SELECT l.id, l.name
+             FROM labels l
+             JOIN question_labels ql ON l.id = ql.label_id
+             WHERE ql.question_id = $1`,
+			[question.id],
+		);
+		question.labels = labelResult.rows;
+	}
+
+	return questions;
 };
 export const getQuestionByIdDB = async (id) => {
 	const result = await db.query(
