@@ -112,16 +112,7 @@ function Home() {
 	const filteredQuestions = filterQuestions(questions, searchTerm);
 
 	const handleQuestionClick = (questionId) => {
-		if (isLoggedIn) {
-			navigate(`/questions/${questionId}`);
-		} else {
-			navigate("/login", {
-				state: {
-					message: "Please log in to view questions",
-					returnTo: `/questions/${questionId}`,
-				},
-			});
-		}
+		navigate(`/questions/${questionId}`);
 	};
 
 	const handleEditClick = (e, question) => {
