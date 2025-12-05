@@ -14,9 +14,25 @@ function MyQuestionsPage() {
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [selectedLabel, setSelectedLabel] = useState(null);
 
-	// Filter questions based on search term
-	const filteredQuestions = filterQuestions(questions, searchTerm);
+	const handleLabelClick = (label) => {
+		setSelectedLabel(selectedLabel?.id === label.id ? null : label);
+	};
+
+	const handleClearLabelFilter = () => {
+		setSelectedLabel(null);
+	};
+
+	// Filter questions based on search term and selected label
+	let filteredQuestions = filterQuestions(questions, searchTerm);
+
+	// Filter by selected label if one is selected
+	if (selectedLabel) {
+		filteredQuestions = filteredQuestions.filter((question) =>
+			question.labels?.some((label) => label.id === selectedLabel.id),
+		);
+	}
 
 	const handleQuestionClick = (questionId) => {
 		navigate(`/questions/${questionId}`);
@@ -66,9 +82,30 @@ function MyQuestionsPage() {
 
 					<main className="flex-1">
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-							<h1 className="text-2xl font-bold text-gray-900 mb-4">
-								My Questions
-							</h1>
+							<div className="flex justify-between items-center flex-wrap gap-4 mb-4">
+								<div className="flex items-center gap-3 flex-wrap">
+									<h1 className="text-2xl font-bold text-gray-900">
+										{selectedLabel
+											? `My Questions tagged with "${selectedLabel.name}"`
+											: searchTerm
+												? `My Questions - Search Results for "${searchTerm}"`
+												: "My Questions"}
+										{(searchTerm || selectedLabel) && (
+											<span className="text-sm font-normal text-gray-500 ml-2">
+												({filteredQuestions.length} results)
+											</span>
+										)}
+									</h1>
+									{selectedLabel && (
+										<button
+											onClick={handleClearLabelFilter}
+											className="text-sm text-[#281d80] hover:text-[#1f1566] underline cursor-pointer"
+										>
+											Clear filter
+										</button>
+									)}
+								</div>
+							</div>
 							{loading && <p>Loading your questions...</p>}
 							{error && <p className="text-red-500 text-sm">{error}</p>}
 							{!loading && !error && questions.length === 0 && (
@@ -143,7 +180,7 @@ function MyQuestionsPage() {
 														<LabelBadge
 															key={label.id}
 															label={label}
-															onClick={() => {}}
+															onClick={handleLabelClick}
 														/>
 													))}
 												</div>
