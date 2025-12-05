@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 
@@ -12,11 +13,10 @@ function Navbar() {
 	const location = useLocation();
 	const { isLoggedIn, user, logout } = useAuth();
 	const { searchTerm, setSearchTerm } = useSearch();
+	const { selectedLabel } = useLabelFilter();
 
-	// Determine if search bar should be shown based on current route
 	const shouldShowSearch = () => {
 		const path = location.pathname;
-		// Show search on: Home, Questions list, Labels, My Questions
 		return (
 			path === "/" ||
 			path === "/questions" ||
@@ -47,23 +47,23 @@ function Navbar() {
 						</span>
 					</Link>
 
-					{/* Search Bar - Desktop */}
 					{shouldShowSearch() && (
 						<div className="hidden md:flex flex-1 max-w-2xl mx-4">
-							<SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
+							<SearchBar
+								searchTerm={searchTerm}
+								onSearch={setSearchTerm}
+								selectedLabel={selectedLabel}
+							/>
 						</div>
 					)}
 
-					{/* Desktop Menu */}
 					<div className="hidden md:flex items-center gap-4 lg:gap-6">
 						{isLoggedIn ? (
 							<>
-								{/* Avatar Only */}
 								<div className="w-10 h-10 bg-[#281d80] text-white rounded-full flex items-center justify-center font-semibold">
 									{userName?.charAt(0).toUpperCase()}
 								</div>
 
-								{/* Logout Button - Circle with Tooltip */}
 								<button
 									onClick={handleLogout}
 									className="group relative bg-[#ed4d4e] text-white rounded-full w-10 h-10 flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:bg-[#d43d3e] cursor-pointer"
@@ -82,10 +82,8 @@ function Navbar() {
 											d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
 										/>
 									</svg>
-									{/* Tooltip */}
 									<span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
 										Logout
-										{/* Tooltip arrow */}
 										<span className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900"></span>
 									</span>
 								</button>
@@ -136,7 +134,11 @@ function Navbar() {
 						<div className="flex flex-col space-y-3">
 							{shouldShowSearch() && (
 								<div className="px-4">
-									<SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
+									<SearchBar
+										searchTerm={searchTerm}
+										onSearch={setSearchTerm}
+										selectedLabel={selectedLabel}
+									/>
 								</div>
 							)}
 

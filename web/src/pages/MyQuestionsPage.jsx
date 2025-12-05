@@ -5,7 +5,11 @@ import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
-import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
+import {
+	getFirstLinePreview,
+	filterQuestions,
+	highlightSearchTerm,
+} from "../utils/questionUtils.jsx";
 
 function MyQuestionsPage() {
 	const navigate = useNavigate();
@@ -16,6 +20,12 @@ function MyQuestionsPage() {
 	const [error, setError] = useState(null);
 	const [selectedLabel, setSelectedLabel] = useState(null);
 
+	useEffect(() => {
+		if (searchTerm && searchTerm.trim() && selectedLabel) {
+			setSelectedLabel(null);
+		}
+	}, [searchTerm, selectedLabel]);
+
 	const handleLabelClick = (label) => {
 		setSelectedLabel(selectedLabel?.id === label.id ? null : label);
 	};
@@ -24,10 +34,8 @@ function MyQuestionsPage() {
 		setSelectedLabel(null);
 	};
 
-	// Filter questions based on search term and selected label
 	let filteredQuestions = filterQuestions(questions, searchTerm);
 
-	// Filter by selected label if one is selected
 	if (selectedLabel) {
 		filteredQuestions = filteredQuestions.filter((question) =>
 			question.labels?.some((label) => label.id === selectedLabel.id),
@@ -85,7 +93,7 @@ function MyQuestionsPage() {
 							<div className="flex justify-between items-center flex-wrap gap-4 mb-4">
 								<div className="flex items-center gap-3 flex-wrap">
 									<h1 className="text-2xl font-bold text-gray-900">
-										{selectedLabel
+										{selectedLabel && !searchTerm
 											? `My Questions tagged with "${selectedLabel.name}"`
 											: searchTerm
 												? `My Questions - Search Results for "${searchTerm}"`
@@ -139,7 +147,9 @@ function MyQuestionsPage() {
 										<div className="flex justify-between items-start">
 											<div className="flex items-center gap-3 flex-1">
 												<h3 className="font-semibold text-lg text-gray-900 mb-2">
-													{question.title}
+													{searchTerm
+														? highlightSearchTerm(question.title, searchTerm)
+														: question.title}
 												</h3>
 												{question.answer_count > 0 && (
 													<span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
@@ -170,7 +180,16 @@ function MyQuestionsPage() {
 										</div>
 
 										<p className="text-gray-600 line-clamp-2">
-											{getFirstLinePreview(question.body || question.content)}
+											{searchTerm
+												? highlightSearchTerm(
+														getFirstLinePreview(
+															question.body || question.content,
+														),
+														searchTerm,
+													)
+												: getFirstLinePreview(
+														question.body || question.content,
+													)}
 										</p>
 										{question.labels &&
 											Array.isArray(question.labels) &&

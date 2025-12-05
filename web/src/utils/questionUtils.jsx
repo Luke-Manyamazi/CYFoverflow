@@ -9,18 +9,13 @@ export const getFirstLinePreview = (html) => {
 	const tempDiv = document.createElement("div");
 	tempDiv.innerHTML = html;
 
-	// Remove code blocks and pre elements (we don't want code in preview)
 	tempDiv.querySelectorAll("pre").forEach((el) => el.remove());
 	tempDiv.querySelectorAll("code").forEach((el) => el.remove());
-
-	// Remove template-specific elements that don't contain user content
 	tempDiv.querySelectorAll("h3").forEach((el) => el.remove());
 	tempDiv.querySelectorAll("hr").forEach((el) => el.remove());
 
-	// Get all paragraph elements
 	const paragraphs = tempDiv.querySelectorAll("p");
 
-	// Find the first paragraph that has actual user content (not empty or placeholder)
 	for (let p of paragraphs) {
 		const text = p.textContent.trim();
 
@@ -80,11 +75,55 @@ export const filterQuestions = (questions, searchTerm) => {
 
 	const term = searchTerm.toLowerCase().trim();
 
-	return questions.filter(
-		(question) =>
-			question.title?.toLowerCase().includes(term) ||
-			(question.content || question.body)?.toLowerCase().includes(term) ||
+	return questions.filter((question) => {
+		if (question.title?.toLowerCase().includes(term)) return true;
+
+		if ((question.content || question.body)?.toLowerCase().includes(term))
+			return true;
+
+		if (
 			question.author_name?.toLowerCase().includes(term) ||
-			question.author?.name?.toLowerCase().includes(term),
-	);
+			question.author?.name?.toLowerCase().includes(term)
+		)
+			return true;
+
+		if (question.labels && Array.isArray(question.labels)) {
+			const labelMatch = question.labels.some((label) =>
+				label.name?.toLowerCase().includes(term),
+			);
+			if (labelMatch) return true;
+		}
+
+		return false;
+	});
+};
+
+/**
+ * Highlights search terms in text
+ * @param {string} text - Text to highlight
+ * @param {string} searchTerm - Search term to highlight
+ * @returns {JSX.Element|string} - Text with highlighted search terms
+ */
+export const highlightSearchTerm = (text, searchTerm) => {
+	if (!text || !searchTerm || !searchTerm.trim()) {
+		return text;
+	}
+
+	const term = searchTerm.trim();
+	const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const regex = new RegExp(`(${escapedTerm})`, "gi");
+	const parts = text.split(regex);
+
+	const filteredParts = parts.filter((part) => part.length > 0);
+
+	return filteredParts.map((part, index) => {
+		if (part.toLowerCase() === term.toLowerCase()) {
+			return (
+				<mark key={index} className="bg-yellow-200 px-1 rounded">
+					{part}
+				</mark>
+			);
+		}
+		return part;
+	});
 };

@@ -42,7 +42,6 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 			return;
 		}
 
-		// Check for meaningful content (similar to question validation)
 		const tempDiv = document.createElement("div");
 		tempDiv.innerHTML = htmlContent;
 
@@ -141,7 +140,6 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 								}
 							`,
 							setup: (editor) => {
-								// Hide placeholder CSS when content is added
 								const togglePlaceholder = () => {
 									const placeholders = editor.dom.select(
 										".template-placeholder",

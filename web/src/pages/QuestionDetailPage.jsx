@@ -18,6 +18,7 @@ function QuestionDetailPage() {
 	const [error, setError] = useState("");
 	const [showAnswerForm, setShowAnswerForm] = useState(false);
 	const editorRef = useRef(null);
+	const answerFormRef = useRef(null);
 
 	const fetchQuestion = useCallback(async () => {
 		try {
@@ -71,6 +72,12 @@ function QuestionDetailPage() {
 			return;
 		}
 		setShowAnswerForm(true);
+		setTimeout(() => {
+			answerFormRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+		}, 100);
 	};
 
 	const handleAnswerSuccess = () => {
@@ -283,12 +290,14 @@ function QuestionDetailPage() {
 						</div>
 
 						{showAnswerForm && (
-							<AnswerForm
-								questionId={id}
-								token={token}
-								onSuccess={handleAnswerSuccess}
-								onCancel={handleAnswerCancel}
-							/>
+							<div ref={answerFormRef}>
+								<AnswerForm
+									questionId={id}
+									token={token}
+									onSuccess={handleAnswerSuccess}
+									onCancel={handleAnswerCancel}
+								/>
+							</div>
 						)}
 
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
