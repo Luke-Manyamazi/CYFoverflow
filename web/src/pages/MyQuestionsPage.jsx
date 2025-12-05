@@ -20,6 +20,12 @@ function MyQuestionsPage() {
 	const [error, setError] = useState(null);
 	const [selectedLabel, setSelectedLabel] = useState(null);
 
+	useEffect(() => {
+		if (searchTerm && searchTerm.trim() && selectedLabel) {
+			setSelectedLabel(null);
+		}
+	}, [searchTerm, selectedLabel]);
+
 	const handleLabelClick = (label) => {
 		setSelectedLabel(selectedLabel?.id === label.id ? null : label);
 	};
@@ -28,10 +34,8 @@ function MyQuestionsPage() {
 		setSelectedLabel(null);
 	};
 
-	// Filter questions based on search term and selected label
 	let filteredQuestions = filterQuestions(questions, searchTerm);
 
-	// Filter by selected label if one is selected
 	if (selectedLabel) {
 		filteredQuestions = filteredQuestions.filter((question) =>
 			question.labels?.some((label) => label.id === selectedLabel.id),
@@ -89,7 +93,7 @@ function MyQuestionsPage() {
 							<div className="flex justify-between items-center flex-wrap gap-4 mb-4">
 								<div className="flex items-center gap-3 flex-wrap">
 									<h1 className="text-2xl font-bold text-gray-900">
-										{selectedLabel
+										{selectedLabel && !searchTerm
 											? `My Questions tagged with "${selectedLabel.name}"`
 											: searchTerm
 												? `My Questions - Search Results for "${searchTerm}"`
