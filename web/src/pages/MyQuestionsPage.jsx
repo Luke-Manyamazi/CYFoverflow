@@ -3,15 +3,20 @@ import { useNavigate } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
+import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
-import { getFirstLinePreview } from "../utils/questionUtils";
+import { getFirstLinePreview, filterQuestions } from "../utils/questionUtils";
 
 function MyQuestionsPage() {
 	const navigate = useNavigate();
 	const { token, isLoggedIn, user } = useAuth();
+	const { searchTerm } = useSearch();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+
+	// Filter questions based on search term
+	const filteredQuestions = filterQuestions(questions, searchTerm);
 
 	const handleQuestionClick = (questionId) => {
 		navigate(`/questions/${questionId}`);
@@ -71,8 +76,16 @@ function MyQuestionsPage() {
 									You have not posted any questions yet.
 								</p>
 							)}
+							{!loading &&
+								!error &&
+								questions.length > 0 &&
+								filteredQuestions.length === 0 && (
+									<p className="text-gray-600">
+										No questions found matching your search.
+									</p>
+								)}
 							<div className="space-y-4 mt-6">
-								{questions.map((question) => (
+								{filteredQuestions.map((question) => (
 									<div
 										key={question.id}
 										role="button"
