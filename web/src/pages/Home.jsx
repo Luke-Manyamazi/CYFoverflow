@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
+import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 import {
@@ -29,10 +30,16 @@ function Home() {
 	const location = useLocation();
 	const { isLoggedIn, user } = useAuth();
 	const { searchTerm } = useSearch();
+	const { selectedLabel, setSelectedLabel } = useLabelFilter();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [selectedLabel, setSelectedLabel] = useState(null);
+
+	useEffect(() => {
+		if (searchTerm && searchTerm.trim() && selectedLabel) {
+			setSelectedLabel(null);
+		}
+	}, [searchTerm, selectedLabel, setSelectedLabel]);
 
 	useEffect(() => {
 		if (selectedLabel) {
@@ -55,7 +62,7 @@ function Home() {
 				.catch(console.error);
 			navigate(location.pathname, { replace: true, state: {} });
 		}
-	}, [location.state?.labelId, location.pathname, navigate]);
+	}, [location.state?.labelId, location.pathname, navigate, setSelectedLabel]);
 
 	const fetchLatestQuestions = async () => {
 		try {
@@ -128,15 +135,11 @@ function Home() {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			{/* Main Content */}
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div className="flex gap-8">
-					{/* Sidebar */}
 					<Sidebar />
 
-					{/* Main Content Area */}
 					<main className="flex-1">
-						{/* Welcome Section */}
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6 text-center">
 							<h1 className="text-4xl font-bold text-gray-900 mb-4">
 								Welcome to <span style={{ color: "#ed4d4e" }}>CYF</span>
@@ -159,13 +162,12 @@ function Home() {
 							)}
 						</div>
 
-						{/* Latest Questions Section */}
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200">
 							<div className="p-6 border-b border-gray-200">
 								<div className="flex justify-between items-center flex-wrap gap-4">
 									<div className="flex items-center gap-3 flex-wrap">
 										<h2 className="text-2xl font-bold text-gray-900">
-											{selectedLabel
+											{selectedLabel && !searchTerm
 												? `Questions tagged with "${selectedLabel.name}"`
 												: searchTerm
 													? `Search Results for "${searchTerm}"`

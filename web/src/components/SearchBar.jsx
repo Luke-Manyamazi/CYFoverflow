@@ -2,14 +2,18 @@ function SearchBar({
 	searchTerm = "",
 	onSearch,
 	placeholder = "Search questions and tags...",
+	selectedLabel = null,
 }) {
 	const handleChange = (e) => {
 		const value = e.target.value;
-		// Call onSearch immediately for real-time filtering
 		if (onSearch) {
 			onSearch(value);
 		}
 	};
+
+	const dynamicPlaceholder = selectedLabel
+		? `Search within "${selectedLabel.name}"...`
+		: placeholder;
 
 	return (
 		<div className="flex-1 relative">
@@ -30,7 +34,7 @@ function SearchBar({
 			</div>
 			<input
 				type="text"
-				placeholder={placeholder}
+				placeholder={dynamicPlaceholder}
 				value={searchTerm || ""}
 				onChange={handleChange}
 				className="block w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#281d80]/50 focus:border-[#281d80] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-200 shadow-sm"
