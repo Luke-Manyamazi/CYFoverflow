@@ -80,11 +80,61 @@ export const filterQuestions = (questions, searchTerm) => {
 
 	const term = searchTerm.toLowerCase().trim();
 
-	return questions.filter(
-		(question) =>
-			question.title?.toLowerCase().includes(term) ||
-			(question.content || question.body)?.toLowerCase().includes(term) ||
+	return questions.filter((question) => {
+		// Search in title
+		if (question.title?.toLowerCase().includes(term)) return true;
+
+		// Search in content/body
+		if ((question.content || question.body)?.toLowerCase().includes(term))
+			return true;
+
+		// Search in author name
+		if (
 			question.author_name?.toLowerCase().includes(term) ||
-			question.author?.name?.toLowerCase().includes(term),
-	);
+			question.author?.name?.toLowerCase().includes(term)
+		)
+			return true;
+
+		// Search in labels/tags
+		if (question.labels && Array.isArray(question.labels)) {
+			const labelMatch = question.labels.some((label) =>
+				label.name?.toLowerCase().includes(term),
+			);
+			if (labelMatch) return true;
+		}
+
+		return false;
+	});
+};
+
+/**
+ * Highlights search terms in text
+ * @param {string} text - Text to highlight
+ * @param {string} searchTerm - Search term to highlight
+ * @returns {JSX.Element|string} - Text with highlighted search terms
+ */
+export const highlightSearchTerm = (text, searchTerm) => {
+	if (!text || !searchTerm || !searchTerm.trim()) {
+		return text;
+	}
+
+	const term = searchTerm.trim();
+	const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const regex = new RegExp(`(${escapedTerm})`, "gi");
+	const parts = text.split(regex);
+
+	// Filter out empty strings from split
+	const filteredParts = parts.filter((part) => part.length > 0);
+
+	return filteredParts.map((part, index) => {
+		// Check if this part matches the search term (case-insensitive)
+		if (part.toLowerCase() === term.toLowerCase()) {
+			return (
+				<mark key={index} className="bg-yellow-200 px-1 rounded">
+					{part}
+				</mark>
+			);
+		}
+		return part;
+	});
 };

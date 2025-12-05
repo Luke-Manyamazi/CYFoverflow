@@ -1,8 +1,5 @@
-import { getFirstLinePreview } from "../utils/questionUtils";
-
-function QuestionList({ questions, loading, error, onQuestionClick, emptyMessage = "No questions found" }) {
+function QuestionList() {
 	return null;
 }
 
 export default QuestionList;
-

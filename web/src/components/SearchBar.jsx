@@ -1,7 +1,7 @@
 function SearchBar({
 	searchTerm = "",
 	onSearch,
-	placeholder = "Search questions, topics, or users...",
+	placeholder = "Search questions and tags...",
 }) {
 	const handleChange = (e) => {
 		const value = e.target.value;
