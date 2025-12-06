@@ -2,13 +2,14 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
+import BackButton from "../components/BackButton";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
 
 const EditQuestion = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { id } = useParams();
+	const { id: identifier } = useParams();
 	const authContext = useAuth();
 	const editorRef = useRef(null);
 
@@ -81,7 +82,7 @@ const EditQuestion = () => {
 			const fetchQuestion = async () => {
 				setLoading(true);
 				try {
-					const res = await fetch(`/api/questions/${id}`);
+					const res = await fetch(`/api/questions/${identifier}`);
 					if (!res.ok) throw new Error("Could not fetch question data");
 
 					const data = await res.json();
@@ -95,7 +96,7 @@ const EditQuestion = () => {
 			};
 			fetchQuestion();
 		}
-	}, [id, location.state]);
+	}, [identifier, location.state]);
 
 	const handleLabelToggle = (labelId) => {
 		setMetaData((prev) => {
@@ -164,7 +165,7 @@ const EditQuestion = () => {
 		};
 
 		try {
-			const response = await fetch(`/api/questions/${id}`, {
+			const response = await fetch(`/api/questions/${identifier}`, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
@@ -179,7 +180,11 @@ const EditQuestion = () => {
 				throw new Error(errorData?.error || "Server rejected the update");
 			}
 
-			navigate(`/questions/${id}`);
+			const updatedQuestion = await response.json();
+			// Use slug if available, otherwise fall back to ID
+			const redirectIdentifier =
+				updatedQuestion.slug || updatedQuestion.id || identifier;
+			navigate(`/questions/${redirectIdentifier}`);
 		} catch (err) {
 			console.error("Update Failed:", err);
 
@@ -196,6 +201,9 @@ const EditQuestion = () => {
 					<Sidebar />
 
 					<main className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+						<div className="mb-6">
+							<BackButton />
+						</div>
 						<h1 className="text-2xl font-bold text-gray-900 mb-6">
 							Edit Question
 						</h1>

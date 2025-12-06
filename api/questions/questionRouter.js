@@ -103,7 +103,10 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
 	try {
 		const { id } = req.params;
-		const question = await getQuestionById(Number(id));
+		const question = await getQuestionById(id);
+		if (!question) {
+			return res.status(404).json({ error: "Question not found" });
+		}
 		res.json(question);
 	} catch (error) {
 		logger.error("get a question by id error: %O", error);
@@ -125,7 +128,7 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 		} = req.body;
 
 		const question = await updateQuestion(
-			Number(id),
+			id,
 			req.user.id,
 			title,
 			content,
@@ -145,7 +148,7 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
-		await deleteQuestion(Number(id), req.user.id);
+		await deleteQuestion(id, req.user.id);
 		res.status(200).json({ message: "Question deleted successfully" });
 	} catch (error) {
 		logger.error("delete a question error: %O", error);
@@ -178,10 +181,10 @@ router.post("/search/by-labels", async (req, res) => {
 
 router.patch("/:id/solve", authenticateToken(), async (req, res) => {
 	try {
-		const { id } = req.params; // questionId
+		const { id } = req.params;
 		const { isSolved } = req.body;
 
-		const updated = await markQuestionSolved(Number(id), req.user.id, isSolved);
+		const updated = await markQuestionSolved(id, req.user.id, isSolved);
 		res.json(updated);
 	} catch (error) {
 		logger.error("Mark question solved error: %O", error);

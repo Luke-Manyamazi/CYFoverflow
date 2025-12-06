@@ -2,6 +2,7 @@ import { useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 
+import BackButton from "../components/BackButton";
 import { useAuth } from "../contexts/useAuth";
 
 function SignUp() {
@@ -38,6 +39,9 @@ function SignUp() {
 	return (
 		<div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
 			<div className="w-full max-w-md">
+				<div className="mb-4">
+					<BackButton />
+				</div>
 				<div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-6 sm:p-8 space-y-5 sm:space-y-6">
 					<div className="text-center">
 						<h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">

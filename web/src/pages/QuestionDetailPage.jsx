@@ -5,12 +5,13 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import Answer from "../components/Answer";
 import AnswerForm from "../components/AnswerForm";
+import BackButton from "../components/BackButton";
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
 
 function QuestionDetailPage() {
-	const { id } = useParams();
+	const { id: identifier } = useParams();
 	const navigate = useNavigate();
 	const { isLoggedIn, token, user } = useAuth();
 	const [question, setQuestion] = useState(null);
@@ -25,7 +26,7 @@ function QuestionDetailPage() {
 		try {
 			setLoading(true);
 			setError("");
-			const response = await fetch(`/api/questions/${id}`);
+			const response = await fetch(`/api/questions/${identifier}`);
 
 			if (!response.ok) {
 				throw new Error("Failed to fetch question");
@@ -39,11 +40,13 @@ function QuestionDetailPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [id]);
+	}, [identifier]);
 
 	const fetchAnswers = useCallback(async () => {
 		try {
-			const response = await fetch(`/api/answers/${id}`);
+			// Use question ID for answers API (answers API still uses ID)
+			const questionId = question?.id || identifier;
+			const response = await fetch(`/api/answers/${questionId}`);
 
 			if (!response.ok) {
 				throw new Error("Failed to fetch answers");
@@ -55,19 +58,27 @@ function QuestionDetailPage() {
 			console.error("Error fetching answers:", err);
 			setAnswers([]);
 		}
-	}, [id]);
+	}, [question?.id, identifier]);
 
 	useEffect(() => {
 		fetchQuestion();
-		fetchAnswers();
-	}, [fetchQuestion, fetchAnswers]);
+	}, [fetchQuestion]);
+
+	useEffect(() => {
+		if (question?.id) {
+			fetchAnswers();
+		}
+	}, [question?.id, fetchAnswers]);
 
 	const handleAnswerClick = () => {
 		if (!isLoggedIn) {
+			const returnTo = question?.slug
+				? `/questions/${question.slug}`
+				: `/questions/${identifier}`;
 			navigate("/login", {
 				state: {
 					message: "Please log in to answer questions",
-					returnTo: `/questions/${id}`,
+					returnTo,
 				},
 			});
 			return;
@@ -95,7 +106,8 @@ function QuestionDetailPage() {
 		if (!isLoggedIn || !token) return;
 
 		try {
-			const response = await fetch(`/api/questions/${id}/solve`, {
+			const questionId = question?.id || identifier;
+			const response = await fetch(`/api/questions/${questionId}/solve`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",
@@ -135,7 +147,8 @@ function QuestionDetailPage() {
 		}
 
 		try {
-			const response = await fetch(`/api/questions/${id}`, {
+			const questionId = question?.id || identifier;
+			const response = await fetch(`/api/questions/${questionId}`, {
 				method: "DELETE",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -155,7 +168,8 @@ function QuestionDetailPage() {
 	};
 
 	const handleEdit = () => {
-		navigate(`/questions/${id}/edit`, {
+		const editIdentifier = question?.slug || question?.id || identifier;
+		navigate(`/questions/${editIdentifier}/edit`, {
 			state: { questionData: question },
 		});
 	};
@@ -214,6 +228,9 @@ function QuestionDetailPage() {
 					<Sidebar />
 
 					<main className="flex-1">
+						<div className="mb-4">
+							<BackButton />
+						</div>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
 							<div className="flex justify-between items-start mb-4">
 								<div className="flex-1">
@@ -415,7 +432,7 @@ function QuestionDetailPage() {
 						{showAnswerForm && (
 							<div ref={answerFormRef}>
 								<AnswerForm
-									questionId={id}
+									questionId={question?.id || identifier}
 									token={token}
 									onSuccess={handleAnswerSuccess}
 									onCancel={handleAnswerCancel}

@@ -56,7 +56,7 @@ export const getQuestionsByUserId = async (userId) => {
 	return repository.getQuestionsByUserIdDB(userId);
 };
 export const updateQuestion = async (
-	id,
+	idOrSlug,
 	userId,
 	title,
 	content,
@@ -66,8 +66,8 @@ export const updateQuestion = async (
 	documentationLink = null,
 	labelId = [],
 ) => {
-	const updated = await repository.getQuestionByIdDB(id);
-	if (!updated) {
+	const question = await repository.getQuestionByIdDB(idOrSlug);
+	if (!question) {
 		throw new Error("Question not found");
 	}
 	if (!title) {
@@ -76,11 +76,12 @@ export const updateQuestion = async (
 	if (!content) {
 		throw new Error("content is required");
 	}
-	if (updated.user_id !== userId) {
+	if (question.user_id !== userId) {
 		throw new Error("You are not authorised to edit");
 	}
+	// Use the actual question ID from the fetched question
 	return repository.updateQuestionDB(
-		id,
+		question.id,
 		title,
 		content,
 		templateType,
@@ -91,15 +92,16 @@ export const updateQuestion = async (
 	);
 };
 
-export const deleteQuestion = async (id, userId) => {
-	const question = await repository.getQuestionByIdDB(id);
+export const deleteQuestion = async (idOrSlug, userId) => {
+	const question = await repository.getQuestionByIdDB(idOrSlug);
 	if (!question) {
 		throw new Error("Question not found");
 	}
 	if (question.user_id !== userId) {
 		throw new Error("You are not authorised to delete");
 	}
-	return repository.deleteQuestionDB(id);
+	// Use the actual question ID from the fetched question
+	return repository.deleteQuestionDB(question.id);
 };
 
 export const getAllLabels = async () => {
@@ -113,8 +115,8 @@ export const searchQuestionsByLabels = async (labelId = []) => {
 	return repository.searchQuestionsByLabelsDB(labelId);
 };
 
-export const markQuestionSolved = async (id, userId, isSolved) => {
-	const question = await repository.getQuestionByIdDB(id);
+export const markQuestionSolved = async (idOrSlug, userId, isSolved) => {
+	const question = await repository.getQuestionByIdDB(idOrSlug);
 
 	if (!question) {
 		throw new Error("Question not found");
@@ -124,5 +126,6 @@ export const markQuestionSolved = async (id, userId, isSolved) => {
 		throw new Error("You are not authorised to change solved status");
 	}
 
-	return repository.updateSolvedStatusDB(id, isSolved);
+	// Use the actual question ID from the fetched question
+	return repository.updateSolvedStatusDB(question.id, isSolved);
 };

@@ -122,8 +122,9 @@ function Home() {
 
 	const filteredQuestions = filterQuestions(questions, searchTerm);
 
-	const handleQuestionClick = (questionId) => {
-		navigate(`/questions/${questionId}`);
+	const handleQuestionClick = (question) => {
+		const identifier = question.slug || question.id;
+		navigate(`/questions/${identifier}`);
 	};
 
 	return (
@@ -209,11 +210,11 @@ function Home() {
 													role="button"
 													tabIndex={0}
 													className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
-													onClick={() => handleQuestionClick(question.id)}
+													onClick={() => handleQuestionClick(question)}
 													onKeyDown={(e) => {
 														if (e.key === "Enter" || e.key === " ") {
 															e.preventDefault();
-															handleQuestionClick(question.id);
+															handleQuestionClick(question);
 														}
 													}}
 												>
