@@ -126,13 +126,6 @@ function Home() {
 		navigate(`/questions/${questionId}`);
 	};
 
-	const handleEditClick = (e, question) => {
-		e.stopPropagation();
-		navigate(`/questions/${question.id}/edit`, {
-			state: { questionData: question },
-		});
-	};
-
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -210,13 +203,6 @@ function Home() {
 								) : filteredQuestions.length > 0 ? (
 									<div className="space-y-4">
 										{filteredQuestions.map((question) => {
-											const isAuthor =
-												isLoggedIn &&
-												user &&
-												(user.id == question.author?.id ||
-													user.id == question.user_id ||
-													user.id == question.author_id);
-
 											return (
 												<div
 													key={question.id}
@@ -277,16 +263,6 @@ function Home() {
 																</span>
 															)}
 														</div>
-
-														{isAuthor && (
-															<button
-																onClick={(e) => handleEditClick(e, question)}
-																className="z-10 text-sm font-medium text-gray-500 hover:text-[#281d80] hover:bg-gray-100 px-3 py-1 rounded transition-colors"
-																title="Edit your question"
-															>
-																✎ Edit
-															</button>
-														)}
 													</div>
 
 													<p className="text-gray-600 line-clamp-2">
