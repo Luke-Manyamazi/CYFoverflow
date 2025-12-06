@@ -2,7 +2,6 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-import BackButton from "../components/BackButton";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
 
@@ -214,9 +213,6 @@ const EditQuestion = () => {
 					<Sidebar />
 
 					<main className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-						<div className="mb-6">
-							<BackButton />
-						</div>
 						<h1 className="text-2xl font-bold text-gray-900 mb-6">
 							Edit Question
 						</h1>

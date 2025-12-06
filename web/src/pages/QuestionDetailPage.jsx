@@ -1,11 +1,11 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { FaEdit, FaTrash, FaCheckCircle } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Answer from "../components/Answer";
 import AnswerForm from "../components/AnswerForm";
-import BackButton from "../components/BackButton";
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
@@ -230,7 +230,13 @@ function QuestionDetailPage() {
 
 					<main className="flex-1">
 						<div className="mb-4">
-							<BackButton />
+							<button
+								onClick={() => navigate("/")}
+								className="flex items-center gap-2 text-gray-600 hover:text-[#281d80] transition-colors duration-200 cursor-pointer"
+							>
+								<FaArrowLeft className="w-4 h-4" />
+								<span className="font-medium">Back to Home</span>
+							</button>
 						</div>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
 							<div className="flex justify-between items-start mb-4">
