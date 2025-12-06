@@ -144,6 +144,11 @@ const AskQuestionPage = () => {
 			return;
 		}
 
+		if (selectedLabels.length === 0) {
+			setError("Please select at least one tag/label for your question.");
+			return;
+		}
+
 		setIsSubmitting(true);
 
 		let metaData = {};
@@ -381,7 +386,8 @@ const AskQuestionPage = () => {
 						{/* Labels Selection */}
 						<fieldset>
 							<legend className="block text-sm font-semibold text-gray-700 mb-2">
-								Tags (Optional - Select up to 3)
+								Tags <span className="text-red-500">*</span> (Required - Select
+								1 to 3)
 							</legend>
 							<div className="flex flex-wrap gap-2">
 								{labels.map((label) => (
@@ -400,11 +406,11 @@ const AskQuestionPage = () => {
 									</button>
 								))}
 							</div>
-							{selectedLabels.length > 0 && (
-								<p className="mt-2 text-xs text-gray-500">
-									{selectedLabels.length} of 3 labels selected
-								</p>
-							)}
+							<p className="mt-2 text-xs text-gray-500">
+								{selectedLabels.length > 0
+									? `${selectedLabels.length} of 3 labels selected`
+									: "Please select at least one tag"}
+							</p>
 						</fieldset>
 
 						{/* Template Specific Fields */}

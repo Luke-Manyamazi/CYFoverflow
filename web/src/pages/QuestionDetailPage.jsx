@@ -11,7 +11,7 @@ import { useAuth } from "../contexts/useAuth";
 function QuestionDetailPage() {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const { isLoggedIn, token } = useAuth();
+	const { isLoggedIn, token, user } = useAuth();
 	const [question, setQuestion] = useState(null);
 	const [answers, setAnswers] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -90,6 +90,35 @@ function QuestionDetailPage() {
 		setShowAnswerForm(false);
 	};
 
+	const handleMarkSolved = async (isSolved) => {
+		if (!isLoggedIn || !token) return;
+
+		try {
+			const response = await fetch(`/api/questions/${id}/solve`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ isSolved }),
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || "Failed to update solved status");
+			}
+
+			const updatedQuestion = await response.json();
+			setQuestion(updatedQuestion);
+		} catch (err) {
+			console.error("Error marking question as solved:", err);
+			alert(err.message || "Failed to update solved status");
+		}
+	};
+
+	const isQuestionAuthor =
+		isLoggedIn && user && question && user.id === question.user_id;
+
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-gray-50">
@@ -147,10 +176,26 @@ function QuestionDetailPage() {
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
 							<div className="flex justify-between items-start mb-4">
 								<div className="flex-1">
-									<div className="flex items-center gap-3 mb-2">
+									<div className="flex items-center gap-3 mb-2 flex-wrap">
 										<h1 className="text-3xl font-bold text-gray-900">
 											{question.title}
 										</h1>
+										{question.is_solved && (
+											<span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+												<svg
+													className="w-4 h-4"
+													fill="currentColor"
+													viewBox="0 0 20 20"
+												>
+													<path
+														fillRule="evenodd"
+														d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+														clipRule="evenodd"
+													/>
+												</svg>
+												Solved
+											</span>
+										)}
 										{question.answer_count > 0 && (
 											<span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
 												<svg
@@ -170,12 +215,61 @@ function QuestionDetailPage() {
 										)}
 									</div>
 								</div>
-								<button
-									onClick={handleAnswerClick}
-									className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ml-4"
-								>
-									Answer
-								</button>
+								<div className="flex items-center gap-3">
+									{isQuestionAuthor && (
+										<button
+											onClick={() => handleMarkSolved(!question.is_solved)}
+											className={`px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${
+												question.is_solved
+													? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+													: "bg-blue-600 text-white hover:bg-blue-700"
+											}`}
+											title={
+												question.is_solved
+													? "Mark as unsolved"
+													: "Mark as solved"
+											}
+										>
+											{question.is_solved ? (
+												<span className="flex items-center gap-2">
+													<svg
+														className="w-4 h-4"
+														fill="currentColor"
+														viewBox="0 0 20 20"
+													>
+														<path
+															fillRule="evenodd"
+															d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													Mark Unsolved
+												</span>
+											) : (
+												<span className="flex items-center gap-2">
+													<svg
+														className="w-4 h-4"
+														fill="currentColor"
+														viewBox="0 0 20 20"
+													>
+														<path
+															fillRule="evenodd"
+															d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													Mark Solved
+												</span>
+											)}
+										</button>
+									)}
+									<button
+										onClick={handleAnswerClick}
+										className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+									>
+										Answer
+									</button>
+								</div>
 							</div>
 
 							<div className="flex items-center gap-4 text-sm text-gray-600 mb-6 flex-wrap">
