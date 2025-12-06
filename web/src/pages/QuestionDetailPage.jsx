@@ -1,5 +1,6 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { FaEdit, FaTrash, FaCheckCircle } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Answer from "../components/Answer";
@@ -119,6 +120,46 @@ function QuestionDetailPage() {
 	const isQuestionAuthor =
 		isLoggedIn && user && question && user.id === question.user_id;
 
+	const handleDelete = async () => {
+		if (
+			!window.confirm(
+				"Are you sure you want to delete this question? This action cannot be undone.",
+			)
+		) {
+			return;
+		}
+
+		if (!isLoggedIn || !token) {
+			setError("You must be logged in to delete questions.");
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/questions/${id}`, {
+				method: "DELETE",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || "Failed to delete question");
+			}
+
+			navigate("/");
+		} catch (err) {
+			console.error("Error deleting question:", err);
+			setError(err.message || "Failed to delete question. Please try again.");
+		}
+	};
+
+	const handleEdit = () => {
+		navigate(`/questions/${id}/edit`, {
+			state: { questionData: question },
+		});
+	};
+
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-gray-50">
@@ -215,53 +256,39 @@ function QuestionDetailPage() {
 										)}
 									</div>
 								</div>
-								<div className="flex items-center gap-3">
+								<div className="flex items-center gap-2">
 									{isQuestionAuthor && (
-										<button
-											onClick={() => handleMarkSolved(!question.is_solved)}
-											className={`px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${
-												question.is_solved
-													? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-													: "bg-blue-600 text-white hover:bg-blue-700"
-											}`}
-											title={
-												question.is_solved
-													? "Mark as unsolved"
-													: "Mark as solved"
-											}
-										>
-											{question.is_solved ? (
-												<span className="flex items-center gap-2">
-													<svg
-														className="w-4 h-4"
-														fill="currentColor"
-														viewBox="0 0 20 20"
-													>
-														<path
-															fillRule="evenodd"
-															d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-															clipRule="evenodd"
-														/>
-													</svg>
-													Mark Unsolved
-												</span>
-											) : (
-												<span className="flex items-center gap-2">
-													<svg
-														className="w-4 h-4"
-														fill="currentColor"
-														viewBox="0 0 20 20"
-													>
-														<path
-															fillRule="evenodd"
-															d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-															clipRule="evenodd"
-														/>
-													</svg>
-													Mark Solved
-												</span>
-											)}
-										</button>
+										<>
+											<button
+												onClick={handleEdit}
+												className="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200"
+												title="Edit question"
+											>
+												<FaEdit className="w-5 h-5" />
+											</button>
+											<button
+												onClick={handleDelete}
+												className="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-red-600 text-white hover:bg-red-700"
+												title="Delete question"
+											>
+												<FaTrash className="w-5 h-5" />
+											</button>
+											<button
+												onClick={() => handleMarkSolved(!question.is_solved)}
+												className={`flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${
+													question.is_solved
+														? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+														: "bg-blue-600 text-white hover:bg-blue-700"
+												}`}
+												title={
+													question.is_solved
+														? "Mark as unsolved"
+														: "Mark as solved"
+												}
+											>
+												<FaCheckCircle className="w-5 h-5" />
+											</button>
+										</>
 									)}
 									<button
 										onClick={handleAnswerClick}
