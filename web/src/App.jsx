@@ -12,7 +12,6 @@ import MyQuestionsPage from "./pages/MyQuestionsPage";
 import MyResponsesPage from "./pages/MyResponsesPage";
 import QuestionDetailPage from "./pages/QuestionDetailPage";
 import QuestionPage from "./pages/QuestionPage";
-import QuestionsPage from "./pages/QuestionsPage";
 import SignUp from "./pages/SignUp";
 import "./App.css";
 
@@ -35,7 +34,6 @@ function App() {
 								<Route path="/ask" element={<QuestionPage />} />
 
 								<Route path="/questions/:id" element={<QuestionDetailPage />} />
-								<Route path="/questions" element={<QuestionsPage />} />
 								<Route path="/labels" element={<LabelsPage />} />
 								<Route path="/my-questions" element={<MyQuestionsPage />} />
 								<Route path="/my-responses" element={<MyResponsesPage />} />

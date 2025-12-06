@@ -36,19 +36,6 @@ function Sidebar() {
 						</li>
 						<li>
 							<button
-								onClick={() => handleNavigation("/questions")}
-								className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 cursor-pointer ${
-									isActive("/questions")
-										? "bg-blue-50 text-blue-700 font-semibold"
-										: "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
-								}`}
-							>
-								<span>💭</span>
-								<span className="font-medium">Questions</span>
-							</button>
-						</li>
-						<li>
-							<button
 								onClick={() => handleNavigation("/labels")}
 								className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 cursor-pointer ${
 									isActive("/labels")
