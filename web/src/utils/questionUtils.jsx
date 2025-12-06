@@ -1,4 +1,22 @@
 /**
+ * Capitalizes the first letter of each word in a title
+ * @param {string} title - Title string to capitalize
+ * @returns {string} - Capitalized title
+ */
+export function capitalizeTitle(title) {
+	if (!title) return title;
+
+	return title
+		.toLowerCase()
+		.split(" ")
+		.map((word) => {
+			if (word.length === 0) return word;
+			return word.charAt(0).toUpperCase() + word.slice(1);
+		})
+		.join(" ");
+}
+
+/**
  * Extracts the first meaningful line from HTML content for question previews
  * @param {string} html - HTML content string
  * @returns {string} - Preview text (max 100 chars)

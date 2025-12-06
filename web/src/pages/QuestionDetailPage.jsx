@@ -9,6 +9,7 @@ import BackButton from "../components/BackButton";
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/useAuth";
+import { capitalizeTitle } from "../utils/questionUtils.jsx";
 
 function QuestionDetailPage() {
 	const { id: identifier } = useParams();
@@ -236,7 +237,7 @@ function QuestionDetailPage() {
 								<div className="flex-1">
 									<div className="flex items-center gap-3 mb-2 flex-wrap">
 										<h1 className="text-3xl font-bold text-gray-900">
-											{question.title}
+											{capitalizeTitle(question.title)}
 										</h1>
 										{question.is_solved && (
 											<span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">

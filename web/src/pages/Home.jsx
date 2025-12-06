@@ -10,6 +10,7 @@ import {
 	getFirstLinePreview,
 	filterQuestions,
 	highlightSearchTerm,
+	capitalizeTitle,
 } from "../utils/questionUtils.jsx";
 
 const AskQuestionButton = ({
@@ -223,10 +224,10 @@ function Home() {
 															<h3 className="font-semibold text-lg text-gray-900 mb-2">
 																{searchTerm
 																	? highlightSearchTerm(
-																			question.title,
+																			capitalizeTitle(question.title),
 																			searchTerm,
 																		)
-																	: question.title}
+																	: capitalizeTitle(question.title)}
 															</h3>
 															{question.is_solved && (
 																<span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">

@@ -9,6 +9,7 @@ import {
 	getFirstLinePreview,
 	filterQuestions,
 	highlightSearchTerm,
+	capitalizeTitle,
 } from "../utils/questionUtils.jsx";
 
 function MyQuestionsPage() {
@@ -150,8 +151,11 @@ function MyQuestionsPage() {
 											<div className="flex items-center gap-3 flex-1">
 												<h3 className="font-semibold text-lg text-gray-900 mb-2">
 													{searchTerm
-														? highlightSearchTerm(question.title, searchTerm)
-														: question.title}
+														? highlightSearchTerm(
+																capitalizeTitle(question.title),
+																searchTerm,
+															)
+														: capitalizeTitle(question.title)}
 												</h3>
 												{question.is_solved && (
 													<span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
