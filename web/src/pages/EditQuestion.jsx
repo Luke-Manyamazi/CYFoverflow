@@ -23,6 +23,7 @@ const EditQuestion = () => {
 		labelId: [],
 	});
 
+	const [labels, setLabels] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
@@ -58,6 +59,21 @@ const EditQuestion = () => {
 	};
 
 	useEffect(() => {
+		const fetchLabels = async () => {
+			try {
+				const response = await fetch("/api/questions/labels/all");
+				if (response.ok) {
+					const data = await response.json();
+					setLabels(data);
+				}
+			} catch (err) {
+				console.error("Error fetching labels:", err);
+			}
+		};
+		fetchLabels();
+	}, []);
+
+	useEffect(() => {
 		const stateData = location.state?.questionData;
 		if (stateData) {
 			initializeFields(stateData);
@@ -81,6 +97,28 @@ const EditQuestion = () => {
 		}
 	}, [id, location.state]);
 
+	const handleLabelToggle = (labelId) => {
+		setMetaData((prev) => {
+			const currentLabels = prev.labelId || [];
+			if (currentLabels.includes(labelId)) {
+				return {
+					...prev,
+					labelId: currentLabels.filter((id) => id !== labelId),
+				};
+			} else {
+				if (currentLabels.length >= 3) {
+					setError("You can select a maximum of 3 labels.");
+					return prev;
+				}
+				setError("");
+				return {
+					...prev,
+					labelId: [...currentLabels, labelId],
+				};
+			}
+		});
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setLoading(true);
@@ -93,11 +131,27 @@ const EditQuestion = () => {
 			return;
 		}
 
-		// 3. CLEAN PAYLOAD
-		// Ensure labelId is an array of Integers
+		if (!title.trim()) {
+			setError("Please enter a title for your question.");
+			setLoading(false);
+			return;
+		}
+
+		if (!description.trim()) {
+			setError("Question content cannot be empty.");
+			setLoading(false);
+			return;
+		}
+
 		const cleanLabelIds = (metaData.labelId || [])
 			.map((tagId) => parseInt(tagId, 10))
 			.filter((tagId) => !isNaN(tagId));
+
+		if (cleanLabelIds.length === 0) {
+			setError("Please select at least one tag/label for your question.");
+			setLoading(false);
+			return;
+		}
 
 		const payload = {
 			title,
@@ -108,8 +162,6 @@ const EditQuestion = () => {
 			documentationLink: metaData.documentationLink,
 			labelId: cleanLabelIds,
 		};
-
-		console.log("🚀 Sending Payload:", payload);
 
 		try {
 			const response = await fetch(`/api/questions/${id}`, {
@@ -221,6 +273,37 @@ const EditQuestion = () => {
 												"body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
 										}}
 									/>
+								</div>
+
+								<div>
+									<fieldset>
+										<legend className="block text-sm font-semibold text-gray-700 mb-2">
+											Tags <span className="text-red-500">*</span> (Required -
+											Select 1 to 3)
+										</legend>
+										<div className="flex flex-wrap gap-2">
+											{labels.map((label) => (
+												<button
+													key={label.id}
+													type="button"
+													onClick={() => handleLabelToggle(label.id)}
+													disabled={loading}
+													className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+														metaData.labelId.includes(label.id)
+															? "bg-[#281d80] text-white shadow-md"
+															: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+													}`}
+												>
+													{label.name}
+												</button>
+											))}
+										</div>
+										<p className="mt-2 text-xs text-gray-500">
+											{metaData.labelId.length > 0
+												? `${metaData.labelId.length} of 3 labels selected`
+												: "Please select at least one tag"}
+										</p>
+									</fieldset>
 								</div>
 
 								<div className="flex gap-4 pt-4">
