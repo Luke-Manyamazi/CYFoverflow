@@ -15,6 +15,7 @@ const EditQuestion = () => {
 
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
+	const MAX_TITLE_LENGTH = 100;
 
 	const [metaData, setMetaData] = useState({
 		templateType: null,
@@ -138,6 +139,18 @@ const EditQuestion = () => {
 			return;
 		}
 
+		if (title.trim().length > MAX_TITLE_LENGTH) {
+			setError(`Title must be ${MAX_TITLE_LENGTH} characters or less.`);
+			setLoading(false);
+			return;
+		}
+
+		if (title.trim().length < 10) {
+			setError("Title must be at least 10 characters long.");
+			setLoading(false);
+			return;
+		}
+
 		if (!description.trim()) {
 			setError("Question content cannot be empty.");
 			setLoading(false);
@@ -234,10 +247,24 @@ const EditQuestion = () => {
 										type="text"
 										id="title"
 										value={title}
+										maxLength={MAX_TITLE_LENGTH}
 										onChange={(e) => setTitle(e.target.value)}
 										className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#281d80] focus:border-transparent outline-none transition-all"
 										required
 									/>
+									<div className="mt-1 flex justify-end">
+										<p
+											className={`text-xs ${
+												title.length > MAX_TITLE_LENGTH
+													? "text-red-600"
+													: title.length > MAX_TITLE_LENGTH * 0.9
+														? "text-orange-600"
+														: "text-gray-500"
+											}`}
+										>
+											{title.length}/{MAX_TITLE_LENGTH}
+										</p>
+									</div>
 								</div>
 
 								<div>

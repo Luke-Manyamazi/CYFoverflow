@@ -15,6 +15,20 @@ export const createQuestion = async (
 	if (!title) {
 		throw new Error("Title is required");
 	}
+
+	const trimmedTitle = title.trim();
+	const MAX_TITLE_LENGTH = 100;
+	const MIN_TITLE_LENGTH = 10;
+
+	if (trimmedTitle.length < MIN_TITLE_LENGTH) {
+		throw new Error(
+			`Title must be at least ${MIN_TITLE_LENGTH} characters long`,
+		);
+	}
+
+	if (trimmedTitle.length > MAX_TITLE_LENGTH) {
+		throw new Error(`Title must be ${MAX_TITLE_LENGTH} characters or less`);
+	}
 	if (!content || (typeof content === "string" && !content.trim())) {
 		throw new Error("Content is required");
 	}
@@ -25,7 +39,7 @@ export const createQuestion = async (
 	if (labelId.length > 3) throw new Error("Maximum 3 labels allowed");
 
 	return repository.createQuestionDB(
-		title.trim(),
+		trimmedTitle,
 		typeof content === "string" ? content.trim() : content,
 		templateType,
 		userId,
@@ -73,6 +87,20 @@ export const updateQuestion = async (
 	if (!title) {
 		throw new Error("title is required");
 	}
+
+	const trimmedTitle = title.trim();
+	const MAX_TITLE_LENGTH = 100;
+	const MIN_TITLE_LENGTH = 10;
+
+	if (trimmedTitle.length < MIN_TITLE_LENGTH) {
+		throw new Error(
+			`Title must be at least ${MIN_TITLE_LENGTH} characters long`,
+		);
+	}
+
+	if (trimmedTitle.length > MAX_TITLE_LENGTH) {
+		throw new Error(`Title must be ${MAX_TITLE_LENGTH} characters or less`);
+	}
 	if (!content) {
 		throw new Error("content is required");
 	}
@@ -82,7 +110,7 @@ export const updateQuestion = async (
 	// Use the actual question ID from the fetched question
 	return repository.updateQuestionDB(
 		question.id,
-		title,
+		trimmedTitle,
 		content,
 		templateType,
 		browser,

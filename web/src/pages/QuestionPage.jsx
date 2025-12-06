@@ -17,6 +17,8 @@ const AskQuestionPage = () => {
 	const [title, setTitle] = useState("");
 
 	const [charCount, setCharCount] = useState(0);
+	const [titleCharCount, setTitleCharCount] = useState(0);
+	const MAX_TITLE_LENGTH = 100;
 	const [error, setError] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const editorRef = useRef(null);
@@ -53,6 +55,7 @@ const AskQuestionPage = () => {
 		setActiveTemplate(template.id);
 
 		setCharCount(0);
+		setTitleCharCount(0);
 		setError(null);
 	};
 
@@ -65,6 +68,7 @@ const AskQuestionPage = () => {
 			setActiveTemplate(null);
 			setInitialContent("");
 			setTitle("");
+			setTitleCharCount(0);
 			setError(null);
 			setSelectedLabels([]);
 		}
@@ -114,6 +118,16 @@ const AskQuestionPage = () => {
 
 		if (!title.trim()) {
 			setError("Please enter a title for your question.");
+			return;
+		}
+
+		if (title.trim().length > MAX_TITLE_LENGTH) {
+			setError(`Title must be ${MAX_TITLE_LENGTH} characters or less.`);
+			return;
+		}
+
+		if (title.trim().length < 10) {
+			setError("Title must be at least 10 characters long.");
 			return;
 		}
 
@@ -309,10 +323,30 @@ const AskQuestionPage = () => {
 								type="text"
 								disabled={isSubmitting}
 								value={title}
-								onChange={(e) => setTitle(e.target.value)}
+								maxLength={MAX_TITLE_LENGTH}
+								onChange={(e) => {
+									setTitle(e.target.value);
+									setTitleCharCount(e.target.value.length);
+								}}
 								className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#281d80] focus:ring-2 focus:ring-[#281d80]/20 transition-all"
 								placeholder="e.g., How do I filter an array in JavaScript?"
 							/>
+							<div className="mt-1 flex justify-between items-center">
+								<p className="text-xs text-gray-500">
+									Be specific and descriptive
+								</p>
+								<p
+									className={`text-xs ${
+										titleCharCount > MAX_TITLE_LENGTH
+											? "text-red-600"
+											: titleCharCount > MAX_TITLE_LENGTH * 0.9
+												? "text-orange-600"
+												: "text-gray-500"
+									}`}
+								>
+									{titleCharCount}/{MAX_TITLE_LENGTH}
+								</p>
+							</div>
 						</div>
 
 						<div>
