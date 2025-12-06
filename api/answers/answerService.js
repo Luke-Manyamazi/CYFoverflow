@@ -20,6 +20,7 @@ export const createAnswer = async (content, userId, questionId) => {
 	try {
 		const question = await getQuestionByIdDB(questionId);
 		if (question?.author_email) {
+			logger.info("Sending email to %s", question.author_email);
 			await sendEmailToAuthor(question.author_email, content, question.title);
 			logger.info(`Email sent to ${question.author_email} about new answer.`);
 		}

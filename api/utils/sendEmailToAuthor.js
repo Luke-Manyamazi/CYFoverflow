@@ -1,18 +1,28 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
+import config from "./config.js";
+
+// SES client using IAM role (no credentials needed)
 const sesClient = new SESClient({
-  region: "eu-west-1",
+	region: config.AWS_REGION || "eu-west-1",
 });
 
-export const sendEmailToAuthor = async (authorEmail, answerContent, questionTitle) => {
-  const params = {
-    Source: "info@cyf.academy",
-    Destination: { ToAddresses: [authorEmail] },
-    Message: {
-      Subject: { Data: `New answer to your question: "${questionTitle}"`, Charset: "UTF-8" },
-      Body: {
-        Html: {
-          Data: `
+export const sendEmailToAuthor = async (
+	authorEmail,
+	answerContent,
+	questionTitle,
+) => {
+	const params = {
+		Source: "info@cyf.academy",
+		Destination: { ToAddresses: [authorEmail] },
+		Message: {
+			Subject: {
+				Data: `New answer to your question: "${questionTitle}"`,
+				Charset: "UTF-8",
+			},
+			Body: {
+				Html: {
+					Data: `
             <html>
               <body>
                 <h1>Your question has a new answer!</h1>
@@ -22,16 +32,15 @@ export const sendEmailToAuthor = async (authorEmail, answerContent, questionTitl
               </body>
             </html>
           `,
-          Charset: "UTF-8",
-        },
-        Text: {
-          Data: `Your question has a new answer!\n\nQuestion: ${questionTitle}\nAnswer: ${answerContent}\nSent at: ${new Date().toLocaleString()}`,
-          Charset: "UTF-8",
-        },
-      },
-    },
-  };
+					Charset: "UTF-8",
+				},
+				Text: {
+					Data: `Your question has a new answer!\n\nQuestion: ${questionTitle}\nAnswer: ${answerContent}\nSent at: ${new Date().toLocaleString()}`,
+					Charset: "UTF-8",
+				},
+			},
+		},
+	};
 
-  const command = new SendEmailCommand(params);
-  return await sesClient.send(command);
+	return await sesClient.send(new SendEmailCommand(params));
 };

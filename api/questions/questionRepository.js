@@ -146,8 +146,10 @@ export const getQuestionsByUserIdDB = async (userId) => {
 };
 export const getQuestionByIdDB = async (id) => {
 	const result = await db.query(
-		`SELECT q.*, u.name as author_name,
-         COALESCE(answer_counts.answer_count, 0) as answer_count
+		`SELECT q.*,
+                u.name as author_name,
+                u.email as author_email,
+                COALESCE(answer_counts.answer_count, 0) as answer_count
          FROM questions q
          JOIN users u ON q.user_id = u.id
          LEFT JOIN (
@@ -158,7 +160,9 @@ export const getQuestionByIdDB = async (id) => {
          WHERE q.id = $1`,
 		[id],
 	);
+
 	const question = result.rows[0];
+
 	const labelResult = await db.query(
 		`SELECT l.id, l.name
          FROM labels l
