@@ -290,12 +290,14 @@ function QuestionDetailPage() {
 											</button>
 										</>
 									)}
-									<button
-										onClick={handleAnswerClick}
-										className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
-									>
-										Answer
-									</button>
+									{!isQuestionAuthor && (
+										<button
+											onClick={handleAnswerClick}
+											className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+										>
+											Answer
+										</button>
+									)}
 								</div>
 							</div>
 
