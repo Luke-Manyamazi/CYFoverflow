@@ -144,36 +144,49 @@ export const getQuestionsByUserIdDB = async (userId) => {
 
 	return questions;
 };
-export const getQuestionByIdDB = async (id) => {
-	const result = await db.query(
-		`SELECT q.*,
-                u.name as author_name,
-                u.email as author_email,
-                COALESCE(answer_counts.answer_count, 0) as answer_count
-         FROM questions q
-         JOIN users u ON q.user_id = u.id
-         LEFT JOIN (
-             SELECT question_id, COUNT(*) as answer_count
-             FROM answers
-             GROUP BY question_id
-         ) answer_counts ON q.id = answer_counts.question_id
-         WHERE q.id = $1`,
-		[id],
-	);
+export const getQuestionByIdDB = async (idOrSlug) => {
+	const isPureNumeric = /^\d+$/.test(idOrSlug);
+
+	let result;
+
+	if (isPureNumeric) {
+		// Lookup by numeric ID
+		result = await db.query(
+			`SELECT q.*, 
+					u.name AS author_name,
+					u.email AS author_email,
+					COALESCE(answer_counts.answer_count, 0) AS answer_count
+			 FROM questions q
+			 JOIN users u ON q.user_id = u.id
+			 LEFT JOIN (
+				 SELECT question_id, COUNT(*) AS answer_count
+				 FROM answers
+				 GROUP BY question_id
+			 ) answer_counts ON q.id = answer_counts.question_id
+			 WHERE q.id = $1`,
+			[idOrSlug],
+		);
+	} else {
+		// Lookup by slug
+		result = await db.query(
+			`SELECT q.*, 
+					u.name AS author_name,
+					u.email AS author_email,
+					COALESCE(answer_counts.answer_count, 0) AS answer_count
+			 FROM questions q
+			 JOIN users u ON q.user_id = u.id
+			 LEFT JOIN (
+				 SELECT question_id, COUNT(*) AS answer_count
+				 FROM answers
+				 GROUP BY question_id
+			 ) answer_counts ON q.id = answer_counts.question_id
+			 WHERE q.slug = $1`,
+			[idOrSlug],
+		);
+	}
 
 	const question = result.rows[0];
-
-	const labelResult = await db.query(
-		`SELECT l.id, l.name
-         FROM labels l
-         JOIN question_labels ql ON l.id = ql.label_id
-         WHERE ql.question_id = $1`,
-		[id],
-	);
-
-	question.labels = labelResult.rows;
-
-	return question;
+	return question || null;
 };
 
 export const deleteQuestionDB = async (id) => {
