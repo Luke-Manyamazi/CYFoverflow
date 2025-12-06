@@ -462,6 +462,7 @@ function QuestionDetailPage() {
 											key={answer.id}
 											answer={answer}
 											onDelete={fetchAnswers}
+											onUpdate={fetchAnswers}
 										/>
 									))}
 								</div>
