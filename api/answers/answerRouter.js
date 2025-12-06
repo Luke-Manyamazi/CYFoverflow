@@ -8,15 +8,16 @@ import {
 	getAnswersByQuestionId,
 	updateAnswer,
 	deleteAnswer,
+	getAnswersByUserId,
 } from "./answerService.js";
 
 const router = express.Router();
 
+// Create answer
 router.post("/", authenticateToken(), async (req, res) => {
 	try {
 		const { content, questionId } = req.body;
 		const userId = req.user.id;
-
 		const answer = await createAnswer(content, userId, questionId);
 		res.status(201).json(answer);
 	} catch (error) {
@@ -25,6 +26,7 @@ router.post("/", authenticateToken(), async (req, res) => {
 	}
 });
 
+// Get answers by question
 router.get("/:questionId", async (req, res) => {
 	try {
 		const { questionId } = req.params;
@@ -36,12 +38,12 @@ router.get("/:questionId", async (req, res) => {
 	}
 });
 
+// Update answer
 router.put("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { content } = req.body;
 		const userId = req.user.id;
-
 		const updated = await updateAnswer(id, content, userId);
 		res.json(updated);
 	} catch (error) {
@@ -50,15 +52,27 @@ router.put("/:id", authenticateToken(), async (req, res) => {
 	}
 });
 
+// Delete answer
 router.delete("/:id", authenticateToken(), async (req, res) => {
 	try {
 		const { id } = req.params;
 		const userId = req.user.id;
-
 		await deleteAnswer(id, userId);
 		res.json({ message: "Answer deleted" });
 	} catch (error) {
 		logger.error("Delete answer error: %O", error);
+		res.status(500).json({ message: error.message });
+	}
+});
+
+// Get answers by logged-in user (My Responses)
+router.get("/user/me", authenticateToken(), async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const answers = await getAnswersByUserId(userId);
+		res.json(answers);
+	} catch (error) {
+		logger.error("Get answers by user error: %O", error);
 		res.status(500).json({ message: error.message });
 	}
 });
