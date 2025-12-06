@@ -48,14 +48,6 @@ function MyQuestionsPage() {
 		navigate(`/questions/${identifier}`);
 	};
 
-	const handleEditClick = (e, question) => {
-		e.stopPropagation();
-		const identifier = question.slug || question.id;
-		navigate(`/questions/${identifier}/edit`, {
-			state: { questionData: question },
-		});
-	};
-
 	useEffect(() => {
 		const fetchMyQuestions = async () => {
 			try {
@@ -191,14 +183,6 @@ function MyQuestionsPage() {
 													</span>
 												)}
 											</div>
-
-											<button
-												onClick={(e) => handleEditClick(e, question)}
-												className="z-10 text-sm font-medium text-gray-500 hover:text-[#281d80] hover:bg-gray-100 px-3 py-1 rounded transition-colors"
-												title="Edit your question"
-											>
-												✎ Edit
-											</button>
 										</div>
 
 										<p className="text-gray-600 line-clamp-2">
