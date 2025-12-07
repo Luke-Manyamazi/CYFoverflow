@@ -164,7 +164,7 @@ export const getQuestionByIdDB = async (idOrSlug) => {
 	let result;
 	if (isPureNumeric) {
 		result = await db.query(
-			`SELECT q.*, u.name as author_name,
+			`SELECT q.*, u.name as author_name, u.email as author_email,
 			 COALESCE(answer_counts.answer_count, 0) as answer_count
 			 FROM questions q
 			 JOIN users u ON q.user_id = u.id
@@ -178,7 +178,7 @@ export const getQuestionByIdDB = async (idOrSlug) => {
 		);
 	} else {
 		result = await db.query(
-			`SELECT q.*, u.name as author_name,
+			`SELECT q.*, u.name as author_name, u.email as author_email,
 			 COALESCE(answer_counts.answer_count, 0) as answer_count
 			 FROM questions q
 			 JOIN users u ON q.user_id = u.id
