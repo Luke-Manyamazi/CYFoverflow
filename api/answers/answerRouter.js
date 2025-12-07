@@ -8,6 +8,7 @@ import {
 	getAnswersByQuestionId,
 	updateAnswer,
 	deleteAnswer,
+	getAnswersByUserId,
 } from "./answerService.js";
 
 const router = express.Router();
@@ -21,6 +22,25 @@ router.post("/", authenticateToken(), async (req, res) => {
 		res.status(201).json(answer);
 	} catch (error) {
 		logger.error("Create answer error: %O", error);
+		res.status(500).json({ message: error.message });
+	}
+});
+
+router.get("/user/me", authenticateToken(), async (req, res) => {
+	try {
+		const userId = req.user.id;
+		logger.info("Getting answers for logged-in user", { userId });
+
+		const answers = await getAnswersByUserId(userId);
+
+		logger.info("Returning answers for user", {
+			userId,
+			count: answers.length,
+		});
+
+		res.json(answers);
+	} catch (error) {
+		logger.error("Get answers by user error: %O", error);
 		res.status(500).json({ message: error.message });
 	}
 });

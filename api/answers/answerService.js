@@ -122,3 +122,26 @@ export const deleteAnswer = async (id, userId) => {
 
 	return repository.deleteAnswerDB(id);
 };
+
+// Add this function to answerService.js
+export const getAnswersByUserId = async (userId) => {
+	try {
+		logger.info("Getting answers for user", { userId });
+
+		// Use the repository function that includes question details
+		const answers = await repository.getAnswersByUserIdWithQuestionsDB(userId);
+
+		logger.info("Found answers for user", {
+			userId,
+			count: answers.length,
+		});
+
+		return answers;
+	} catch (error) {
+		logger.error("Error getting answers by user", {
+			userId,
+			error: error.message,
+		});
+		throw error;
+	}
+};
