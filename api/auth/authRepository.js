@@ -29,7 +29,7 @@ export async function createUser(name, email, hashedPassword) {
 export async function findUserById(id) {
 	try {
 		const result = await db.query(
-			"SELECT id, name, username, email FROM users WHERE id = $1",
+			"SELECT id, name, email FROM users WHERE id = $1",
 			[id],
 		);
 		return result.rows[0];
