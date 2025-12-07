@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
+import PaginationControls from "../components/PaginationControls";
 import Sidebar from "../components/Sidebar";
 import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 import {
 	getFirstLinePreview,
-	filterQuestions,
 	highlightSearchTerm,
 	capitalizeTitle,
 } from "../utils/questionUtils.jsx";
@@ -35,6 +35,11 @@ function Home() {
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const [pagination, setPagination] = useState(null);
+
+	const searchParams = new URLSearchParams(location.search);
+	const currentPageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+	const itemsPerPage = 10;
 
 	useEffect(() => {
 		if (searchTerm && searchTerm.trim() && selectedLabel) {
@@ -43,49 +48,30 @@ function Home() {
 	}, [searchTerm, selectedLabel, setSelectedLabel]);
 
 	useEffect(() => {
-		if (selectedLabel) {
-			fetchQuestionsByLabel(selectedLabel.id);
-		} else {
-			fetchLatestQuestions();
+		if (searchTerm && searchTerm.trim()) {
+			const newSearchParams = new URLSearchParams(location.search);
+			if (newSearchParams.has("page")) {
+				newSearchParams.delete("page");
+				navigate(`${location.pathname}?${newSearchParams.toString()}`, {
+					replace: true,
+				});
+			}
 		}
-	}, [selectedLabel]);
+	}, [searchTerm, location.pathname, location.search, navigate]);
 
 	useEffect(() => {
-		if (location.state?.labelId) {
-			fetch("/api/questions/labels/all")
-				.then((res) => res.json())
-				.then((labels) => {
-					const label = labels.find((l) => l.id === location.state.labelId);
-					if (label) {
-						setSelectedLabel(label);
-					}
-				})
-				.catch(console.error);
-			navigate(location.pathname, { replace: true, state: {} });
-		}
-	}, [location.state?.labelId, location.pathname, navigate, setSelectedLabel]);
-
-	const fetchLatestQuestions = async () => {
-		try {
-			setLoading(true);
-			setError("");
-			const response = await fetch("/api/questions?limit=10");
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch questions: ${response.status}`);
+		if (selectedLabel) {
+			const newSearchParams = new URLSearchParams(location.search);
+			if (newSearchParams.has("page")) {
+				newSearchParams.delete("page");
+				navigate(`${location.pathname}?${newSearchParams.toString()}`, {
+					replace: true,
+				});
 			}
-
-			const data = await response.json();
-			setQuestions(data);
-		} catch (err) {
-			console.error("Error fetching questions:", err);
-			setError("Failed to load questions. Please try again later.");
-		} finally {
-			setLoading(false);
 		}
-	};
+	}, [selectedLabel, location.pathname, location.search, navigate]);
 
-	const fetchQuestionsByLabel = async (labelId) => {
+	const fetchQuestionsByLabel = useCallback(async (labelId) => {
 		try {
 			setLoading(true);
 			setError("");
@@ -105,13 +91,103 @@ function Home() {
 
 			const data = await response.json();
 			setQuestions(data);
+			setPagination(null);
 		} catch (err) {
 			console.error("Error fetching questions by label:", err);
 			setError("Failed to load questions. Please try again later.");
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
+
+	const fetchQuestionsBySearch = useCallback(async () => {
+		try {
+			setLoading(true);
+			setError("");
+			const response = await fetch(
+				`/api/questions/search?q=${encodeURIComponent(searchTerm.trim())}&page=${currentPageFromUrl}&limit=${itemsPerPage}`,
+			);
+
+			if (!response.ok) {
+				throw new Error("Failed to search questions");
+			}
+
+			const data = await response.json();
+
+			if (data.pagination) {
+				setQuestions(data.questions);
+				setPagination(data.pagination);
+			} else {
+				setQuestions(data);
+				setPagination(null);
+			}
+		} catch (err) {
+			console.error("Error searching questions:", err);
+			setError("Failed to search questions. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
+	}, [searchTerm, currentPageFromUrl, itemsPerPage]);
+
+	const fetchLatestQuestions = useCallback(async () => {
+		try {
+			setLoading(true);
+			setError("");
+			const response = await fetch(
+				`/api/questions?page=${currentPageFromUrl}&limit=${itemsPerPage}`,
+			);
+
+			if (!response.ok) {
+				throw new Error(`Failed to fetch questions: ${response.status}`);
+			}
+
+			const data = await response.json();
+
+			if (data.pagination) {
+				setQuestions(data.questions);
+				setPagination(data.pagination);
+			} else {
+				setQuestions(data);
+				setPagination(null);
+			}
+		} catch (err) {
+			console.error("Error fetching questions:", err);
+			setError("Failed to load questions. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
+	}, [currentPageFromUrl, itemsPerPage]);
+
+	useEffect(() => {
+		if (selectedLabel) {
+			fetchQuestionsByLabel(selectedLabel.id);
+		} else if (searchTerm && searchTerm.trim()) {
+			fetchQuestionsBySearch();
+		} else {
+			fetchLatestQuestions();
+		}
+	}, [
+		selectedLabel,
+		searchTerm,
+		fetchLatestQuestions,
+		fetchQuestionsByLabel,
+		fetchQuestionsBySearch,
+	]);
+
+	useEffect(() => {
+		if (location.state?.labelId) {
+			fetch("/api/questions/labels/all")
+				.then((res) => res.json())
+				.then((labels) => {
+					const label = labels.find((l) => l.id === location.state.labelId);
+					if (label) {
+						setSelectedLabel(label);
+					}
+				})
+				.catch(console.error);
+			navigate(location.pathname, { replace: true, state: {} });
+		}
+	}, [location.state?.labelId, location.pathname, navigate, setSelectedLabel]);
 
 	const handleLabelClick = (label) => {
 		if (searchTerm && searchTerm.trim()) {
@@ -124,7 +200,21 @@ function Home() {
 		setSelectedLabel(null);
 	};
 
-	const filteredQuestions = filterQuestions(questions, searchTerm);
+	const handlePageChange = (newPage) => {
+		const newSearchParams = new URLSearchParams(location.search);
+		if (newPage === 1) {
+			newSearchParams.delete("page");
+		} else {
+			newSearchParams.set("page", newPage.toString());
+		}
+		navigate(`${location.pathname}?${newSearchParams.toString()}`, {
+			replace: true,
+		});
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
+
+	const displayQuestions = questions;
+	const showPagination = pagination && pagination.totalPages > 1;
 
 	const handleQuestionClick = (question) => {
 		const identifier = question.slug || question.id;
@@ -170,9 +260,14 @@ function Home() {
 												: searchTerm
 													? `Search Results for "${searchTerm}"`
 													: "Latest Questions"}
-											{(searchTerm || selectedLabel) && (
+											{(searchTerm || selectedLabel) && pagination && (
 												<span className="text-xs sm:text-sm font-normal text-gray-500 ml-1 sm:ml-2">
-													({filteredQuestions.length} results)
+													({pagination.totalItems} results)
+												</span>
+											)}
+											{(searchTerm || selectedLabel) && !pagination && (
+												<span className="text-xs sm:text-sm font-normal text-gray-500 ml-1 sm:ml-2">
+													({displayQuestions.length} results)
 												</span>
 											)}
 										</h2>
@@ -210,118 +305,128 @@ function Home() {
 											Try Again
 										</button>
 									</div>
-								) : filteredQuestions.length > 0 ? (
-									<div className="space-y-4">
-										{filteredQuestions.map((question) => {
-											return (
-												<div
-													key={question.id}
-													role="button"
-													tabIndex={0}
-													className="border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
-													onClick={() => handleQuestionClick(question)}
-													onKeyDown={(e) => {
-														if (e.key === "Enter" || e.key === " ") {
-															e.preventDefault();
-															handleQuestionClick(question);
-														}
-													}}
-												>
-													<div className="flex flex-col sm:flex-row justify-between items-start gap-2">
-														<div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1">
-															<h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">
-																{searchTerm
-																	? highlightSearchTerm(
-																			capitalizeTitle(question.title),
-																			searchTerm,
-																		)
-																	: capitalizeTitle(question.title)}
-															</h3>
-															{question.is_solved && (
-																<span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
-																	<svg
-																		className="w-3 h-3"
-																		fill="currentColor"
-																		viewBox="0 0 20 20"
-																	>
-																		<path
-																			fillRule="evenodd"
-																			d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-																			clipRule="evenodd"
-																		/>
-																	</svg>
-																	Solved
-																</span>
-															)}
-															{question.answer_count > 0 && (
-																<span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
-																	<svg
-																		className="w-3 h-3"
-																		fill="currentColor"
-																		viewBox="0 0 20 20"
-																	>
-																		<path
-																			fillRule="evenodd"
-																			d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-																			clipRule="evenodd"
-																		/>
-																	</svg>
-																	{question.answer_count}{" "}
-																	{question.answer_count === 1
-																		? "Answer"
-																		: "Answers"}
-																</span>
-															)}
-														</div>
-													</div>
-
-													<p className="text-sm sm:text-base text-gray-600 line-clamp-2">
-														{searchTerm
-															? highlightSearchTerm(
-																	getFirstLinePreview(
-																		question.body || question.content,
-																	),
-																	searchTerm,
-																)
-															: getFirstLinePreview(
-																	question.body || question.content,
+								) : displayQuestions.length > 0 ? (
+									<>
+										<div className="space-y-4">
+											{displayQuestions.map((question) => {
+												return (
+													<div
+														key={question.id}
+														role="button"
+														tabIndex={0}
+														className="border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
+														onClick={() => handleQuestionClick(question)}
+														onKeyDown={(e) => {
+															if (e.key === "Enter" || e.key === " ") {
+																e.preventDefault();
+																handleQuestionClick(question);
+															}
+														}}
+													>
+														<div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+															<div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1">
+																<h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">
+																	{searchTerm
+																		? highlightSearchTerm(
+																				capitalizeTitle(question.title),
+																				searchTerm,
+																			)
+																		: capitalizeTitle(question.title)}
+																</h3>
+																{question.is_solved && (
+																	<span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
+																		<svg
+																			className="w-3 h-3"
+																			fill="currentColor"
+																			viewBox="0 0 20 20"
+																		>
+																			<path
+																				fillRule="evenodd"
+																				d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+																				clipRule="evenodd"
+																			/>
+																		</svg>
+																		Solved
+																	</span>
 																)}
-													</p>
-													{question.labels && question.labels.length > 0 && (
-														<div className="flex flex-wrap gap-2 mt-2 sm:mt-3">
-															{question.labels.map((label) => (
-																<LabelBadge
-																	key={label.id}
-																	label={label}
-																	onClick={handleLabelClick}
-																/>
-															))}
+																{question.answer_count > 0 && (
+																	<span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full whitespace-nowrap mb-2">
+																		<svg
+																			className="w-3 h-3"
+																			fill="currentColor"
+																			viewBox="0 0 20 20"
+																		>
+																			<path
+																				fillRule="evenodd"
+																				d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+																				clipRule="evenodd"
+																			/>
+																		</svg>
+																		{question.answer_count}{" "}
+																		{question.answer_count === 1
+																			? "Answer"
+																			: "Answers"}
+																	</span>
+																)}
+															</div>
 														</div>
-													)}
-													<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 mt-2 sm:mt-3 text-xs sm:text-sm text-gray-500">
-														<span>
-															Asked by{" "}
-															{question.author_name ||
-																question.author?.name ||
-																"Anonymous"}
-														</span>
-														<span>
-															{new Date(question.created_at).toLocaleDateString(
-																"en-US",
-																{
+
+														<p className="text-sm sm:text-base text-gray-600 line-clamp-2">
+															{searchTerm
+																? highlightSearchTerm(
+																		getFirstLinePreview(
+																			question.body || question.content,
+																		),
+																		searchTerm,
+																	)
+																: getFirstLinePreview(
+																		question.body || question.content,
+																	)}
+														</p>
+														{question.labels && question.labels.length > 0 && (
+															<div className="flex flex-wrap gap-2 mt-2 sm:mt-3">
+																{question.labels.map((label) => (
+																	<LabelBadge
+																		key={label.id}
+																		label={label}
+																		onClick={handleLabelClick}
+																	/>
+																))}
+															</div>
+														)}
+														<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 mt-2 sm:mt-3 text-xs sm:text-sm text-gray-500">
+															<span>
+																Asked by{" "}
+																{question.author_name ||
+																	question.author?.name ||
+																	"Anonymous"}
+															</span>
+															<span>
+																{new Date(
+																	question.created_at,
+																).toLocaleDateString("en-US", {
 																	year: "numeric",
 																	month: "short",
 																	day: "numeric",
 																	hour: "2-digit",
 																	minute: "2-digit",
-																},
-															)}
-														</span>
+																})}
+															</span>
+														</div>
 													</div>
-												</div>
-											);
-										})}
-									</div>
+												);
+											})}
+										</div>
+										{showPagination && (
+											<div className="mt-6 pt-6 border-t border-gray-200">
+												<PaginationControls
+													currentPage={pagination.currentPage}
+													totalPages={pagination.totalPages}
+													onPageChange={handlePageChange}
+												/>
+											</div>
+										)}
+									</>
 								) : searchTerm ? (
 									<div className="text-center py-8 text-gray-500">
 										<svg
