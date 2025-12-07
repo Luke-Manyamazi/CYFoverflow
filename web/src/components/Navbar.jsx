@@ -142,6 +142,67 @@ function Navbar() {
 								</div>
 							)}
 
+							{/* Navigation Links (Sidebar items for mobile) */}
+							<div className="px-4 space-y-1 border-b border-gray-200 pb-3">
+								<Link
+									to="/"
+									onClick={() => setIsMenuOpen(false)}
+									className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
+										location.pathname === "/"
+											? "bg-blue-50 text-blue-700"
+											: "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+									}`}
+								>
+									<span>📋</span>
+									<span>Home</span>
+								</Link>
+								<Link
+									to="/labels"
+									onClick={() => setIsMenuOpen(false)}
+									className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
+										location.pathname === "/labels"
+											? "bg-blue-50 text-blue-700"
+											: "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+									}`}
+								>
+									<span>🏷️</span>
+									<span>Tags</span>
+								</Link>
+								{isLoggedIn && (
+									<>
+										<div className="px-4 pt-2 pb-1">
+											<h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+												Personal
+											</h3>
+										</div>
+										<Link
+											to="/my-questions"
+											onClick={() => setIsMenuOpen(false)}
+											className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
+												location.pathname === "/my-questions"
+													? "bg-blue-50 text-blue-700"
+													: "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+											}`}
+										>
+											<span>❓</span>
+											<span>My Questions</span>
+										</Link>
+										<Link
+											to="/my-responses"
+											onClick={() => setIsMenuOpen(false)}
+											className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
+												location.pathname === "/my-responses"
+													? "bg-blue-50 text-blue-700"
+													: "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+											}`}
+										>
+											<span>💬</span>
+											<span>My Responses</span>
+										</Link>
+									</>
+								)}
+							</div>
+
 							{isLoggedIn ? (
 								<>
 									<div className="px-4 py-2 flex items-center gap-3">
@@ -159,7 +220,7 @@ function Navbar() {
 									</div>
 									<button
 										onClick={handleLogout}
-										className="bg-[#ed4d4e] text-white px-4 py-2.5 rounded-lg text-base font-semibold hover:bg-[#d43d3e] transition-all duration-200 shadow-md hover:shadow-lg text-left flex items-center gap-2 cursor-pointer"
+										className="mx-4 bg-[#ed4d4e] text-white px-4 py-2.5 rounded-lg text-base font-semibold hover:bg-[#d43d3e] transition-all duration-200 shadow-md hover:shadow-lg text-left flex items-center gap-2 cursor-pointer"
 									>
 										<svg
 											className="w-5 h-5"
@@ -182,14 +243,14 @@ function Navbar() {
 									<Link
 										to="/login"
 										onClick={() => setIsMenuOpen(false)}
-										className="text-gray-700 hover:text-[#281d80] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 cursor-pointer"
+										className="mx-4 text-gray-700 hover:text-[#281d80] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 cursor-pointer"
 									>
 										Login
 									</Link>
 									<Link
 										to="/signup"
 										onClick={() => setIsMenuOpen(false)}
-										className="bg-[#281d80] text-white px-4 py-2.5 rounded-lg text-base font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg text-center cursor-pointer"
+										className="mx-4 bg-[#281d80] text-white px-4 py-2.5 rounded-lg text-base font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg text-center cursor-pointer"
 									>
 										Sign Up
 									</Link>

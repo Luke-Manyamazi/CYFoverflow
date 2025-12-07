@@ -1,7 +1,6 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { FaEdit, FaTrash, FaCheckCircle } from "react-icons/fa";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCheckCircle, FaArrowLeft } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Answer from "../components/Answer";
@@ -224,31 +223,31 @@ function QuestionDetailPage() {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="flex gap-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+				<div className="flex flex-col md:flex-row gap-4 md:gap-8">
 					<Sidebar />
 
-					<main className="flex-1">
-						<div className="mb-4">
+					<main className="flex-1 min-w-0">
+						<div className="mb-3 md:mb-4">
 							<button
 								onClick={() => navigate("/")}
-								className="flex items-center gap-2 text-gray-600 hover:text-[#281d80] transition-colors duration-200 cursor-pointer"
+								className="flex items-center gap-2 text-sm sm:text-base text-gray-600 hover:text-[#281d80] transition-colors duration-200 cursor-pointer"
 							>
 								<FaArrowLeft className="w-4 h-4" />
 								<span className="font-medium">Back to Home</span>
 							</button>
 						</div>
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-							<div className="flex justify-between items-start mb-4">
-								<div className="flex-1">
-									<div className="flex items-center gap-3 mb-2 flex-wrap">
-										<h1 className="text-3xl font-bold text-gray-900">
+						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-4 md:mb-6">
+							<div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 mb-3 md:mb-4">
+								<div className="flex-1 min-w-0">
+									<div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+										<h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 wrap-break-word">
 											{capitalizeTitle(question.title)}
 										</h1>
 										{question.is_solved && (
-											<span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+											<span className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 text-xs sm:text-sm font-semibold rounded-full whitespace-nowrap">
 												<svg
-													className="w-4 h-4"
+													className="w-3 h-3 sm:w-4 sm:h-4"
 													fill="currentColor"
 													viewBox="0 0 20 20"
 												>
@@ -262,9 +261,9 @@ function QuestionDetailPage() {
 											</span>
 										)}
 										{question.answer_count > 0 && (
-											<span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
+											<span className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-green-100 text-green-800 text-xs sm:text-sm font-semibold rounded-full whitespace-nowrap">
 												<svg
-													className="w-4 h-4"
+													className="w-3 h-3 sm:w-4 sm:h-4"
 													fill="currentColor"
 													viewBox="0 0 20 20"
 												>
@@ -280,26 +279,28 @@ function QuestionDetailPage() {
 										)}
 									</div>
 								</div>
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap">
 									{isQuestionAuthor && (
 										<>
 											<button
 												onClick={handleEdit}
-												className="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200"
+												className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200"
 												title="Edit question"
+												aria-label="Edit question"
 											>
-												<FaEdit className="w-5 h-5" />
+												<FaEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
 											</button>
 											<button
 												onClick={handleDelete}
-												className="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-red-600 text-white hover:bg-red-700"
+												className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer bg-red-600 text-white hover:bg-red-700"
 												title="Delete question"
+												aria-label="Delete question"
 											>
-												<FaTrash className="w-5 h-5" />
+												<FaTrash className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
 											</button>
 											<button
 												onClick={() => handleMarkSolved(!question.is_solved)}
-												className={`flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${
+												className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer ${
 													question.is_solved
 														? "bg-gray-200 text-gray-700 hover:bg-gray-300"
 														: "bg-blue-600 text-white hover:bg-blue-700"
@@ -309,15 +310,20 @@ function QuestionDetailPage() {
 														? "Mark as unsolved"
 														: "Mark as solved"
 												}
+												aria-label={
+													question.is_solved
+														? "Mark as unsolved"
+														: "Mark as solved"
+												}
 											>
-												<FaCheckCircle className="w-5 h-5" />
+												<FaCheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
 											</button>
 										</>
 									)}
 									{!isQuestionAuthor && (
 										<button
 											onClick={handleAnswerClick}
-											className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+											className="bg-[#281d80] text-white px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 rounded-lg text-xs sm:text-sm md:text-base font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
 										>
 											Answer
 										</button>
@@ -325,15 +331,15 @@ function QuestionDetailPage() {
 								</div>
 							</div>
 
-							<div className="flex items-center gap-4 text-sm text-gray-600 mb-6 flex-wrap">
-								<span>
+							<div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 md:gap-4 text-xs sm:text-sm text-gray-600 mb-4 md:mb-6 flex-wrap">
+								<span className="whitespace-nowrap">
 									Asked by{" "}
 									<span className="font-semibold">
 										{question.author_name || "Anonymous"}
 									</span>
 								</span>
-								<span>•</span>
-								<span>
+								<span className="hidden sm:inline">•</span>
+								<span className="break-words sm:whitespace-normal">
 									{new Date(question.created_at).toLocaleDateString("en-US", {
 										year: "numeric",
 										month: "long",
@@ -342,12 +348,14 @@ function QuestionDetailPage() {
 										minute: "2-digit",
 									})}
 									{question.updated_at !== question.created_at && (
-										<span className="ml-2 italic text-gray-500">(edited)</span>
+										<span className="ml-1 sm:ml-2 italic text-gray-500">
+											(edited)
+										</span>
 									)}
 								</span>
 								{question.labels && question.labels.length > 0 && (
 									<>
-										<span>•</span>
+										<span className="hidden sm:inline">•</span>
 										<div className="flex gap-2 flex-wrap">
 											{question.labels.map((label) => (
 												<LabelBadge
@@ -447,8 +455,8 @@ function QuestionDetailPage() {
 							</div>
 						)}
 
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-							<h2 className="text-2xl font-bold text-gray-900 mb-4">
+						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+							<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
 								Answers ({answers.length})
 							</h2>
 							{answers.length === 0 ? (

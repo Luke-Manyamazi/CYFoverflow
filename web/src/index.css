@@ -1,75 +1,85 @@
 @import "tailwindcss";
 
 body {
-  margin: 0;
-  background-color: #efeef8;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	background-color: #efeef8;
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+		"Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .question-content-display .tox-tinymce {
-  border: none !important;
+	border: none !important;
 }
 
 .question-content-display .tox-editor-header {
-  display: none !important;
+	display: none !important;
 }
 
 .question-content-display .tox-statusbar {
-  display: none !important;
+	display: none !important;
 }
 
 .question-content-display .tox-edit-area {
-  border: none !important;
+	border: none !important;
 }
 
 .question-content-display .tox-edit-area__iframe {
-  min-height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+	min-height: auto !important;
+	max-height: none !important;
+	overflow: visible !important;
 }
 
 .question-content-display pre,
 .question-content-display pre[class*="language-"],
 .answer-content-display pre,
 .answer-content-display pre[class*="language-"] {
-  max-height: 400px;
-  overflow-y: auto;
-  overflow-x: auto;
-  margin: 1em 0;
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: auto;
+	margin: 1em 0;
 }
 
 .question-content-display pre code,
 .answer-content-display pre code {
-  display: block;
-  white-space: pre;
+	display: block;
+	white-space: pre;
 }
 
 .answer-content-display .tox-tinymce {
-  border: none !important;
+	border: none !important;
 }
 
 .answer-content-display .tox-editor-header {
-  display: none !important;
+	display: none !important;
 }
 
 .answer-content-display .tox-statusbar {
-  display: none !important;
+	display: none !important;
 }
 
 .answer-content-display .tox-edit-area {
-  border: none !important;
+	border: none !important;
 }
 
 .answer-content-display .tox-edit-area__iframe {
-  min-height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+	min-height: auto !important;
+	max-height: none !important;
+	overflow: visible !important;
+}
+
+.sidebar-responsive {
+	display: none;
+}
+
+@media (min-width: 768px) {
+	.sidebar-responsive {
+		display: block;
+	}
 }

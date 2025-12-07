@@ -208,12 +208,12 @@ const EditQuestion = () => {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="flex gap-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+				<div className="flex flex-col md:flex-row gap-4 md:gap-8">
 					<Sidebar />
 
-					<main className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-						<h1 className="text-2xl font-bold text-gray-900 mb-6">
+					<main className="flex-1 min-w-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
+						<h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
 							Edit Question
 						</h1>
 
@@ -337,11 +337,11 @@ const EditQuestion = () => {
 									</fieldset>
 								</div>
 
-								<div className="flex gap-4 pt-4">
+								<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
 									<button
 										type="submit"
 										disabled={loading}
-										className="bg-[#281d80] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1f1566] transition-all disabled:opacity-50 cursor-pointer"
+										className="bg-[#281d80] text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#1f1566] transition-all disabled:opacity-50 cursor-pointer"
 									>
 										{loading ? "Updating..." : "Update Question"}
 									</button>

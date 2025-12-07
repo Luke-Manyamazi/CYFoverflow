@@ -62,17 +62,17 @@ function Answer({ answer, onDelete }) {
 	}
 
 	return (
-		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
-			<div className="flex items-start justify-between mb-4">
+		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4">
+			<div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
 				{/* User Info */}
-				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 bg-[#281d80] rounded-full flex items-center justify-center text-white font-semibold">
+				<div className="flex items-center gap-2 sm:gap-3">
+					<div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#281d80] rounded-full flex items-center justify-center text-white text-sm sm:text-base font-semibold">
 						{answer.author_name
 							? answer.author_name.charAt(0).toUpperCase()
 							: "A"}
 					</div>
 					<div>
-						<p className="font-semibold text-gray-900">
+						<p className="text-sm sm:text-base font-semibold text-gray-900">
 							{answer.author_name || "Anonymous"}
 						</p>
 						<p className="text-xs text-gray-500">
@@ -84,7 +84,7 @@ function Answer({ answer, onDelete }) {
 								minute: "2-digit",
 							})}
 							{answer.updated_at !== answer.created_at && (
-								<span className="ml-2 italic">(edited)</span>
+								<span className="ml-1 sm:ml-2 italic">(edited)</span>
 							)}
 						</p>
 					</div>
@@ -92,14 +92,14 @@ function Answer({ answer, onDelete }) {
 
 				{/* Author Controls */}
 				{isAuthor && (
-					<div className="flex items-center gap-2">
-						<span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+					<div className="flex flex-wrap items-center gap-2">
+						<span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
 							Your answer
 						</span>
 
 						<button
 							onClick={() => setIsEditing(true)}
-							className="px-3 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors cursor-pointer"
+							className="px-2 sm:px-3 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors cursor-pointer whitespace-nowrap"
 							title="Edit answer"
 						>
 							Edit
@@ -108,7 +108,7 @@ function Answer({ answer, onDelete }) {
 						<button
 							onClick={handleDelete}
 							disabled={isDeleting}
-							className="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+							className="px-2 sm:px-3 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
 							title="Delete answer"
 						>
 							{isDeleting ? "Deleting..." : "Delete"}
