@@ -223,37 +223,37 @@ const AskQuestionPage = () => {
 	// TEMPLATE SELECTION
 	if (!activeTemplate) {
 		return (
-			<div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-				<div className="max-w-5xl w-full space-y-10 animate-fade-in">
+			<div className="min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+				<div className="max-w-5xl w-full space-y-6 sm:space-y-10 animate-fade-in">
 					<div className="text-center">
-						<h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+						<h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
 							What kind of question do you have?
 						</h2>
-						<p className="text-lg text-gray-600">
+						<p className="text-base sm:text-lg text-gray-600">
 							Select a template to help us help you faster.
 						</p>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
 						{TEMPLATES.map((template) => (
 							<button
 								key={template.id}
 								onClick={() => handleTemplateSelect(template)}
 								className={`
-                  relative group flex flex-col items-start p-8 rounded-2xl border-2 transition-all duration-300 ease-in-out
-                  hover:shadow-2xl hover:-translate-y-2 text-left w-full h-full
+                  relative group flex flex-col items-start p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ease-in-out
+                  hover:shadow-xl sm:hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2 text-left w-full h-full
                   ${template.color || "bg-white border-gray-200 hover:border-gray-400"}
                 `}
 							>
-								<div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform">
+								<div className="text-3xl sm:text-4xl mb-3 sm:mb-4 transform group-hover:scale-110 transition-transform">
 									{template.icon}
 								</div>
 								<h3
-									className={`text-xl font-bold mb-3 ${template.textColor || "text-gray-900"}`}
+									className={`text-lg sm:text-xl font-bold mb-2 sm:mb-3 ${template.textColor || "text-gray-900"}`}
 								>
 									{template.title}
 								</h3>
-								<p className="text-gray-600 leading-relaxed">
+								<p className="text-sm sm:text-base text-gray-600 leading-relaxed">
 									{template.description}
 								</p>
 								<div className="mt-auto pt-6 flex items-center text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-gray-900">
@@ -278,12 +278,12 @@ const AskQuestionPage = () => {
 
 	// EDITOR FORM ---
 	return (
-		<div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+		<div className="min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
 			<div className="max-w-4xl w-full">
 				{/* Back Button */}
 				<button
 					onClick={handleBackToSelection}
-					className="mb-6 flex items-center text-sm text-gray-500 hover:text-[#281d80] transition-colors group"
+					className="mb-4 sm:mb-6 flex items-center text-xs sm:text-sm text-gray-500 hover:text-[#281d80] transition-colors group"
 				>
 					<span className="mr-2 group-hover:-translate-x-1 transition-transform">
 						&larr;
@@ -291,9 +291,9 @@ const AskQuestionPage = () => {
 					Choose a different template
 				</button>
 
-				<div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 animate-fade-in">
-					<div className="text-center border-b border-gray-100 pb-6">
-						<h2 className="text-3xl font-bold text-gray-900 mb-2">
+				<div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 animate-fade-in">
+					<div className="text-center border-b border-gray-100 pb-4 sm:pb-6">
+						<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
 							Ask a public question
 						</h2>
 						<div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-600 mt-2">

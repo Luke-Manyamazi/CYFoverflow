@@ -108,8 +108,10 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 	};
 
 	return (
-		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-			<h2 className="text-2xl font-bold text-gray-900 mb-4">Your Answer</h2>
+		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+			<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+				Your Answer
+			</h2>
 			<form onSubmit={handleSubmit}>
 				<div className="rounded-lg overflow-hidden border-2 border-gray-200 focus-within:border-[#281d80] focus-within:ring-2 focus-within:ring-[#281d80]/20 transition-all">
 					<Editor
@@ -170,11 +172,11 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 					</div>
 				)}
 
-				<div className="flex gap-4 mt-6">
+				<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6">
 					<button
 						type="submit"
 						disabled={isSubmitting}
-						className="bg-[#281d80] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+						className="bg-[#281d80] text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#1f1566] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{isSubmitting ? "Submitting..." : "Post Answer"}
 					</button>
@@ -182,7 +184,7 @@ function AnswerForm({ questionId, onSuccess, onCancel, token }) {
 						type="button"
 						onClick={onCancel}
 						disabled={isSubmitting}
-						className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-200 cursor-pointer disabled:opacity-50"
+						className="bg-gray-200 text-gray-700 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-300 transition-all duration-200 cursor-pointer disabled:opacity-50"
 					>
 						Cancel
 					</button>

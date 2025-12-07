@@ -79,22 +79,22 @@ function MyQuestionsPage() {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="flex gap-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+				<div className="flex flex-col md:flex-row gap-4 md:gap-8">
 					<Sidebar />
 
-					<main className="flex-1">
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-							<div className="flex justify-between items-center flex-wrap gap-4 mb-4">
-								<div className="flex items-center gap-3 flex-wrap">
-									<h1 className="text-2xl font-bold text-gray-900">
+					<main className="flex-1 min-w-0">
+						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
+							<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-3 md:mb-4">
+								<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 flex-wrap">
+									<h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
 										{selectedLabel && !searchTerm
 											? `My Questions tagged with "${selectedLabel.name}"`
 											: searchTerm
 												? `My Questions - Search Results for "${searchTerm}"`
 												: "My Questions"}
 										{(searchTerm || selectedLabel) && (
-											<span className="text-sm font-normal text-gray-500 ml-2">
+											<span className="text-xs sm:text-sm font-normal text-gray-500 ml-1 sm:ml-2">
 												({filteredQuestions.length} results)
 											</span>
 										)}
@@ -102,7 +102,7 @@ function MyQuestionsPage() {
 									{selectedLabel && (
 										<button
 											onClick={handleClearLabelFilter}
-											className="text-sm text-[#281d80] hover:text-[#1f1566] underline cursor-pointer"
+											className="text-xs sm:text-sm text-[#281d80] hover:text-[#1f1566] underline cursor-pointer"
 										>
 											Clear filter
 										</button>
@@ -124,13 +124,13 @@ function MyQuestionsPage() {
 										No questions found matching your search.
 									</p>
 								)}
-							<div className="space-y-4 mt-6">
+							<div className="space-y-3 md:space-y-4 mt-4 md:mt-6">
 								{filteredQuestions.map((question) => (
 									<div
 										key={question.id}
 										role="button"
 										tabIndex={0}
-										className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
+										className="border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
 										onClick={() => handleQuestionClick(question)}
 										onKeyDown={(e) => {
 											if (e.key === "Enter" || e.key === " ") {
@@ -139,9 +139,9 @@ function MyQuestionsPage() {
 											}
 										}}
 									>
-										<div className="flex justify-between items-start">
-											<div className="flex items-center gap-3 flex-1">
-												<h3 className="font-semibold text-lg text-gray-900 mb-2">
+										<div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+											<div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1">
+												<h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">
 													{searchTerm
 														? highlightSearchTerm(
 																capitalizeTitle(question.title),
@@ -185,7 +185,7 @@ function MyQuestionsPage() {
 											</div>
 										</div>
 
-										<p className="text-gray-600 line-clamp-2">
+										<p className="text-sm sm:text-base text-gray-600 line-clamp-2">
 											{searchTerm
 												? highlightSearchTerm(
 														getFirstLinePreview(
@@ -200,7 +200,7 @@ function MyQuestionsPage() {
 										{question.labels &&
 											Array.isArray(question.labels) &&
 											question.labels.length > 0 && (
-												<div className="flex flex-wrap gap-2 mt-3">
+												<div className="flex flex-wrap gap-2 mt-2 sm:mt-3">
 													{question.labels.map((label) => (
 														<LabelBadge
 															key={label.id}
@@ -210,7 +210,7 @@ function MyQuestionsPage() {
 													))}
 												</div>
 											)}
-										<div className="flex justify-between items-center mt-3 text-sm text-gray-500">
+										<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 mt-2 sm:mt-3 text-xs sm:text-sm text-gray-500">
 											<span>
 												Asked by{" "}
 												{question.author_name ||
