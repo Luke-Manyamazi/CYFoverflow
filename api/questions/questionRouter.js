@@ -12,7 +12,9 @@ import {
 	deleteQuestion,
 	getAllLabels,
 	searchQuestionsByLabels,
+	searchQuestionsByText,
 	getTotalQuestionsCount,
+	getSearchQuestionsCount,
 	markQuestionSolved,
 } from "./questionService.js";
 
@@ -71,8 +73,8 @@ router.post("/", authenticateToken(), async (req, res) => {
 
 router.get("/", async (req, res) => {
 	try {
-		const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
-		const page = req.query.page ? parseInt(req.query.page, 10) : null;
+		const limit = req.query.limit ? Number.parseInt(req.query.limit, 10) : null;
+		const page = req.query.page ? Number.parseInt(req.query.page, 10) : null;
 
 		const paginationLimit = page ? limit || 10 : limit;
 
@@ -97,6 +99,58 @@ router.get("/", async (req, res) => {
 	} catch (error) {
 		logger.error("Get questions error: %O", error);
 		res.status(500).json({ error: "failed to fetch questions" });
+	}
+});
+
+router.get("/search", async (req, res) => {
+	try {
+		const { q, limit, page } = req.query;
+
+		if (!q || !q.trim()) {
+			return res.status(400).json({ error: "Search query is required" });
+		}
+
+		const searchLimit = limit ? Number.parseInt(limit, 10) : null;
+		const searchPage = page ? Number.parseInt(page, 10) : null;
+		const paginationLimit = searchPage ? searchLimit || 10 : searchLimit;
+
+		const questions = await searchQuestionsByText(
+			q,
+			paginationLimit,
+			searchPage,
+		);
+
+		if (searchPage) {
+			const total = await getSearchQuestionsCount(q);
+			const totalPages = Math.ceil(total / paginationLimit);
+
+			res.json({
+				questions,
+				pagination: {
+					currentPage: searchPage,
+					totalPages,
+					totalItems: total,
+					itemsPerPage: paginationLimit,
+				},
+			});
+		} else {
+			res.json(questions);
+		}
+	} catch (error) {
+		logger.error("Search questions error: %O", error);
+		res.status(500).json({
+			error: error.message || "Failed to search questions",
+		});
+	}
+});
+
+router.get("/labels/all", async (__, res) => {
+	try {
+		const labels = await getAllLabels();
+		res.json(labels);
+	} catch (error) {
+		logger.error("Get labels error: %O", error);
+		res.status(500).json({ error: "failed to fetch labels" });
 	}
 });
 
@@ -153,16 +207,6 @@ router.delete("/:id", authenticateToken(), async (req, res) => {
 	} catch (error) {
 		logger.error("delete a question error: %O", error);
 		res.status(500).json({ error: "failed to delete question" });
-	}
-});
-
-router.get("/labels/all", async (__, res) => {
-	try {
-		const labels = await getAllLabels();
-		res.json(labels);
-	} catch (error) {
-		logger.error("Get labels error: %O", error);
-		res.status(500).json({ error: "failed to fetch labels" });
 	}
 });
 

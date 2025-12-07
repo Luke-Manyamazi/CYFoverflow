@@ -313,6 +313,71 @@ export const searchQuestionsByLabelsDB = async (labelId = []) => {
 	return questions;
 };
 
+export const searchQuestionsByTextDB = async (
+	searchTerm,
+	limit = null,
+	page = null,
+) => {
+	const searchPattern = `%${searchTerm}%`;
+	let query = `SELECT DISTINCT q.*, u.name as author_name,
+         COALESCE(answer_counts.answer_count, 0) as answer_count
+         FROM questions q
+         JOIN users u ON q.user_id = u.id
+         LEFT JOIN (
+             SELECT question_id, COUNT(*) as answer_count
+             FROM answers
+             GROUP BY question_id
+         ) answer_counts ON q.id = answer_counts.question_id
+         LEFT JOIN question_labels ql ON q.id = ql.question_id
+         LEFT JOIN labels l ON ql.label_id = l.id
+         WHERE q.title ILIKE $1 
+            OR q.content ILIKE $1
+            OR l.name ILIKE $1
+         ORDER BY q.created_at DESC`;
+
+	const params = [searchPattern];
+
+	if (limit && page) {
+		const offset = (page - 1) * limit;
+		query += ` LIMIT $2 OFFSET $3`;
+		params.push(limit, offset);
+	} else if (limit) {
+		query += ` LIMIT $2`;
+		params.push(limit);
+	}
+
+	const result = await db.query(query, params);
+	const questions = result.rows;
+
+	for (let question of questions) {
+		const labelResult = await db.query(
+			`SELECT l.id, l.name
+             FROM labels l
+             JOIN question_labels ql ON l.id = ql.label_id
+             WHERE ql.question_id = $1`,
+			[question.id],
+		);
+		question.labels = labelResult.rows;
+	}
+
+	return questions;
+};
+
+export const getSearchQuestionsCountDB = async (searchTerm) => {
+	const searchPattern = `%${searchTerm}%`;
+	const result = await db.query(
+		`SELECT COUNT(DISTINCT q.id) as total
+         FROM questions q
+         LEFT JOIN question_labels ql ON q.id = ql.question_id
+         LEFT JOIN labels l ON ql.label_id = l.id
+         WHERE q.title ILIKE $1 
+            OR q.content ILIKE $1
+            OR l.name ILIKE $1`,
+		[searchPattern],
+	);
+	return parseInt(result.rows[0].total, 10);
+};
+
 export const updateSolvedStatusDB = async (id, isSolved) => {
 	const result = await db.query(
 		`UPDATE questions

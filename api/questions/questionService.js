@@ -143,6 +143,26 @@ export const searchQuestionsByLabels = async (labelId = []) => {
 	return repository.searchQuestionsByLabelsDB(labelId);
 };
 
+export const searchQuestionsByText = async (
+	searchTerm,
+	limit = null,
+	page = null,
+) => {
+	if (!searchTerm || !searchTerm.trim()) {
+		throw new Error("Search term is required");
+	}
+
+	return repository.searchQuestionsByTextDB(searchTerm.trim(), limit, page);
+};
+
+export const getSearchQuestionsCount = async (searchTerm) => {
+	if (!searchTerm || !searchTerm.trim()) {
+		return 0;
+	}
+
+	return repository.getSearchQuestionsCountDB(searchTerm.trim());
+};
+
 export const markQuestionSolved = async (idOrSlug, userId, isSolved) => {
 	const question = await repository.getQuestionByIdDB(idOrSlug);
 
