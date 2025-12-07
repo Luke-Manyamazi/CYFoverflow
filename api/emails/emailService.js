@@ -23,6 +23,7 @@ class EmailService {
 		questionAuthorEmail,
 		questionAuthorName,
 		questionId,
+		questionSlug,
 		questionTitle,
 		answererName,
 		answerContent,
@@ -39,7 +40,8 @@ class EmailService {
 
 			// Use provided appUrl or default from constants
 			const finalAppUrl = appUrl || EMAIL_SOURCE.replace("info@", "https://");
-			const questionUrl = getQuestionUrl(questionId, finalAppUrl);
+			const questionIdentifier = questionSlug || questionId;
+			const questionUrl = getQuestionUrl(questionIdentifier, finalAppUrl);
 			const truncatedAnswer = truncateContent(answerContent, 300);
 
 			const params = {

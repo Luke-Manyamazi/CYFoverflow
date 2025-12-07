@@ -4,8 +4,8 @@ export const truncateContent = (content, maxLength = 300) => {
 	return content.substring(0, maxLength) + "...";
 };
 
-export const getQuestionUrl = (questionId, appUrl) => {
-	return `${appUrl || "https://cyf.academy"}/questions/${questionId}`;
+export const getQuestionUrl = (questionIdentifier, appUrl) => {
+	return `${appUrl}/questions/${questionIdentifier}`;
 };
 
 export const formatDate = (date = new Date()) => {

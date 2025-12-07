@@ -51,6 +51,7 @@ export const createAnswer = async (
 					questionAuthorEmail: question.author_email,
 					questionAuthorName: question.author_name || question.author_username,
 					questionId: question.id,
+					questionSlug: question.slug,
 					questionTitle: question.title,
 					answererName: finalAnswererName,
 					answerContent: content,
