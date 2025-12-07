@@ -1,41 +1,71 @@
-// api/auth/schemas.js
 import Joi from "joi";
 
-// Regular expressions for the password requirements
-const hasUppercase = /(?=.*[A-Z])/; // Must contain at least one uppercase letter (A-Z)
-const hasAlphanumeric = /(?=.*[a-z0-9])/; // Must contain at least one lowercase letter OR number
-const hasSpecialChar = /(?=.*[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?])/; // Must contain at least one special character
-const validCharacters = /^[a-zA-Z0-9!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?]+$/; // Ensures NO illegal characters
+const hasUppercase = /(?=.*[A-Z])/;
+const hasLowercase = /(?=.*[a-z])/;
+const hasNumber = /(?=.*[0-9])/;
+const hasSpecialChar = /(?=.*[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?])/;
+const validCharacters = /^[a-zA-Z0-9!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?]+$/;
 
 const complexPassword = Joi.string()
-	.min(6) // Minimum length of 6 characters
-	.pattern(hasUppercase, { name: "uppercase" })
-	.pattern(hasAlphanumeric, { name: "alphanumeric" })
+	.min(8)
+	.max(128)
+	.pattern(hasUppercase, { name: "uppercase letter" })
+	.pattern(hasLowercase, { name: "lowercase letter" })
+	.pattern(hasNumber, { name: "number" })
 	.pattern(hasSpecialChar, { name: "special character" })
-	.pattern(validCharacters) // Enforce only allowed characters
-	.required();
+	.pattern(validCharacters)
+	.required()
+	.messages({
+		"string.min": "Password must be at least 8 characters long",
+		"string.max": "Password must be no more than 128 characters",
+		"string.pattern.name": "Password must contain at least one {#name}",
+		"string.pattern.base": "Password contains invalid characters",
+		"any.required": "Password is required",
+	});
 
 const signupSchema = Joi.object({
-	name: Joi.string().trim().min(2).max(50).required(),
+	name: Joi.string()
+		.trim()
+		.min(2)
+		.max(50)
+		.pattern(/^[a-zA-Z\s'-]+$/, {
+			name: "letters, spaces, hyphens, and apostrophes",
+		})
+		.required()
+		.messages({
+			"string.min": "Name must be at least 2 characters long",
+			"string.max": "Name must be no more than 50 characters",
+			"string.pattern.name": "Name can only contain {#name}",
+			"any.required": "Name is required",
+		}),
 
-	// Email validation with domain segments
 	email: Joi.string()
 		.email({
 			minDomainSegments: 2,
 			maxDomainSegments: 4,
 			tlds: { allow: true },
 		})
-		.required(),
+		.lowercase()
+		.trim()
+		.required()
+		.messages({
+			"string.email": "Please provide a valid email address",
+			"any.required": "Email is required",
+		}),
 
-	// Applying the complex password validation for SIGNUP
 	password: complexPassword,
 });
 
 const loginSchema = Joi.object({
-	email: Joi.string().email().required(),
+	email: Joi.string().email().lowercase().trim().required().messages({
+		"string.email": "Please provide a valid email address",
+		"any.required": "Email is required",
+	}),
 
-	// For LOGIN, enforcing the minimum length
-	password: Joi.string().min(6).required(),
+	password: Joi.string().min(6).required().messages({
+		"string.min": "Password must be at least 6 characters long",
+		"any.required": "Password is required",
+	}),
 });
 
 export { signupSchema, loginSchema };

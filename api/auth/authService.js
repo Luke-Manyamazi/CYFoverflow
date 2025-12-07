@@ -5,21 +5,30 @@ import logger from "../utils/logger.js";
 import * as repository from "./authRepository.js";
 
 export async function signUp(name, email, password) {
-	const existingUser = await repository.findUserByEmail(email);
+	const normalizedEmail = email.toLowerCase().trim();
+	const normalizedName = name.trim();
+
+	const existingUser = await repository.findUserByEmail(normalizedEmail);
 	if (existingUser) {
-		throw new Error("User already exists.");
+		throw new Error("An account with this email already exists.");
 	}
 
 	const hashedPassword = await bcrypt.hash(password, 10);
-	logger.debug(`Password for ${email} hashed successfully.`);
+	logger.debug(`Password for ${normalizedEmail} hashed successfully.`);
 
-	const newUser = await repository.createUser(name, email, hashedPassword);
-	logger.info("New user created with ID: %s", email);
+	const newUser = await repository.createUser(
+		normalizedName,
+		normalizedEmail,
+		hashedPassword,
+	);
+	logger.info("New user created with ID: %s", normalizedEmail);
 	return newUser;
 }
 
 export async function login(email, password) {
-	const user = await repository.findUserByEmail(email);
+	const normalizedEmail = email.toLowerCase().trim();
+
+	const user = await repository.findUserByEmail(normalizedEmail);
 	if (!user) {
 		throw new Error("Invalid credentials.");
 	}
@@ -30,6 +39,6 @@ export async function login(email, password) {
 	}
 
 	const { hashed_password: _, ...userWithoutPassword } = user;
-	logger.info("User logged in successfully: %s", email);
+	logger.info("User logged in successfully: %s", normalizedEmail);
 	return userWithoutPassword;
 }

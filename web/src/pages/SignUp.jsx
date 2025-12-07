@@ -13,6 +13,46 @@ function SignUp() {
 	const navigate = useNavigate();
 	const { signUp } = useAuth();
 
+	const validateName = (nameValue) => {
+		if (!nameValue || nameValue.trim().length < 2) {
+			return "Name must be at least 2 characters long";
+		}
+		if (nameValue.trim().length > 50) {
+			return "Name must be no more than 50 characters";
+		}
+		if (!/^[a-zA-Z\s'-]+$/.test(nameValue.trim())) {
+			return "Name can only contain letters, spaces, hyphens, and apostrophes";
+		}
+		return "";
+	};
+
+	const validatePassword = (passwordValue) => {
+		if (!passwordValue || passwordValue.length < 8) {
+			return "Password must be at least 8 characters long";
+		}
+		if (passwordValue.length > 128) {
+			return "Password must be no more than 128 characters";
+		}
+		if (!/(?=.*[A-Z])/.test(passwordValue)) {
+			return "Password must contain at least one uppercase letter";
+		}
+		if (!/(?=.*[a-z])/.test(passwordValue)) {
+			return "Password must contain at least one lowercase letter";
+		}
+		if (!/(?=.*[0-9])/.test(passwordValue)) {
+			return "Password must contain at least one number";
+		}
+		if (!/(?=.*[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?])/.test(passwordValue)) {
+			return "Password must contain at least one special character";
+		}
+		if (
+			!/^[a-zA-Z0-9!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?]+$/.test(passwordValue)
+		) {
+			return "Password contains invalid characters";
+		}
+		return "";
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
@@ -22,32 +62,24 @@ function SignUp() {
 			return;
 		}
 
-		if (password.length < 6) {
-			setError("Password must be at least 6 characters");
+		const nameError = validateName(name);
+		if (nameError) {
+			setError(nameError);
+			return;
+		}
+
+		const passwordError = validatePassword(password);
+		if (passwordError) {
+			setError(passwordError);
 			return;
 		}
 
 		try {
-			await signUp(name, email, password);
+			await signUp(name.trim(), email.trim().toLowerCase(), password);
 			navigate("/");
 		} catch (error) {
 			const msg = error.message || "";
-
-			if (msg.includes("uppercase")) {
-				setError("Password must contain at least one uppercase letter.");
-			} else if (msg.includes("alphanumeric") || msg.includes("lowercase")) {
-				setError(
-					"Password must contain at least one lowercase letter or number.",
-				);
-			} else if (msg.includes("special")) {
-				setError("Password must contain at least one special character.");
-			} else if (msg.includes("valid") || msg.includes("illegal")) {
-				setError("Password contains invalid characters.");
-			} else if (msg.includes("pattern")) {
-				setError("Password does not meet complexity requirements.");
-			} else {
-				setError(msg || "Sign up failed. Please try again.");
-			}
+			setError(msg || "Sign up failed. Please try again.");
 		}
 	};
 
@@ -93,9 +125,24 @@ function SignUp() {
 									required
 									value={name}
 									onChange={(e) => setName(e.target.value)}
+									maxLength={50}
 									className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#281d80] focus:ring-2 focus:ring-[#281d80]/20 transition-all"
 									placeholder="Enter your name"
 								/>
+								{name.length > 0 && (
+									<div className="mt-1 flex items-center justify-between">
+										<span className="text-xs text-gray-500">
+											{name.trim().length < 2
+												? "Name must be at least 2 characters"
+												: !/^[a-zA-Z\s'-]+$/.test(name.trim())
+													? "Only letters, spaces, hyphens, and apostrophes allowed"
+													: ""}
+										</span>
+										<span className="text-xs text-gray-400">
+											{name.length}/50
+										</span>
+									</div>
+								)}
 							</div>
 
 							<div>
@@ -134,8 +181,9 @@ function SignUp() {
 										required
 										value={password}
 										onChange={(e) => setPassword(e.target.value)}
+										maxLength={128}
 										className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#281d80] focus:ring-2 focus:ring-[#281d80]/20 transition-all"
-										placeholder="Enter your password (min. 6 characters)"
+										placeholder="Enter your password (min. 8 characters)"
 									/>
 									<button
 										type="button"
@@ -153,11 +201,54 @@ function SignUp() {
 									</button>
 								</div>
 								{password.length > 0 && (
-									<span className="block mt-2 text-xs text-gray-500">
-										Password must be at least 6 characters and contain at least
-										one uppercase letter, one lowercase letter or number, and
-										one special character.
-									</span>
+									<div className="mt-2 space-y-1">
+										<p className="text-xs text-gray-600 font-medium">
+											Password requirements:
+										</p>
+										<ul className="text-xs text-gray-500 space-y-0.5 ml-4 list-disc">
+											<li
+												className={
+													password.length >= 8 && password.length <= 128
+														? "text-green-600"
+														: ""
+												}
+											>
+												At least 8 characters (max 128)
+											</li>
+											<li
+												className={
+													/(?=.*[A-Z])/.test(password) ? "text-green-600" : ""
+												}
+											>
+												One uppercase letter
+											</li>
+											<li
+												className={
+													/(?=.*[a-z])/.test(password) ? "text-green-600" : ""
+												}
+											>
+												One lowercase letter
+											</li>
+											<li
+												className={
+													/(?=.*[0-9])/.test(password) ? "text-green-600" : ""
+												}
+											>
+												One number
+											</li>
+											<li
+												className={
+													/(?=.*[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>/?])/.test(
+														password,
+													)
+														? "text-green-600"
+														: ""
+												}
+											>
+												One special character
+											</li>
+										</ul>
+									</div>
 								)}
 							</div>
 						</div>

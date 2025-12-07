@@ -9,11 +9,8 @@ import { signupSchema, loginSchema } from "./validationSchema.js";
 
 const authRouter = Router();
 
-// --- SIGN-UP Route ---
-// Using the validate middleware with signupSchema
 authRouter.post("/signup", validate(signupSchema), async (req, res) => {
 	try {
-		// Joi has ensured name, email, and password meet all requirements.
 		const { name, email, password } = req.body;
 
 		const newUser = await authService.signUp(name, email, password);
@@ -32,11 +29,8 @@ authRouter.post("/signup", validate(signupSchema), async (req, res) => {
 	}
 });
 
-// --- LOGIN Route ---
-// Using the validate middleware with loginSchema
 authRouter.post("/login", validate(loginSchema), async (req, res) => {
 	try {
-		// Joi has ensured email and password are present and meet min length.
 		const { email, password } = req.body;
 
 		const user = await authService.login(email, password);
