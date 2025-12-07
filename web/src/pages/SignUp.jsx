@@ -2,7 +2,6 @@ import { useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 
-import BackButton from "../components/BackButton";
 import { useAuth } from "../contexts/useAuth";
 
 function SignUp() {
@@ -32,16 +31,29 @@ function SignUp() {
 			await signUp(name, email, password);
 			navigate("/");
 		} catch (error) {
-			setError(error.message || "Sign up failed. Please try again.");
+			const msg = error.message || "";
+
+			if (msg.includes("uppercase")) {
+				setError("Password must contain at least one uppercase letter.");
+			} else if (msg.includes("alphanumeric") || msg.includes("lowercase")) {
+				setError(
+					"Password must contain at least one lowercase letter or number.",
+				);
+			} else if (msg.includes("special")) {
+				setError("Password must contain at least one special character.");
+			} else if (msg.includes("valid") || msg.includes("illegal")) {
+				setError("Password contains invalid characters.");
+			} else if (msg.includes("pattern")) {
+				setError("Password does not meet complexity requirements.");
+			} else {
+				setError(msg || "Sign up failed. Please try again.");
+			}
 		}
 	};
 
 	return (
 		<div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
 			<div className="w-full max-w-md">
-				<div className="mb-4">
-					<BackButton />
-				</div>
 				<div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-6 sm:p-8 space-y-5 sm:space-y-6">
 					<div className="text-center">
 						<h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
