@@ -1,4 +1,5 @@
 import db from "../db.js";
+import logger from "../utils/logger.js";
 
 // Helper function to detect which column exists (prefer 'content', fallback to 'body')
 let answerContentColumnName = null;
@@ -73,4 +74,92 @@ export const getAnswerByIdDB = async (id) => {
 		[id],
 	);
 	return result.rows[0];
+};
+
+// Add this function to answerRepository.js
+export const getAnswersByUserIdDB = async (userId) => {
+	const columnName = await getAnswerContentColumnName();
+	const result = await db.query(
+		`SELECT
+            a.id,
+            a.${columnName} AS content,
+            a.user_id,
+            a.question_id,
+            a.created_at,
+            a.updated_at,
+            u.name AS author_name,
+            u.email AS author_email
+         FROM answers a
+         JOIN users u ON a.user_id = u.id
+         WHERE a.user_id = $1
+         ORDER BY a.created_at DESC`,
+		[userId],
+	);
+	return result.rows;
+};
+
+// Add this function to get answers with question details
+export const getAnswersByUserIdWithQuestionsDB = async (userId) => {
+	const columnName = await getAnswerContentColumnName();
+
+	// First get all answers for the user
+	const answersResult = await db.query(
+		`SELECT
+            a.id,
+            a.${columnName} AS content,
+            a.user_id,
+            a.question_id,
+            a.created_at,
+            a.updated_at,
+            u.name AS author_name,
+            u.email AS author_email
+         FROM answers a
+         JOIN users u ON a.user_id = u.id
+         WHERE a.user_id = $1
+         ORDER BY a.created_at DESC`,
+		[userId],
+	);
+
+	const answers = answersResult.rows;
+
+	// For each answer, get the question details
+	for (const answer of answers) {
+		try {
+			// Get basic question info
+			const questionResult = await db.query(
+				`SELECT
+                    q.id,
+                    q.title,
+                    q.slug,
+                    q.created_at,
+                    q.is_solved,
+                    qu.name AS author_name,
+                    qu.email AS author_email
+                 FROM questions q
+                 JOIN users qu ON q.user_id = qu.id
+                 WHERE q.id = $1`,
+				[answer.question_id],
+			);
+
+			if (questionResult.rows.length > 0) {
+				answer.question = questionResult.rows[0];
+
+				// Get labels for the question
+				const labelsResult = await db.query(
+					`SELECT l.id, l.name
+                     FROM labels l
+                     JOIN question_labels ql ON l.id = ql.label_id
+                     WHERE ql.question_id = $1`,
+					[answer.question_id],
+				);
+
+				answer.question.labels = labelsResult.rows;
+			}
+		} catch (error) {
+			logger.error(`Error fetching question ${answer.question_id}:`, error);
+			answer.question = null;
+		}
+	}
+
+	return answers;
 };
