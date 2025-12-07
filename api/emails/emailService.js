@@ -1,18 +1,17 @@
-// api/emails/emailService.js
 import AWS from "aws-sdk";
 
 import logger from "../utils/logger.js";
 
-import { EMAIL_SOURCE, EMAIL_REGION, SUBJECTS } from "./constants.js";
+import { EMAIL_SOURCE, EMAIL_REGION, SUBJECTS, APP_URL } from "./constants.js";
 import {
 	getAnswerNotificationHtml,
 	getAnswerNotificationText,
 } from "./templates/index.js";
-import { truncateContent, getQuestionUrl } from "./templates/templateUtils.js";
+import { truncateContent } from "./templates/templateUtils.js";
 
-// Configure AWS SES - Hardcode the region
+// Configure AWS SES
 AWS.config.update({
-	region: EMAIL_REGION, // This is now hardcoded to 'eu-west-1'
+	region: EMAIL_REGION,
 	// No credentials needed - will automatically use EC2 instance IAM role
 });
 
@@ -22,12 +21,12 @@ class EmailService {
 	async sendAnswerNotification({
 		questionAuthorEmail,
 		questionAuthorName,
-		questionId,
 		questionSlug,
+		questionId,
 		questionTitle,
 		answererName,
 		answerContent,
-		appUrl, // This can still be passed optionally
+		appUrl = APP_URL,
 	}) {
 		try {
 			if (!questionAuthorEmail) {
@@ -38,10 +37,17 @@ class EmailService {
 				};
 			}
 
-			// Use provided appUrl or default from constants
-			const finalAppUrl = appUrl || EMAIL_SOURCE.replace("info@", "https://");
-			const questionIdentifier = questionSlug || questionId;
-			const questionUrl = getQuestionUrl(questionIdentifier, finalAppUrl);
+			// CRITICAL: Build the URL with the slug
+			const questionUrl = `${appUrl}/questions/${questionSlug}`;
+
+			// Log the URL for debugging
+			logger.info("Building email URL:", {
+				appUrl,
+				questionSlug,
+				questionUrl,
+				questionId,
+				hasSlug: !!questionSlug,
+			});
 			const truncatedAnswer = truncateContent(answerContent, 300);
 
 			const params = {
@@ -83,6 +89,8 @@ class EmailService {
 			logger.info("EmailService: Answer notification sent successfully", {
 				to: questionAuthorEmail,
 				questionId,
+				questionSlug,
+				questionUrl,
 				messageId: result.MessageId,
 			});
 
@@ -95,6 +103,7 @@ class EmailService {
 				error: error.message,
 				errorCode: error.code,
 				questionId,
+				questionSlug,
 				to: questionAuthorEmail,
 			});
 

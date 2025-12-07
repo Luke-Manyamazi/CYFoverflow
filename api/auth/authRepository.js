@@ -27,9 +27,14 @@ export async function createUser(name, email, hashedPassword) {
 }
 
 export async function findUserById(id) {
-	const result = await db.query(
-		"SELECT id, name, email FROM users WHERE id = $1",
-		[id],
-	);
-	return result.rows[0];
+	try {
+		const result = await db.query(
+			"SELECT id, name, username, email FROM users WHERE id = $1",
+			[id],
+		);
+		return result.rows[0];
+	} catch (error) {
+		logger.error("Error finding user by id: %O", error);
+		throw error;
+	}
 }

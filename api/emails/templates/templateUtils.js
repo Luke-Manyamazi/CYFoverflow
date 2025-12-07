@@ -4,10 +4,6 @@ export const truncateContent = (content, maxLength = 300) => {
 	return content.substring(0, maxLength) + "...";
 };
 
-export const getQuestionUrl = (questionIdentifier, appUrl) => {
-	return `${appUrl}/questions/${questionIdentifier}`;
-};
-
 export const formatDate = (date = new Date()) => {
 	return date.toLocaleString();
 };
