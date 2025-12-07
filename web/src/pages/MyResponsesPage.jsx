@@ -114,10 +114,10 @@ function MyResponsesPage() {
 									</p>
 									<div className="mt-4 md:mt-6">
 										<button
-											onClick={() => navigate("/questions")}
+											onClick={() => navigate("/")}
 											className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 border border-transparent shadow-sm text-xs md:text-sm font-medium rounded-md text-white bg-[#281d80] hover:bg-[#1f1566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#281d80] cursor-pointer"
 										>
-											Browse Questions
+											Back to Home Page
 										</button>
 									</div>
 								</div>
