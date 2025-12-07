@@ -15,7 +15,7 @@ import {
 function MyQuestionsPage() {
 	const navigate = useNavigate();
 	const { token, isLoggedIn, user } = useAuth();
-	const { searchTerm } = useSearch();
+	const { searchTerm, setSearchTerm } = useSearch();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -28,6 +28,9 @@ function MyQuestionsPage() {
 	}, [searchTerm, selectedLabel]);
 
 	const handleLabelClick = (label) => {
+		if (searchTerm && searchTerm.trim()) {
+			setSearchTerm("");
+		}
 		setSelectedLabel(selectedLabel?.id === label.id ? null : label);
 	};
 

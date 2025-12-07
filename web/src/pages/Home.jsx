@@ -30,7 +30,7 @@ function Home() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { isLoggedIn, user } = useAuth();
-	const { searchTerm } = useSearch();
+	const { searchTerm, setSearchTerm } = useSearch();
 	const { selectedLabel, setSelectedLabel } = useLabelFilter();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -114,6 +114,9 @@ function Home() {
 	};
 
 	const handleLabelClick = (label) => {
+		if (searchTerm && searchTerm.trim()) {
+			setSearchTerm("");
+		}
 		setSelectedLabel(label);
 	};
 
