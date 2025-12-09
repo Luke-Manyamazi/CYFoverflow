@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <circle cx="16" cy="16" r="15" fill="#281d80"/>
+  <text x="16" y="12" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#ed4d4e" text-anchor="middle">CYF</text>
+  <circle cx="16" cy="22" r="6" fill="none" stroke="#ed4d4e" stroke-width="1.5"/>
+  <text x="16" y="25" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#ed4d4e" text-anchor="middle">O</text>
+</svg>
+
