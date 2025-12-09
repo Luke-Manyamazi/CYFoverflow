@@ -1,7 +1,7 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { FaEdit, FaTrash, FaCheckCircle, FaArrowLeft } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 import Answer from "../components/Answer";
 import AnswerForm from "../components/AnswerForm";
@@ -13,6 +13,7 @@ import { capitalizeTitle } from "../utils/questionUtils.jsx";
 function QuestionDetailPage() {
 	const { id: identifier } = useParams();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { isLoggedIn, token, user } = useAuth();
 	const [question, setQuestion] = useState(null);
 	const [answers, setAnswers] = useState([]);
@@ -44,7 +45,6 @@ function QuestionDetailPage() {
 
 	const fetchAnswers = useCallback(async () => {
 		try {
-			// Use question ID for answers API (answers API still uses ID)
 			const questionId = question?.id || identifier;
 			const response = await fetch(`/api/answers/${questionId}`);
 
@@ -69,6 +69,21 @@ function QuestionDetailPage() {
 			fetchAnswers();
 		}
 	}, [question?.id, fetchAnswers]);
+
+	useEffect(() => {
+		if (location.hash && answers.length > 0 && !loading) {
+			const answerId = location.hash.replace("#", "");
+			const answerElement = document.getElementById(answerId);
+			if (answerElement) {
+				setTimeout(() => {
+					answerElement.scrollIntoView({
+						behavior: "smooth",
+						block: "start",
+					});
+				}, 100);
+			}
+		}
+	}, [location.hash, answers, loading]);
 
 	const handleAnswerClick = () => {
 		if (!isLoggedIn) {

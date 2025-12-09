@@ -18,15 +18,16 @@ function MyResponsesPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	// Filter answers based on search term
 	const filteredAnswers = filterAnswers(answers, searchTerm);
 
-	const handleViewQuestion = (questionId) => {
-		navigate(`/questions/${questionId}`);
+	const handleViewQuestion = (answer) => {
+		const identifier = answer.question?.slug || answer.question_id;
+		navigate(`/questions/${identifier}`);
 	};
 
-	const handleViewAnswer = (questionId, answerId) => {
-		navigate(`/questions/${questionId}#answer-${answerId}`);
+	const handleViewAnswer = (answer) => {
+		const identifier = answer.question?.slug || answer.question_id;
+		navigate(`/questions/${identifier}#answer-${answer.id}`);
 	};
 
 	useEffect(() => {
@@ -181,11 +182,11 @@ function MyResponsesPage() {
 												role="button"
 												tabIndex={0}
 												className="bg-gray-50 border border-gray-100 rounded-lg p-3 md:p-4 mb-3 md:mb-4 hover:bg-gray-100 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#281d80] focus:ring-opacity-50"
-												onClick={() => handleViewQuestion(answer.question_id)}
+												onClick={() => handleViewQuestion(answer)}
 												onKeyDown={(e) => {
 													if (e.key === "Enter" || e.key === " ") {
 														e.preventDefault();
-														handleViewQuestion(answer.question_id);
+														handleViewQuestion(answer);
 													}
 												}}
 											>
@@ -283,15 +284,13 @@ function MyResponsesPage() {
 										{/* Actions */}
 										<div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2">
 											<button
-												onClick={() => handleViewQuestion(answer.question_id)}
+												onClick={() => handleViewQuestion(answer)}
 												className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-[#281d80] hover:text-white hover:bg-[#281d80] border border-[#281d80] rounded-lg transition-colors cursor-pointer"
 											>
 												View Question
 											</button>
 											<button
-												onClick={() =>
-													handleViewAnswer(answer.question_id, answer.id)
-												}
+												onClick={() => handleViewAnswer(answer)}
 												className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-white bg-[#281d80] hover:bg-[#1f1566] rounded-lg transition-colors cursor-pointer"
 											>
 												View Your Answer
@@ -308,18 +307,15 @@ function MyResponsesPage() {
 	);
 }
 
-// Helper function to filter answers
 function filterAnswers(answers, searchTerm) {
 	if (!searchTerm || !searchTerm.trim()) return answers;
 
 	const term = searchTerm.toLowerCase();
 	return answers.filter((answer) => {
-		// Search in answer content
 		if (answer.content && answer.content.toLowerCase().includes(term)) {
 			return true;
 		}
 
-		// Search in question title if we have question data
 		if (
 			answer.question &&
 			answer.question.title &&
@@ -328,7 +324,6 @@ function filterAnswers(answers, searchTerm) {
 			return true;
 		}
 
-		// Search in question content/body if we have question data
 		if (
 			answer.question &&
 			(answer.question.body || answer.question.content) &&

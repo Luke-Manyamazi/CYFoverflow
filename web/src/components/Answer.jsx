@@ -62,7 +62,10 @@ function Answer({ answer, onDelete }) {
 	}
 
 	return (
-		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4">
+		<div
+			id={`answer-${answer.id}`}
+			className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4"
+		>
 			<div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
 				{/* User Info */}
 				<div className="flex items-center gap-2 sm:gap-3">
