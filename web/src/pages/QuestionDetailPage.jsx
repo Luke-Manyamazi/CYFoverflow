@@ -73,17 +73,21 @@ function QuestionDetailPage() {
 	useEffect(() => {
 		if (location.hash && answers.length > 0 && !loading) {
 			const answerId = location.hash.replace("#", "");
-			const answerElement = document.getElementById(answerId);
-			if (answerElement) {
-				setTimeout(() => {
-					answerElement.scrollIntoView({
-						behavior: "smooth",
-						block: "start",
-					});
-				}, 100);
+			if (answerId.startsWith("answer-")) {
+				const answerElement = document.getElementById(answerId);
+				if (answerElement) {
+					setTimeout(() => {
+						answerElement.scrollIntoView({
+							behavior: "smooth",
+							block: "start",
+						});
+					}, 100);
+				}
 			}
+		} else if (!location.hash && !loading && question) {
+			window.scrollTo({ top: 0, behavior: "instant" });
 		}
-	}, [location.hash, answers, loading]);
+	}, [location.hash, answers, loading, question]);
 
 	const handleAnswerClick = () => {
 		if (!isLoggedIn) {
