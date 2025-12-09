@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
+import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 
 const TAG_DESCRIPTIONS = {
@@ -57,9 +58,14 @@ const TAG_DESCRIPTIONS = {
 function LabelsPage() {
 	const navigate = useNavigate();
 	const { searchTerm, setSearchTerm } = useSearch();
+	const { setSelectedLabel } = useLabelFilter();
 	const [labels, setLabels] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+
+	useEffect(() => {
+		setSelectedLabel(null);
+	}, [setSelectedLabel]);
 
 	useEffect(() => {
 		const fetchLabels = async () => {

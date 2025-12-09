@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
+import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 import {
@@ -14,20 +15,29 @@ function MyResponsesPage() {
 	const navigate = useNavigate();
 	const { token, isLoggedIn } = useAuth();
 	const { searchTerm } = useSearch();
+	const { setSelectedLabel } = useLabelFilter();
 	const [answers, setAnswers] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+
+	useEffect(() => {
+		setSelectedLabel(null);
+	}, [setSelectedLabel]);
 
 	const filteredAnswers = filterAnswers(answers, searchTerm);
 
 	const handleViewQuestion = (answer) => {
 		const identifier = answer.question?.slug || answer.question_id;
-		navigate(`/questions/${identifier}`);
+		navigate(`/questions/${identifier}`, {
+			state: { fromMyResponses: true },
+		});
 	};
 
 	const handleViewAnswer = (answer) => {
 		const identifier = answer.question?.slug || answer.question_id;
-		navigate(`/questions/${identifier}#answer-${answer.id}`);
+		navigate(`/questions/${identifier}#answer-${answer.id}`, {
+			state: { fromMyResponses: true },
+		});
 	};
 
 	useEffect(() => {

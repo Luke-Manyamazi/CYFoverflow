@@ -245,11 +245,25 @@ function QuestionDetailPage() {
 					<main className="flex-1 min-w-0">
 						<div className="mb-3 md:mb-4">
 							<button
-								onClick={() => navigate("/")}
+								onClick={() => {
+									if (location.state?.fromMyResponses) {
+										navigate("/my-responses");
+									} else if (location.state?.fromMyQuestions) {
+										navigate("/my-questions");
+									} else {
+										navigate("/");
+									}
+								}}
 								className="flex items-center gap-2 text-sm sm:text-base text-gray-600 hover:text-[#281d80] transition-colors duration-200 cursor-pointer"
 							>
 								<FaArrowLeft className="w-4 h-4" />
-								<span className="font-medium">Back to Home</span>
+								<span className="font-medium">
+									{location.state?.fromMyResponses
+										? "Back to My Responses"
+										: location.state?.fromMyQuestions
+											? "Back to My Questions"
+											: "Back to Home"}
+								</span>
 							</button>
 						</div>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-4 md:mb-6">

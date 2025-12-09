@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import LabelBadge from "../components/LabelBadge";
 import Sidebar from "../components/Sidebar";
+import { useLabelFilter } from "../contexts/LabelFilterContext";
 import { useSearch } from "../contexts/SearchContext";
 import { useAuth } from "../contexts/useAuth";
 import {
@@ -16,10 +17,15 @@ function MyQuestionsPage() {
 	const navigate = useNavigate();
 	const { token, isLoggedIn, user } = useAuth();
 	const { searchTerm, setSearchTerm } = useSearch();
+	const { setSelectedLabel: setGlobalSelectedLabel } = useLabelFilter();
 	const [questions, setQuestions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [selectedLabel, setSelectedLabel] = useState(null);
+
+	useEffect(() => {
+		setGlobalSelectedLabel(null);
+	}, [setGlobalSelectedLabel]);
 
 	useEffect(() => {
 		if (searchTerm && searchTerm.trim() && selectedLabel) {
@@ -48,7 +54,9 @@ function MyQuestionsPage() {
 
 	const handleQuestionClick = (question) => {
 		const identifier = question.slug || question.id;
-		navigate(`/questions/${identifier}`);
+		navigate(`/questions/${identifier}`, {
+			state: { fromMyQuestions: true },
+		});
 	};
 
 	useEffect(() => {
