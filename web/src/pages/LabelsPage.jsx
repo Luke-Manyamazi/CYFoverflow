@@ -200,10 +200,7 @@ function LabelsPage() {
 												<div className="flex items-start justify-between mb-2">
 													<LabelBadge
 														label={label}
-														onClick={(e) => {
-															e.stopPropagation();
-															handleLabelClick(label);
-														}}
+														onClick={handleLabelClick}
 														className="text-sm font-semibold"
 													/>
 												</div>
