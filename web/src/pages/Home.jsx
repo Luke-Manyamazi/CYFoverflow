@@ -184,7 +184,9 @@ function Home() {
 						setSelectedLabel(label);
 					}
 				})
-				.catch(console.error);
+				.catch((err) => {
+					console.error("Error fetching labels:", err);
+				});
 			navigate(location.pathname, { replace: true, state: {} });
 		}
 	}, [location.state?.labelId, location.pathname, navigate, setSelectedLabel]);
