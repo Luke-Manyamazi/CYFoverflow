@@ -71,10 +71,12 @@ function Home() {
 		}
 	}, [selectedLabel, location.pathname, location.search, navigate]);
 
-	const fetchQuestionsByLabel = useCallback(async (labelId) => {
+	const fetchQuestionsByLabel = useCallback(async (labelId, silent = false) => {
 		try {
-			setLoading(true);
-			setError("");
+			if (!silent) {
+				setLoading(true);
+				setError("");
+			}
 			const response = await fetch("/api/questions/search/by-labels", {
 				method: "POST",
 				headers: {
@@ -94,69 +96,91 @@ function Home() {
 			setPagination(null);
 		} catch (err) {
 			console.error("Error fetching questions by label:", err);
-			setError("Failed to load questions. Please try again later.");
+			if (!silent) {
+				setError("Failed to load questions. Please try again later.");
+			}
 		} finally {
-			setLoading(false);
+			if (!silent) {
+				setLoading(false);
+			}
 		}
 	}, []);
 
-	const fetchQuestionsBySearch = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError("");
-			const response = await fetch(
-				`/api/questions/search?q=${encodeURIComponent(searchTerm.trim())}&page=${currentPageFromUrl}&limit=${itemsPerPage}`,
-			);
+	const fetchQuestionsBySearch = useCallback(
+		async (silent = false) => {
+			try {
+				if (!silent) {
+					setLoading(true);
+					setError("");
+				}
+				const response = await fetch(
+					`/api/questions/search?q=${encodeURIComponent(searchTerm.trim())}&page=${currentPageFromUrl}&limit=${itemsPerPage}`,
+				);
 
-			if (!response.ok) {
-				throw new Error("Failed to search questions");
+				if (!response.ok) {
+					throw new Error("Failed to search questions");
+				}
+
+				const data = await response.json();
+
+				if (data.pagination) {
+					setQuestions(data.questions);
+					setPagination(data.pagination);
+				} else {
+					setQuestions(data);
+					setPagination(null);
+				}
+			} catch (err) {
+				console.error("Error searching questions:", err);
+				if (!silent) {
+					setError("Failed to search questions. Please try again later.");
+				}
+			} finally {
+				if (!silent) {
+					setLoading(false);
+				}
 			}
+		},
+		[searchTerm, currentPageFromUrl, itemsPerPage],
+	);
 
-			const data = await response.json();
+	const fetchLatestQuestions = useCallback(
+		async (silent = false) => {
+			try {
+				if (!silent) {
+					setLoading(true);
+					setError("");
+				}
+				const response = await fetch(
+					`/api/questions?page=${currentPageFromUrl}&limit=${itemsPerPage}`,
+				);
 
-			if (data.pagination) {
-				setQuestions(data.questions);
-				setPagination(data.pagination);
-			} else {
-				setQuestions(data);
-				setPagination(null);
+				if (!response.ok) {
+					throw new Error(`Failed to fetch questions: ${response.status}`);
+				}
+
+				const data = await response.json();
+
+				if (data.pagination) {
+					setQuestions(data.questions);
+					setPagination(data.pagination);
+				} else {
+					setQuestions(data);
+					setPagination(null);
+				}
+			} catch (err) {
+				console.error("Error fetching questions:", err);
+				if (!silent) {
+					setError("Failed to load questions. Please try again later.");
+				}
+			} finally {
+				if (!silent) {
+					setLoading(false);
+				}
 			}
-		} catch (err) {
-			console.error("Error searching questions:", err);
-			setError("Failed to search questions. Please try again later.");
-		} finally {
-			setLoading(false);
-		}
-	}, [searchTerm, currentPageFromUrl, itemsPerPage]);
-
-	const fetchLatestQuestions = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError("");
-			const response = await fetch(
-				`/api/questions?page=${currentPageFromUrl}&limit=${itemsPerPage}`,
-			);
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch questions: ${response.status}`);
-			}
-
-			const data = await response.json();
-
-			if (data.pagination) {
-				setQuestions(data.questions);
-				setPagination(data.pagination);
-			} else {
-				setQuestions(data);
-				setPagination(null);
-			}
-		} catch (err) {
-			console.error("Error fetching questions:", err);
-			setError("Failed to load questions. Please try again later.");
-		} finally {
-			setLoading(false);
-		}
-	}, [currentPageFromUrl, itemsPerPage]);
+		},
+		[currentPageFromUrl, itemsPerPage],
+	);
 
 	useEffect(() => {
 		if (selectedLabel) {
@@ -167,6 +191,58 @@ function Home() {
 			fetchLatestQuestions();
 		}
 	}, [
+		selectedLabel,
+		searchTerm,
+		fetchLatestQuestions,
+		fetchQuestionsByLabel,
+		fetchQuestionsBySearch,
+	]);
+
+	useEffect(() => {
+		if (loading) return;
+
+		const POLL_INTERVAL = 30000;
+
+		const refetchData = async () => {
+			try {
+				if (selectedLabel) {
+					await fetchQuestionsByLabel(selectedLabel.id, true);
+				} else if (searchTerm && searchTerm.trim()) {
+					await fetchQuestionsBySearch(true);
+				} else {
+					await fetchLatestQuestions(true);
+				}
+			} catch (err) {
+				console.error("Error refetching questions:", err);
+			}
+		};
+
+		const intervalId = setInterval(() => {
+			if (document.visibilityState === "visible") {
+				refetchData();
+			}
+		}, POLL_INTERVAL);
+
+		const handleFocus = () => {
+			refetchData();
+		};
+
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === "visible") {
+				refetchData();
+			}
+		};
+
+		window.addEventListener("focus", handleFocus);
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+
+		return () => {
+			clearInterval(intervalId);
+			window.removeEventListener("focus", handleFocus);
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
+		};
+	}, [
+		loading,
 		selectedLabel,
 		searchTerm,
 		fetchLatestQuestions,

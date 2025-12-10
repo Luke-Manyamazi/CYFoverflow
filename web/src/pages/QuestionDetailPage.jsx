@@ -117,6 +117,11 @@ function QuestionDetailPage() {
 		fetchAnswers();
 	};
 
+	const handleAnswerDelete = () => {
+		fetchQuestion();
+		fetchAnswers();
+	};
+
 	const handleAnswerCancel = () => {
 		setShowAnswerForm(false);
 	};
@@ -502,7 +507,7 @@ function QuestionDetailPage() {
 										<Answer
 											key={answer.id}
 											answer={answer}
-											onDelete={fetchAnswers}
+											onDelete={handleAnswerDelete}
 											onUpdate={fetchAnswers}
 										/>
 									))}
