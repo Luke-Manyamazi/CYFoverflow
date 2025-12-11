@@ -312,7 +312,8 @@ function Home() {
 								<span style={{ color: "#281d80" }}>overflow</span>
 							</h1>
 							<p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 md:mb-6 font-medium">
-								Your community Q&A platform for technical questions
+								Your community-powered platform for asking, learning, and
+								sharing.
 							</p>
 
 							{isLoggedIn && user && (
