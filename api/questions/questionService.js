@@ -174,46 +174,6 @@ export const deleteQuestion = async (idOrSlug, userId) => {
 		throw new Error("You are not authorised to delete");
 	}
 
-	try {
-		const answers = await answerRepository.getAnswerByQuestionIdDB(question.id);
-		if (answers && answers.length > 0) {
-			const answererIds = [
-				...new Set(
-					answers
-						.map((answer) => answer.user_id)
-						.filter((answererId) => answererId !== question.user_id),
-				),
-			];
-
-			const questionAuthor = await authRepository.findUserById(
-				question.user_id,
-			);
-			const questionAuthorName = questionAuthor?.name || "The question author";
-
-			for (const answererId of answererIds) {
-				notificationService
-					.createNotification({
-						userId: answererId,
-						type: "question_deleted",
-						message: `${questionAuthorName} deleted the question: "${question.title}"`,
-						relatedQuestionId: question.id,
-					})
-					.catch((error) => {
-						logger.error("Failed to create notification for answerer", {
-							answererId,
-							questionId: question.id,
-							error: error.message,
-						});
-					});
-			}
-		}
-	} catch (error) {
-		logger.error("Error creating notifications for question deletion", {
-			questionId: question.id,
-			error: error.message,
-		});
-	}
-
 	return repository.deleteQuestionDB(question.id);
 };
 

@@ -172,37 +172,6 @@ export const deleteAnswer = async (id, userId) => {
 		throw new Error("Unauthorized: You can only delete your own answer");
 	}
 
-	try {
-		const question = await questionRepository.getQuestionByIdDB(
-			answer.question_id,
-		);
-		if (question && question.user_id && question.user_id !== userId) {
-			const answerer = await authRepository.findUserById(userId);
-			const answererName = answerer?.name || "A fellow learner";
-
-			notificationService
-				.createNotification({
-					userId: question.user_id,
-					type: "answer_deleted",
-					message: `${answererName} deleted their answer to your question: "${question.title}"`,
-					relatedQuestionId: question.id,
-					relatedAnswerId: answer.id,
-				})
-				.catch((error) => {
-					logger.error("Failed to create notification for answer deletion", {
-						answerId: answer.id,
-						questionAuthorId: question.user_id,
-						error: error.message,
-					});
-				});
-		}
-	} catch (error) {
-		logger.error("Error creating notification for answer deletion", {
-			answerId: answer.id,
-			error: error.message,
-		});
-	}
-
 	return repository.deleteAnswerDB(id);
 };
 
