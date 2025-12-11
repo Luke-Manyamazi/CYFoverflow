@@ -1,3 +1,6 @@
+import * as answerRepository from "../answers/answerRepository.js";
+import * as authRepository from "../auth/authRepository.js";
+import * as notificationService from "../notifications/notificationService.js";
 import logger from "../utils/logger.js";
 
 import * as repository from "./questionRepository.js";
@@ -107,8 +110,8 @@ export const updateQuestion = async (
 	if (question.user_id !== userId) {
 		throw new Error("You are not authorised to edit");
 	}
-	// Use the actual question ID from the fetched question
-	return repository.updateQuestionDB(
+
+	const updatedQuestion = await repository.updateQuestionDB(
 		question.id,
 		trimmedTitle,
 		content,
@@ -118,6 +121,48 @@ export const updateQuestion = async (
 		documentationLink,
 		labelId,
 	);
+
+	try {
+		const answers = await answerRepository.getAnswerByQuestionIdDB(question.id);
+		if (answers && answers.length > 0) {
+			const answererIds = [
+				...new Set(
+					answers
+						.map((answer) => answer.user_id)
+						.filter((answererId) => answererId !== question.user_id),
+				),
+			];
+
+			const questionAuthor = await authRepository.findUserById(
+				question.user_id,
+			);
+			const questionAuthorName = questionAuthor?.name || "The question author";
+
+			for (const answererId of answererIds) {
+				notificationService
+					.createNotification({
+						userId: answererId,
+						type: "question_updated",
+						message: `${questionAuthorName} updated the question: "${trimmedTitle}"`,
+						relatedQuestionId: question.id,
+					})
+					.catch((error) => {
+						logger.error("Failed to create notification for answerer", {
+							answererId,
+							questionId: question.id,
+							error: error.message,
+						});
+					});
+			}
+		}
+	} catch (error) {
+		logger.error("Error creating notifications for question update", {
+			questionId: question.id,
+			error: error.message,
+		});
+	}
+
+	return updatedQuestion;
 };
 
 export const deleteQuestion = async (idOrSlug, userId) => {
@@ -128,7 +173,47 @@ export const deleteQuestion = async (idOrSlug, userId) => {
 	if (question.user_id !== userId) {
 		throw new Error("You are not authorised to delete");
 	}
-	// Use the actual question ID from the fetched question
+
+	try {
+		const answers = await answerRepository.getAnswerByQuestionIdDB(question.id);
+		if (answers && answers.length > 0) {
+			const answererIds = [
+				...new Set(
+					answers
+						.map((answer) => answer.user_id)
+						.filter((answererId) => answererId !== question.user_id),
+				),
+			];
+
+			const questionAuthor = await authRepository.findUserById(
+				question.user_id,
+			);
+			const questionAuthorName = questionAuthor?.name || "The question author";
+
+			for (const answererId of answererIds) {
+				notificationService
+					.createNotification({
+						userId: answererId,
+						type: "question_deleted",
+						message: `${questionAuthorName} deleted the question: "${question.title}"`,
+						relatedQuestionId: question.id,
+					})
+					.catch((error) => {
+						logger.error("Failed to create notification for answerer", {
+							answererId,
+							questionId: question.id,
+							error: error.message,
+						});
+					});
+			}
+		}
+	} catch (error) {
+		logger.error("Error creating notifications for question deletion", {
+			questionId: question.id,
+			error: error.message,
+		});
+	}
+
 	return repository.deleteQuestionDB(question.id);
 };
 
@@ -174,6 +259,5 @@ export const markQuestionSolved = async (idOrSlug, userId, isSolved) => {
 		throw new Error("You are not authorised to change solved status");
 	}
 
-	// Use the actual question ID from the fetched question
 	return repository.updateSolvedStatusDB(question.id, isSolved);
 };

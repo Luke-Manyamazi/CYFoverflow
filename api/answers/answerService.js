@@ -1,5 +1,6 @@
 import * as authRepository from "../auth/authRepository.js";
-import emailService from "../emails/emailService.js"; // This imports the fixed file
+import emailService from "../emails/emailService.js";
+import * as notificationService from "../notifications/notificationService.js";
 import * as questionRepository from "../questions/questionRepository.js";
 import logger from "../utils/logger.js";
 
@@ -13,16 +14,13 @@ export const createAnswer = async (content, userId, questionId) => {
 	try {
 		logger.info("Creating answer", { userId, questionId });
 
-		// 1. Get answerer details
 		const answerer = await authRepository.findUserById(userId);
 		if (!answerer) throw new Error("Answerer not found");
 		const answererName = answerer.name || "A fellow learner";
 
-		// 2. Get question details
 		const question = await questionRepository.getQuestionByIdDB(questionId);
 		if (!question) throw new Error("Question not found");
 
-		// DEBUG: Verify we have the slug
 		logger.info("Question for email:", {
 			id: question.id,
 			slug: question.slug,
@@ -31,7 +29,6 @@ export const createAnswer = async (content, userId, questionId) => {
 			authorEmail: question.author_email,
 		});
 
-		// 3. Create the answer
 		const answer = await repository.createAnswerDB({
 			content,
 			user_id: userId,
@@ -40,13 +37,35 @@ export const createAnswer = async (content, userId, questionId) => {
 
 		logger.info("Answer created", { answerId: answer.id });
 
-		// 4. Send email notification
+		if (question.user_id && question.user_id !== userId) {
+			notificationService
+				.createNotification({
+					userId: question.user_id,
+					type: "answer",
+					message: `${answererName} answered your question: "${question.title}"`,
+					relatedQuestionId: question.id,
+					relatedAnswerId: answer.id,
+				})
+				.then(() => {
+					logger.info("Notification created successfully", {
+						answerId: answer.id,
+						questionAuthorId: question.user_id,
+					});
+				})
+				.catch((error) => {
+					logger.error("Notification creation failed", {
+						answerId: answer.id,
+						error: error.message,
+					});
+				});
+		}
+
 		if (question.author_email && question.slug) {
 			emailService
 				.sendAnswerNotification({
 					questionAuthorEmail: question.author_email,
 					questionAuthorName: question.author_name,
-					questionSlug: question.slug, // Pass the slug
+					questionSlug: question.slug,
 					questionId: question.id,
 					questionTitle: question.title,
 					answererName: answererName,
@@ -106,7 +125,40 @@ export const updateAnswer = async (id, content, userId) => {
 		throw new Error("Unauthorized: You can only edit your own answer");
 	}
 
-	return repository.updateAnswerDB(id, content);
+	const updatedAnswer = await repository.updateAnswerDB(id, content);
+
+	try {
+		const question = await questionRepository.getQuestionByIdDB(
+			answer.question_id,
+		);
+		if (question && question.user_id && question.user_id !== userId) {
+			const answerer = await authRepository.findUserById(userId);
+			const answererName = answerer?.name || "A fellow learner";
+
+			notificationService
+				.createNotification({
+					userId: question.user_id,
+					type: "answer_updated",
+					message: `${answererName} updated their answer to your question: "${question.title}"`,
+					relatedQuestionId: question.id,
+					relatedAnswerId: answer.id,
+				})
+				.catch((error) => {
+					logger.error("Failed to create notification for answer update", {
+						answerId: answer.id,
+						questionAuthorId: question.user_id,
+						error: error.message,
+					});
+				});
+		}
+	} catch (error) {
+		logger.error("Error creating notification for answer update", {
+			answerId: answer.id,
+			error: error.message,
+		});
+	}
+
+	return updatedAnswer;
 };
 
 export const deleteAnswer = async (id, userId) => {
@@ -120,15 +172,44 @@ export const deleteAnswer = async (id, userId) => {
 		throw new Error("Unauthorized: You can only delete your own answer");
 	}
 
+	try {
+		const question = await questionRepository.getQuestionByIdDB(
+			answer.question_id,
+		);
+		if (question && question.user_id && question.user_id !== userId) {
+			const answerer = await authRepository.findUserById(userId);
+			const answererName = answerer?.name || "A fellow learner";
+
+			notificationService
+				.createNotification({
+					userId: question.user_id,
+					type: "answer_deleted",
+					message: `${answererName} deleted their answer to your question: "${question.title}"`,
+					relatedQuestionId: question.id,
+					relatedAnswerId: answer.id,
+				})
+				.catch((error) => {
+					logger.error("Failed to create notification for answer deletion", {
+						answerId: answer.id,
+						questionAuthorId: question.user_id,
+						error: error.message,
+					});
+				});
+		}
+	} catch (error) {
+		logger.error("Error creating notification for answer deletion", {
+			answerId: answer.id,
+			error: error.message,
+		});
+	}
+
 	return repository.deleteAnswerDB(id);
 };
 
-// Add this function to answerService.js
 export const getAnswersByUserId = async (userId) => {
 	try {
 		logger.info("Getting answers for user", { userId });
 
-		// Use the repository function that includes question details
 		const answers = await repository.getAnswersByUserIdWithQuestionsDB(userId);
 
 		logger.info("Found answers for user", {
