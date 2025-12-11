@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { LabelFilterProvider } from "./contexts/LabelFilterContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import { SearchProvider } from "./contexts/SearchContext";
 import EditQuestion from "./pages/EditQuestion.jsx";
 import Home from "./pages/Home";
@@ -20,28 +21,36 @@ function App() {
 		<AuthProvider>
 			<SearchProvider>
 				<LabelFilterProvider>
-					<Router>
-						<div
-							className="min-h-screen"
-							style={{ backgroundColor: "#efeef8" }}
-						>
-							<Navbar />
-							<Routes>
-								{/* Existing Routes */}
-								<Route path="/" element={<Home />} />
-								<Route path="/login" element={<Login />} />
-								<Route path="/signup" element={<SignUp />} />
-								<Route path="/ask" element={<QuestionPage />} />
+					<NotificationProvider>
+						<Router>
+							<div
+								className="min-h-screen"
+								style={{ backgroundColor: "#efeef8" }}
+							>
+								<Navbar />
+								<Routes>
+									{/* Existing Routes */}
+									<Route path="/" element={<Home />} />
+									<Route path="/login" element={<Login />} />
+									<Route path="/signup" element={<SignUp />} />
+									<Route path="/ask" element={<QuestionPage />} />
 
-								<Route path="/questions/:id" element={<QuestionDetailPage />} />
-								<Route path="/labels" element={<LabelsPage />} />
-								<Route path="/my-questions" element={<MyQuestionsPage />} />
-								<Route path="/my-responses" element={<MyResponsesPage />} />
+									<Route
+										path="/questions/:id"
+										element={<QuestionDetailPage />}
+									/>
+									<Route path="/labels" element={<LabelsPage />} />
+									<Route path="/my-questions" element={<MyQuestionsPage />} />
+									<Route path="/my-responses" element={<MyResponsesPage />} />
 
-								<Route path="/questions/:id/edit" element={<EditQuestion />} />
-							</Routes>
-						</div>
-					</Router>
+									<Route
+										path="/questions/:id/edit"
+										element={<EditQuestion />}
+									/>
+								</Routes>
+							</div>
+						</Router>
+					</NotificationProvider>
 				</LabelFilterProvider>
 			</SearchProvider>
 		</AuthProvider>
