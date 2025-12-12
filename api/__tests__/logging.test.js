@@ -1,4 +1,5 @@
 import stripAnsi from "strip-ansi";
+import { describe, it, expect, afterEach, vi } from "vitest";
 
 import { createRequest } from "./testUtils.js";
 
@@ -30,9 +31,9 @@ describe("default request logging", () => {
 
 		it("logs other routes", async () => {
 			const request = await createRequest();
-			await request.get("/api/message").expect(200);
+			await request.get("/api/questions").expect(200);
 			expect(stripColorCodes(LOGGER.info.mock.calls)).toContainEqual([
-				expect.stringMatching(/^GET \/api\/message 200/),
+				expect.stringMatching(/^GET \/api\/questions 200/),
 			]);
 		});
 	});
@@ -59,9 +60,9 @@ describe("default request logging", () => {
 
 		it("logs other routes", async () => {
 			const request = await createRequest();
-			await request.get("/api/message").expect(200);
+			await request.get("/api/questions").expect(200);
 			expect(stripColorCodes(LOGGER.info.mock.calls)).toContainEqual([
-				expect.stringMatching(/^GET \/api\/message 200/),
+				expect.stringMatching(/^GET \/api\/questions 200/),
 			]);
 		});
 	});
