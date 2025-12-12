@@ -201,7 +201,7 @@ function Home() {
 	useEffect(() => {
 		if (loading) return;
 
-		const POLL_INTERVAL = 30000;
+		const POLL_INTERVAL = 60000;
 
 		const refetchData = async () => {
 			try {
