@@ -1,8 +1,7 @@
 // api/emails/constants.js
 export const EMAIL_SOURCE = "info@cyf.academy";
 export const EMAIL_REGION = "eu-west-1"; // Hardcode your region
-export const APP_URL =
-	"https://g8s8wck4848csgk00040cgk0.hosting.codeyourfuture.io";
+export const APP_URL = "https://cyfoverflow.hosting.codeyourfuture.io/";
 
 // Email subjects
 export const SUBJECTS = {
