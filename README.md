@@ -49,7 +49,6 @@ Create a `.env` file in the root directory:
 ```bash
 DATABASE_URL=postgres://your_user:your_password@localhost:5432/cyfoverflow
 JWT_SECRET=your_strong_jwt_secret_here
-PGSSLMODE=disable
 ````
 
 > Generate a strong JWT secret:
