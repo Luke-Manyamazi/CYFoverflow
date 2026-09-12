@@ -1,108 +1,108 @@
-# CYFOverflow  
-**CYFOverflow** is a full-stack Q&A platform that allows users to ask questions, share knowledge, and vote on answers—designed to foster a collaborative technical community.  
+# CYFOverflow
 
----
+> A full-stack technical Q&A platform where developers can ask questions, share knowledge, vote on answers, and collaborate with a community.
 
-## Key Technologies
+## Overview
 
-| Category       | Technology               | Description |
-|----------------|-------------------------|------------|
-| Backend (API)  | Node.js, Express.js      | Fast and robust server handling RESTful endpoints. |
-| Database       | PostgreSQL               | Reliable relational database for users, questions, and answers. |
-| Authentication | bcrypt, JWT             | Secure password hashing and token-based authentication. |
-| Frontend       | React (Vite)            | Modern, fast client-side application with responsive design. |
-| Routing        | React Router            | Dynamic client-side navigation for a seamless user experience. |
-| Validation     | Joi                     | Schema-based input validation for secure and consistent data handling. |
-| Rich Text Editor | TinyMCE               | WYSIWYG editor enabling users to create and format rich text content.  |
-
----
-
-## Collaborators
-
-- **Ali**
-- **Sheetal**  
-- **Eyuel**  
-
----
+CYFOverflow is a Stack Overflow–style community application built as a full-stack project during CodeYourFuture. It demonstrates practical experience across frontend development, REST APIs, authentication, relational data modelling, validation, testing, and deployment.
 
 ## Features
 
-- User registration and authentication with hashed passwords  
-- Post, answer, edit, and vote on questions  
-- Real-time updates with client-side rendering  
-- Mobile-first, accessible UI following WCAG guidelines  
-- Admin tools for managing content and users  
+- User registration and authentication
+- Ask, edit, and answer questions
+- Vote on questions and answers
+- Rich-text question and answer authoring
+- Admin tools for managing users and community content
+- Responsive, mobile-first interface
+- Backend validation and authenticated API access
+- Automated unit/integration and end-to-end testing
+- Production deployment workflow with health-check support
 
----
+## Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, React Router |
+| Backend | Node.js, Express.js |
+| Database | PostgreSQL |
+| Authentication | JWT, bcrypt |
+| Validation | Joi |
+| Editor | TinyMCE |
+| Testing | Vitest, Playwright |
+| Tooling | ESLint, Prettier, Husky |
+| Deployment | Coolify |
+
+## Architecture
+
+```text
+React + Vite
+     │
+     ▼
+Express REST API
+     │
+     ├── Authentication / Authorization
+     ├── Request Validation
+     └── Community Business Logic
+             │
+             ▼
+         PostgreSQL
+```
+
+The repository is organized as a workspace containing the web client, API, end-to-end tests, and shared linting/tooling configuration.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20.x LTS  
-- PostgreSQL 15.x running locally  
+- Node.js 20+ (22+ recommended)
+- PostgreSQL
+- npm
 
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```bash
-DATABASE_URL=postgres://your_user:your_password@localhost:5432/cyfoverflow
-JWT_SECRET=your_strong_jwt_secret_here
-````
-
-> Generate a strong JWT secret:
-> `python3 -c 'import secrets; print(secrets.token_hex(32))'`
-
-### Install Dependencies
+### Installation
 
 ```bash
+git clone https://github.com/Luke-Manyamazi/CYFoverflow.git
+cd CYFoverflow
 npm install
 ```
 
-### Database Setup
-
-Make sure PostgreSQL is running, then run migrations:
+Configure the database connection and authentication environment variables required by the API, then run migrations:
 
 ```bash
-npm run migrate
+npm run migration
 ```
 
----
+Start the application in development mode:
 
-## Development Scripts
+```bash
+npm run dev
+```
 
-| Script     | Command              | Description                                          |
-| ---------- | -------------------- | ---------------------------------------------------- |
-| dev        | `npm run dev`        | Start frontend + backend concurrently in watch mode. |
-| serve      | `npm run serve`      | Build client and run in local production mode.       |
-| lint       | `npm run lint`       | Check and format code with ESLint + Prettier.        |
-| test       | `npm run test`       | Run unit and integration tests.                      |
-| test:cover | `npm run test:cover` | Run tests with coverage output.                      |
-| e2e        | `npm run e2e`        | Run end-to-end tests using Playwright.               |
-| ship       | `npm run ship`       | Pre-push: runs lint, test, then e2e.                 |
+## Quality & Testing
 
----
+The project includes linting, formatting, unit/integration testing, and Playwright end-to-end testing. The `ship` command runs the main pre-release checks together:
+
+```bash
+npm run ship
+```
 
 ## Deployment
 
-### Coolify
+The application is structured for deployment with a Node.js API and PostgreSQL database. The original deployment setup uses Coolify with a health-check endpoint and GitHub-triggered deployment.
 
-1. Create PostgreSQL & Git resources in the production environment.
-2. Set environment variables (`PGSSLMODE=disable`, `DATABASE_URL`).
-3. Enable healthcheck endpoint (`/healthz`).
-4. Configure GitHub webhook for automatic deployment.
+## Engineering Highlights
 
----
+- Full-stack JavaScript application with separated web and API workspaces
+- JWT-based authentication and bcrypt password hashing
+- Relational PostgreSQL data model
+- Server-side validation with Joi
+- Automated testing across multiple levels
+- Production-oriented linting, formatting, and pre-release checks
+- Responsive UI designed for a community product
 
-## Security
+## Project Context
 
-* Only essential PII is collected: Name, Email, Hashed Password
-* Passwords hashed with bcrypt and never stored in plain text
-* Authentication required for user access
-* All validation and security logic handled on the backend
-
----
+CYFOverflow was developed as a collaborative CodeYourFuture project, providing hands-on experience building and shipping a complete community product rather than a standalone frontend exercise.
 
 ## License
 
